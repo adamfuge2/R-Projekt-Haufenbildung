@@ -1,7 +1,5 @@
 
 
-load('TestData.r')
-
 
 
 ## The standard K-means-Algorithm
