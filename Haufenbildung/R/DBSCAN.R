@@ -1,3 +1,7 @@
+library(tibble)
+library(dplyr)
+library(ggplot2)
+
 # DBSCAN Algorithm
 # Was dieser Code am Ende können soll:
 # (gefühlt ist alles was man findet also werden Begriffe sehr inkonsistent deutsch und englisch gemixt bis ich lust habe das zu vereinheitlichen <3)
@@ -12,36 +16,74 @@
      
 dbscan <- function(data, epsilon, min_Pts) {
  x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
+ dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data
  data_entries <- nrow(x)
- dist_x <- as.matrix(dist(x))
  
- cluster = 0L
- # for each element in data (i in data_entries)
-    # mark i as visited
-    area = data.regionQuery(i, epsilon)
-    if sizeof(area) < min_Pts
-      # mark i as noise
-    else
-      # cluster = cluster + 1
-      expandCluster(i, area, cluster, epsilon, min_Pts)
+ cluster_id = 0L
+ visited <- rep(FALSE, data_entries)
+ cluster_labels <- rep(0L, data_entries)
  
-   return  
+ regionQuery <- function(point) {
+   which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
+ }
+ 
+ expandCluster <- function(point, area, cluster_id) {
+   cluster_labels[point] <<- cluster_id # must be super-assigned, or vanished after function call
+   # add point to cluster / assign cluster to point
+   i <- 1
+   while(i <= length(area)) { # for each element p in region:
+     pt <- area[i]
+     if (visited[pt] == FALSE) { # if p not visited:
+       visited[pt] <<- TRUE # mark p as visited
+       new_area <- regionQuery(pt) # new_region = data.regionQuery(p, eps)
+       
+       if(length(new_area) >= min_Pts) { # if sizeof(new_region) >= min_Pts
+         area <- unique(c(area, new_area)) # remove duplicate, points exist only once in cluster; region = region joined with new_region
+       }
+     }
+     if(cluster_labels[pt] == 0L) { # if p not in any cluster
+       cluster_labels[pt] <<- cluster_id # unmark p as noise
+     }
+     i <- i + 1
+   }
+ }
+ 
+
+ # for each element in data (point in data_entries)
+ for(point in 1:data_entries) # should later be changed to a lapply/sapply function
+  if(visited[point] == FALSE) {
+    visited[point] <- TRUE    # mark point as visited
+    area <- regionQuery(point) # get neighbors
+    if(length(area) < min_Pts) {
+      cluster_labels[point] <- 0L # mark i as noise
+    }
+    else {
+      cluster_id <- cluster_id + 1
+      expandCluster(point, area, cluster_id)
+    }
+  }
+  
+   return(list(cluster = cluster_labels))
 }
 
-expandCluster <- function(point, region, cluster, epsilon, min_Pts) {
-  # add point to cluster
-  # for each element p in region:
-    # if p not visited:
-      # mark p as visited
-      # new_region = data.regionQuery(p, eps)
-      # if sizeof(new_region) >= min_Pts
-        # region = region joined with new_region
-    # if p not in any cluster
-      # add p to cluster
-      # unmark p as noise
-}
 
-regionQuery <- function(point, epsilon) {
-  region = list() # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
-  return region
-}
+### let's try it out (to be removed before merging in main)
+data <- generateClusterTestDataSimple2D(n=100)
+result <- dbscan(data, epsilon=0.1, min_Pts=5)
+
+data$cluster <- factor(
+  result$cluster,
+  levels = sort(unique(result$cluster)),
+  labels = paste("Cluster", sort(unique(result$cluster)))
+)
+ggplot2::ggplot(data, ggplot2::aes(X, Y, color = cluster)) +
+  ggplot2::geom_point() +
+  ggplot2::scale_color_manual(
+    values = c(
+      "Cluster 0" = "black",
+      setNames(
+        grDevices::rainbow(length(levels(data$cluster)) - 1),
+        levels(data$cluster)[-1]
+      )
+    )
+  )
