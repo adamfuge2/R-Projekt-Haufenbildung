@@ -139,5 +139,5 @@ view_data <- function(data){
 
 
 
-
-
+data <- generateClusterTestDataSimple2D(n=100)
+view_clusters(datam,function(x))

@@ -77,7 +77,9 @@ K_means <- function(data,K,D=NULL){
 }
 
 
-## The K-means-Algorithm optimized to look for GLABAL optimal clusters
+# consensus k_means
+
+## The K-means-Algorithm optimized to look for GLOBAL optimal clusters
 ## Tries fitting the data into K many clusters centered around so called
 ## centroids which are derived from the mean value of guessed clusters.
 ## This process is then repeated a number of times and only the best clustering
