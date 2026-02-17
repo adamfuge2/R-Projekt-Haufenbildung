@@ -19,9 +19,9 @@
 ## function,  a function relating every data point to their cluster.
 ##            Can be used on new data!
 ##            input: atomic vectors Of the data row type
-##            returns: a number 1-k, representing the related cluster
+##            returns: a number 1 to k, representing the related cluster
 ##
-K_means <- function(data,K,D=NULL){
+K_means <- function(data,K,metric=NULL){
   
   ## if not specified, use euclidean metric
   if(base::missing(D)){D <- function(x,y){base::sum((x-y)^2)}}
@@ -129,16 +129,6 @@ K_means_global <- function(data,K,D=NULL,tries=K){
     ## meaning the sum over all distances of the points to their cluster centroid
     cost <- inner_inequality(data,clustering)
     
-    #### For testing purposes: compare the found clustering to the currently best clustering
-    ##ggplot(data,aes(x=data[[1]],y=data[[2]],colour = cluster)) + 
-    ##  geom_point() + 
-    ##  scale_color_gradient2(midpoint = K/2+1/2, low="darkblue", mid="green",high="red", space ="Lab" )
-    ##
-    ##
-    ##ggplot(best_clustered_data,aes(x=data[[1]],y=data[[2]],colour = cluster)) + 
-    ##  geom_point() + 
-    ##  scale_color_gradient2(midpoint = K/2+1/2, low="darkblue", mid="green",high="red", space ="Lab" )
-    
     ## Check if the found cluster has minimal cost and if so, 
     ## update the currently best clustering guess 
     if(cost < minimal_cost){
@@ -154,6 +144,8 @@ K_means_global <- function(data,K,D=NULL,tries=K){
   ## return a function returning the cluster a datapoint (atomic vector) belongs to
   return(best_clustering)
 }
+
+
 
 find_cluster_amount <- function(data){
   clusterings <- list()
@@ -183,10 +175,16 @@ find_cluster_amount <- function(data){
 }
 
 
+
+
+
+
+
+
 ## Example:
 
 ## Lets create some test data
-data <- generateClusterTestDataSimple2D(n=100, nclusters = 10)
+data <- generateClusterTestDataSimple2D(n=100, nclusters = 6)
 
 ## This is what it looks like
 view_clusters(data,function(x) 1)
@@ -196,6 +194,7 @@ view_clusters(data,function(x) 1)
 clustering <- K_means(data, K = 4)
 ## (This may take a while)                      ##
 ##################################################
+
 
 ## Lets look at the results 
 view_clusters(data,clustering)
@@ -223,7 +222,7 @@ clustering <- K_means_global(data, K = 6, tries=10)
 view_clusters(data,clustering)
 
 ## Giving new data:
-new_data <- tibble::tibble(X = stats::runif(10000,min=0,max=1), Y = stats::runif(10000,min=0,max=1))
+new_data <- tibble::tibble(X = stats::runif(5000,min=0,max=1), Y = stats::runif(5000,min=0,max=1))
 
 ## view the clustering applied to unknown data
 view_clusters(new_data,clustering)
@@ -268,7 +267,7 @@ ggplot2::ggplot(data,ggplot2::aes(x=data[[1]],y=data[[2]])) +
   ggplot2::geom_point() 
 
 ## lets try k_mean
-clustering <- K_means_global(data, 2,tries = 10)
+clustering <- K_means_global(data, 2,tries = 5)
 
 ## not very succsessful
 view_clusters(data,clustering)
