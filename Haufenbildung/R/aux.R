@@ -14,9 +14,9 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
     n_clusters <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
   }
   
-  x_clusters <- stats::runif(nclusters, min=0, max=1)
-  y_clusters <- stats::runif(nclusters, min=0, max=1)
-  sd_clusters <- stats::runif(nclusters, min=0.001, max=0.1)
+  x_clusters <- stats::runif(n_clusters, min=0, max=1)
+  y_clusters <- stats::runif(n_clusters, min=0, max=1)
+  sd_clusters <- stats::runif(n_clusters, min=0.001, max=0.1)
   
   
   
@@ -391,6 +391,6 @@ maximumMetric <- function(x,y) base::max(x-y)
 ##
 ## Returns:
 ## numeric,   a real number >= 0.  
-pMetric(p) <- function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
+pMetric(p) <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
 
 
