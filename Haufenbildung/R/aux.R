@@ -299,18 +299,29 @@ viewClusters <- function(data,clustering=NULL){
   else{
     
     ## apply the cluster function to the data
-    clustered_data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(all_of(1:2))))
+    clustered_data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(all_of(1:2))), cluster_label = clusterLabeling(cluster))
     
     ## Defer the number of clusters
     K <- dplyr::n_distinct(clustered_data$cluster)
     
+    ## 
+    K <- K - dplyr::n_distinct(clustered_data$cluster) |> dplyr::filter(cluster==0) |> base::nrow()
+    
     ## Display data as 2D scatter plot
     ggplot2::ggplot(clustered_data,ggplot2::aes(x=clustered_data[[1]],y=clustered_data[[2]],colour = cluster)) + 
       ggplot2::geom_point() + 
-      ggplot2::scale_color_gradient2(midpoint = K/2+1/2, low="darkblue", mid="green",high="red", space ="Lab" ) +
+      ggplot2::scale_color_manual(
+        values = c(
+          "Outlier" = "black",
+          setNames(
+            grDevices::rainbow(K),paste0('Cluster ',1:K)
+          )
+        )
+      ) +
       ggplot2::coord_fixed()
   }
 }
+
 
 
 ## View 2D data as a simple scatter plot
@@ -322,6 +333,11 @@ viewData <- function(data){
     ggplot2::geom_point() 
 }
 
+
+clusterLabeling <- function(x){
+  if(x==0) return('Outlier')
+  return(paste0('Cluster ',x))
+}
 
 
 
