@@ -13,18 +13,18 @@
 ##            The number of rows is the sample size and called n.
 ## K          A whole number between 0 and n+1.
 ##            The amount of Clusters the algorithm tries to find in the data
-## D          A metric whose inputs are the rows of data as atomic vectors
+## metric          A metric whose inputs are the rows of data as atomic vectors
 ## 
 ## Returns:
 ## function,  a function relating every data point to their cluster.
 ##            Can be used on new data!
 ##            input: atomic vectors Of the data row type
-##            returns: a number 1-k, representing the related cluster
+##            returns: a number 1 to k, representing the related cluster
 ##
-K_means <- function(data,K,D=NULL){
+K_means <- function(data,K,metric=NULL){
   
   ## if not specified, use euclidean metric
-  if(base::missing(D)){D <- function(x,y){base::sum((x-y)^2)}}
+  if(base::missing(metric)){metric <- function(x,y){base::sum((x-y)^2)}}
   
   ## some necessary variables
   n <- base::nrow(data)
@@ -50,7 +50,7 @@ K_means <- function(data,K,D=NULL){
     
     ## Calculate distances to centroids
     for(centroid_number in 1:base::nrow(centroids)){
-      data <- data |> dplyr::rowwise() |> dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := D(dplyr::c_across(all_of(1:dim)),base::unlist(centroids[centroid_number,])))
+      data <- data |> dplyr::rowwise() |> dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := metric(dplyr::c_across(all_of(1:dim)),base::unlist(centroids[centroid_number,])))
     }
     
     ## Defer the clustering with respect to the centroid
@@ -72,7 +72,7 @@ K_means <- function(data,K,D=NULL){
   return(function(x) {
     distances <- base::numeric()
     for(k in 1:K){
-      distances = c(distances,D(x,base::unlist(centroids[k,])))
+      distances = c(distances,metric(x,base::unlist(centroids[k,])))
     }
     return(base::which.min(distances))})
 }
@@ -90,7 +90,7 @@ K_means <- function(data,K,D=NULL){
 ##            The number of rows is the sample size and called n.
 ## K,         a whole number between 0 and n+1.
 ##            The amount of Clusters the algorithm tries to find in the data
-## D,         a metric whose inputs are the rows of data as atomic vectors
+## metric,         a metric whose inputs are the rows of data as atomic vectors
 ## tries,     an integer greater than one. 
 ##            The amount of times the algorithms should try to find a globally best
 ##            clustering.
@@ -101,10 +101,10 @@ K_means <- function(data,K,D=NULL){
 ##            input: atomic vectors Of the data row type
 ##            returns: a number 1-k, representing the related cluster
 ##
-K_means_global <- function(data,K,D=NULL,tries=K){
+K_means_global <- function(data,K,metric=NULL,tries=K){
   
   ## if not specified, use euclidean metric
-  if(base::missing(D)){D <- function(x,y){base::sum((x-y)^2)}}
+  if(base::missing(metric)){metric <- function(x,y){base::sum((x-y)^2)}}
   
   ## some necessary variables
   n <- base::nrow(data)
@@ -123,21 +123,11 @@ K_means_global <- function(data,K,D=NULL,tries=K){
   ## Try 5 times, to minimize the dependency on random chance
   for(repeats in 1:tries){
     
-    clustering <- K_means(data,K,D)
+    clustering <- K_means(data,K,metric)
     
     ## Calculate the cost of the found cluster, 
     ## meaning the sum over all distances of the points to their cluster centroid
     cost <- inner_inequality(data,clustering)
-    
-    #### For testing purposes: compare the found clustering to the currently best clustering
-    ##ggplot(data,aes(x=data[[1]],y=data[[2]],colour = cluster)) + 
-    ##  geom_point() + 
-    ##  scale_color_gradient2(midpoint = K/2+1/2, low="darkblue", mid="green",high="red", space ="Lab" )
-    ##
-    ##
-    ##ggplot(best_clustered_data,aes(x=data[[1]],y=data[[2]],colour = cluster)) + 
-    ##  geom_point() + 
-    ##  scale_color_gradient2(midpoint = K/2+1/2, low="darkblue", mid="green",high="red", space ="Lab" )
     
     ## Check if the found cluster has minimal cost and if so, 
     ## update the currently best clustering guess 
@@ -155,7 +145,9 @@ K_means_global <- function(data,K,D=NULL,tries=K){
   return(best_clustering)
 }
 
-find_cluster_amount <- function(data){
+
+
+find_cluster_amount_elbow <- function(data){
   clusterings <- list()
   improvement <- 2
   K <- 1
@@ -172,7 +164,7 @@ find_cluster_amount <- function(data){
     if(K>1)improvement <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
     
     
-    print(paste0('Improvement from K = ',K,' to K = ',K,' is ',improvement))
+    print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
     
     K <- K+1
     
@@ -183,10 +175,42 @@ find_cluster_amount <- function(data){
 }
 
 
+
+find_cluster_amount_silhouette <- function(data,metric){
+  clusterings <- list()
+  improvement <- Inf
+  K <- 1
+  
+  while(improvement>0){
+    print(paste0('checking K = ',K))
+    
+    clusterings[[K]] <- K_medioids(data,K) 
+    
+    fit <- lapply(clusterings,function(x) meanSilhouette(data,x,metric))
+    
+    plot(1:K,fit)
+    
+    if(K>1)improvement <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
+    
+    
+    print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
+    
+    K <- K+1
+    
+  }
+  
+  
+  return(K-2)
+}
+
+
+
+
+
 ## Example:
 
 ## Lets create some test data
-data <- generateClusterTestDataSimple2D(n=100, nclusters = 10)
+data <- generateClusterTestDataSimple2D(n=100, nclusters = 6)
 
 ## This is what it looks like
 view_clusters(data,function(x) 1)
@@ -196,6 +220,7 @@ view_clusters(data,function(x) 1)
 clustering <- K_means(data, K = 4)
 ## (This may take a while)                      ##
 ##################################################
+
 
 ## Lets look at the results 
 view_clusters(data,clustering)
@@ -223,7 +248,7 @@ clustering <- K_means_global(data, K = 6, tries=10)
 view_clusters(data,clustering)
 
 ## Giving new data:
-new_data <- tibble::tibble(X = stats::runif(10000,min=0,max=1), Y = stats::runif(10000,min=0,max=1))
+new_data <- tibble::tibble(X = stats::runif(5000,min=0,max=1), Y = stats::runif(5000,min=0,max=1))
 
 ## view the clustering applied to unknown data
 view_clusters(new_data,clustering)
@@ -268,7 +293,7 @@ ggplot2::ggplot(data,ggplot2::aes(x=data[[1]],y=data[[2]])) +
   ggplot2::geom_point() 
 
 ## lets try k_mean
-clustering <- K_means_global(data, 2,tries = 10)
+clustering <- K_means_global(data, 2,tries = 5)
 
 ## not very succsessful
 view_clusters(data,clustering)
