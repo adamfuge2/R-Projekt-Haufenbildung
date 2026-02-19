@@ -1,11 +1,24 @@
 
 
-
-## andere idee
-K_medioids <- function(data,K,metric=NULL){
-  
-  ## if not specified, use euclidean metric
-  if(base::missing(metric)){metric <- function(x,y){base::sum((x-y)^2)}}
+## The standard K-medioids 
+## Tries fitting the data into K many clusters centered around so called
+## medioids, the data points closest to the centroids of the resulting cluster.
+##
+## Inputs:
+## data,      a tibble with with every row representing a data point. 
+##            The number columns is therefore the dimensionality,
+##            The number of rows is the sample size and called n.
+## K,         A whole number between 0 and n+1.
+##            The amount of Clusters the algorithm tries to find in the data
+## metric,    A metric whose inputs are the rows of data as atomic vectors.
+## 
+## Returns:
+## function,  a function relating every data point to their cluster.
+##            Can be used on new data!
+##            input: atomic vectors Of the data row type
+##            returns: a number 1 to k, representing the related cluster
+##
+K_medioids <- function(data,K,metric = euclidean){
   
   ## some necessary variables
   n <- base::nrow(data)
@@ -18,6 +31,7 @@ K_medioids <- function(data,K,metric=NULL){
   base::stopifnot('Data must have more than 0 rows' = n>0)
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
+  
   
   
   ## (BUILD) Define starting centroids
@@ -40,10 +54,8 @@ K_medioids <- function(data,K,metric=NULL){
     }
     return(base::which.min(distances))}
   
-  view_clusters(data[1:dim],clustering)
-  
     
-  new_min_cost <- inner_inequality(data[,1:dim],clustering)
+  new_min_cost <- innerInequality(data[,1:dim],clustering)
     
   while(new_min_cost < old_min_cost){
     ## Weve found a new, better medioids configuration!
@@ -56,7 +68,7 @@ K_medioids <- function(data,K,metric=NULL){
     ## calculate which changed medioids would diminsh the inner inequality most
     costs <- base::matrix(base::rep(1:n,base::nrow(centroids)),ncol = base::nrow(centroids))
     for(k in 1:base::nrow(centroids)){
-      costs[,k] <- sapply(costs[,k],function(x) inner_inequality_after_changining_medioid(data[,1:dim],x,centroids,k,metric))
+      costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedioid(data[,1:dim],x,centroids,k,metric))
     }
     
     ## Save which indeces of data point o and medioid m would have the lower cost
@@ -84,7 +96,7 @@ K_medioids <- function(data,K,metric=NULL){
 
 
 
-inner_inequality_after_changining_medioid <- function(data,o,centroids,m,metric){
+innerInequalityAfterChangingMedioid <- function(data,o,centroids,m,metric){
   
   # change medioid
   centroids[m,] <- data[o,]
@@ -97,13 +109,11 @@ inner_inequality_after_changining_medioid <- function(data,o,centroids,m,metric)
   clustering <- function(x) {base::which.min(sapply(1:base::nrow(centroids),function(k) metric(x,base::unlist(centroids[k,]))))}
 
   # return the costs
-  return( inner_inequality(data,clustering,metric))
+  return( innerInequality(data,clustering,metric))
 }
 
 
 
-
-metric <- function(x,y){base::sum((x-y)^2)}
 
 sumOfDistancestTo <- function(data,vector,metric){
   data |> dplyr::rowwise() |> dplyr::mutate(distance = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
@@ -122,15 +132,19 @@ dissimilarityMatrix <-function(data,metric){
 }
 
 
+
 ## greedy search of medioids is part of PAM algorithm for finding a good enough
 ## starting cluster constellation for the k-medioids algorithm
-greedySearchMedioids <- function(data,K,metric){
+greedySearchMedioids <- function(data,K,metric=euclidean){
+  
   
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must positive' = (0 < K))
   
   
   M <- dissimilarityMatrix(data,metric)
+  
+  
   
   medioid_index <- M |> base::apply(c(1),sum) |> which.min()
   medioids <- data[medioid_index,]
@@ -142,10 +156,11 @@ greedySearchMedioids <- function(data,K,metric){
     for(k in 2:K){
       
       # For all data points calculate their minimum distance to the chosen medioids
-      metric <- sapply(1:base::nrow(data),function(o) min(sapply(1:(k-1), function(m) metric(data[o,],medioids[m,])))) 
+      
+      D <- sapply(1:base::nrow(data),function(o) min(sapply(1:(k-1), function(m) metric(data[o,],medioids[m,])))) 
         
       # Remove the already chosen medioids and format to a matrix (for later)
-      metric <- metric[metric != 0] |> base::rep(base::nrow(data)-k+1) |>
+      D <- D[D != 0] |> base::rep(base::nrow(data)-k+1) |>
         base::matrix(ncol = base::nrow(data)-k+1, byrow = TRUE)
       
       
@@ -155,7 +170,7 @@ greedySearchMedioids <- function(data,K,metric){
       # BUT ignore all data point j whose delta is negative
       # aka the data points i that are closer to the existing medioids than the 
       # data point j
-      M_k <- apply(metric-M, c(1,2), function(x) max(x,0))
+      M_k <- apply(D-M, c(1,2), function(x) max(x,0))
       
       # we take the data point, which would be most advantageous to add to the medioids
       medioid_index <- M_k |> base::apply(c(1),sum) |> which.max()
@@ -164,7 +179,7 @@ greedySearchMedioids <- function(data,K,metric){
       M <- M[-medioid_index,-medioid_index]
       
       # account for the removed rows from M
-      sapply(medioid_indeces,function(x) if(medioid_index>x){medioid_index<-medioid_index+1})
+      for(x in medioid_indeces) if(medioid_index >= x){medioid_index<-medioid_index+1}
       
       # lastly: add the newly found medioid 
       medioid_indeces <- c(medioid_indeces,medioid_index)
@@ -181,7 +196,7 @@ greedySearchMedioids <- function(data,K,metric){
 data <- generateClusterTestDataSimple2D(n=50,5)
 
 # lets view it
-view_clusters(data)
+viewClusters(data)
 
 ##############################################################
 # Apply the K-Medioids algortithm                           ##
@@ -191,20 +206,25 @@ clustering <- K_medioids(data,K=5)
 
 # is this any good? We can calculate the inner inequalty of this clustering
 # here, lower is better
-inner_inequality(data,clustering)
+innerInequality(data,clustering)
+
 
 # or we can find the silhouette coefficient of the clustering
 # the closer this is to 1, the better
 meanSilhouette(data,clustering)
 
 
+viewClusters(data,clustering)
+
+
+
 
 
 ## We can also apply this to data, whose number of clusters is unknown
-data <- generateClusterTestDataSimple2D(n=100, nclusters=base::floor(stats::runif(1,1,10)))
+data <- generateClusterTestDataSimple2D(n=100, n_clusters=base::floor(stats::runif(1,1,10)))
 
 # this is what it looks like
-view_clusters(data)
+viewClusters(data)
 
 ##############################################################
 # We make a guess for K and apply the K-Medioids algortithm ##
@@ -213,7 +233,7 @@ clustering <- K_medioids(data,K=4)
 ##############################################################
 
 # is it any good?
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 meanSilhouette(data,clustering)
 
 ##############################################################
@@ -223,7 +243,7 @@ clustering <- K_medioids(data,K=7)
 ##############################################################
 
 # By comparing the mean Silhouette one can defer the number of clusters
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 meanSilhouette(data,clustering)
 
 
@@ -246,8 +266,8 @@ clustering <- K_medioids(training_data,4)
 # this would take ages for 1000 data points
 
 # lets take a look
-view_clusters(training_data,clustering)
-view_clusters(unknown_data,clustering)
+viewClusters(training_data,clustering)
+viewClusters(unknown_data,clustering)
 
 
 
@@ -277,7 +297,7 @@ medioids <- greedySearchMedioids(data,K=5)
 clustering <- clusteringFromCentroids(medioids)
 
 # lets see the unoptimized clustering
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 ####################################################
 # Lets see the real K-Medioids in action!         ##
@@ -286,6 +306,6 @@ clustering <- K_medioids(data,K=5)
 ####################################################
 
 # lets see the optimized clustering
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 

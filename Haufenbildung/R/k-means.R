@@ -21,10 +21,7 @@
 ##            input: atomic vectors Of the data row type
 ##            returns: a number 1 to k, representing the related cluster
 ##
-K_means <- function(data,K,metric=NULL){
-  
-  ## if not specified, use euclidean metric
-  if(base::missing(metric)){metric <- function(x,y){base::sum((x-y)^2)}}
+K_means <- function(data,K,metric=euclidean){
   
   ## some necessary variables
   n <- base::nrow(data)
@@ -101,10 +98,8 @@ K_means <- function(data,K,metric=NULL){
 ##            input: atomic vectors Of the data row type
 ##            returns: a number 1-k, representing the related cluster
 ##
-K_means_global <- function(data,K,metric=NULL,tries=K){
+K_means_global <- function(data,K,metric=euclidean,tries=K){
   
-  ## if not specified, use euclidean metric
-  if(base::missing(metric)){metric <- function(x,y){base::sum((x-y)^2)}}
   
   ## some necessary variables
   n <- base::nrow(data)
@@ -127,7 +122,7 @@ K_means_global <- function(data,K,metric=NULL,tries=K){
     
     ## Calculate the cost of the found cluster, 
     ## meaning the sum over all distances of the points to their cluster centroid
-    cost <- inner_inequality(data,clustering)
+    cost <- innerInequality(data,clustering)
     
     ## Check if the found cluster has minimal cost and if so, 
     ## update the currently best clustering guess 
@@ -147,7 +142,7 @@ K_means_global <- function(data,K,metric=NULL,tries=K){
 
 
 
-find_cluster_amount_elbow <- function(data){
+findClusterAmountElbow <- function(data){
   clusterings <- list()
   improvement <- 2
   K <- 1
@@ -157,7 +152,7 @@ find_cluster_amount_elbow <- function(data){
     
     clusterings[[K]] <- K_means_global(data,K,tries = 10) 
     
-    inner_inequalities <- lapply(clusterings,function(x) inner_inequality(data,x))
+    inner_inequalities <- lapply(clusterings,function(x) innerInequality(data,x))
     
     plot(1:K,inner_inequalities,asp=1)
     
@@ -176,7 +171,7 @@ find_cluster_amount_elbow <- function(data){
 
 
 
-find_cluster_amount_silhouette <- function(data,metric){
+findClusterAmountSilhouette <- function(data,metric){
   clusterings <- list()
   improvement <- Inf
   K <- 1
@@ -210,10 +205,10 @@ find_cluster_amount_silhouette <- function(data,metric){
 ## Example:
 
 ## Lets create some test data
-data <- generateClusterTestDataSimple2D(n=100, nclusters = 6)
+data <- generateClusterTestDataSimple2D(n=100, n_clusters = 4)
 
 ## This is what it looks like
-view_clusters(data,function(x) 1)
+viewClusters(data)
 
 ##################################################
 ## Apply the K-means-algorithm with K = 4       ##
@@ -223,9 +218,9 @@ clustering <- K_means(data, K = 4)
 
 
 ## Lets look at the results 
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
-inner_inequality(data,clustering)
+innerInequality(data,clustering)
 
 ######################################################
 ## Apply the K-means-algorithm with K = 4           ##
@@ -235,7 +230,7 @@ clustering <- K_means_global(data, K = 4, tries=10)
 ######################################################
 
 ## Lets look at the results 
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 ##################################################
 ## Now try the K-means-algorithm with larger K  ##
@@ -245,13 +240,13 @@ clustering <- K_means_global(data, K = 6, tries=10)
 
 
 ## Better!
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 ## Giving new data:
 new_data <- tibble::tibble(X = stats::runif(5000,min=0,max=1), Y = stats::runif(5000,min=0,max=1))
 
 ## view the clustering applied to unknown data
-view_clusters(new_data,clustering)
+viewClusters(new_data,clustering)
 
 
 
@@ -266,16 +261,16 @@ view_clusters(new_data,clustering)
 ## Another example: What if we dont know the amount of clusters?
 ##
 
-data <- generateClusterTestDataSimple2D(n=100, nclusters=base::floor(stats::runif(1,1,10)))
+data <- generateClusterTestDataSimple2D(n=100, n_clusters=base::floor(stats::runif(1,1,10)))
 
-view_clusters(data,function(x) 1)
+viewClusters(data)
 
 ## Use find_cluster_amount, to calculate K, using K_means an the 'elbow-graph-approach' 
 ## be careful, this is a heuristic approach
-K <- find_cluster_amount(data)
+K <- findClusterAmountElbow(data)
 
 clustering <- K_means_global(data, K,tries = 10)
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 
 
@@ -289,14 +284,13 @@ list_of_paths <- list(tibble::tibble(X = c(0.2,0.2,0.6,0.6), Y = c(0.4,0.8,0.8,0
 data <- generateClusterTestData2DFromPaths(n=300,list_of_paths)
 
 ## there are, rather obviously, 2 clusters
-ggplot2::ggplot(data,ggplot2::aes(x=data[[1]],y=data[[2]])) + 
-  ggplot2::geom_point() 
+viewData(data)
 
 ## lets try k_mean
-clustering <- K_means_global(data, 2,tries = 5)
+clustering <- K_means(data,K = 2)
 
 ## not very succsessful
-view_clusters(data,clustering)
+viewClusters(data,clustering)
 
 
 

@@ -109,7 +109,7 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 ## Returns:
 ## numeric,     a real number > 0.
 ##
-innerInequality <- function(data,clustering,metric=euclidean()){
+innerInequality <- function(data,clustering,metric=euclidean){
   
   clustered_data <- data |> 
     dplyr::rowwise() |> 
@@ -263,7 +263,7 @@ meanSilhouette <- function(data,clustering,metric=euclidean){
 ##              input: a numeric t in [0,1]
 ##              returns: a data row type
 ##
-tibble.as.simplepath <- function(data){
+tibbleAsPath <- function(data){
   return(
     function(t){
       base::stopifnot('A path maps t in [0,1] to points in R^dim space' = 0<=t && t<=1)
@@ -295,20 +295,19 @@ viewClusters <- function(data,clustering=NULL){
   ## Invariant
   stopifnot('This function can currently only display clusterings of 2D data' = ncol(data)==2)
   
-  if(base::missing(clustering)) view_data(data)
+  
+  if(base::missing(clustering)) viewData(data)
   else{
+    colnames(data) <- c('X','Y')
     
     ## apply the cluster function to the data
     clustered_data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(all_of(1:2))), cluster_label = clusterLabeling(cluster))
     
     ## Defer the number of clusters
-    K <- dplyr::n_distinct(clustered_data$cluster)
-    
-    ## 
-    K <- K - dplyr::n_distinct(clustered_data$cluster) |> dplyr::filter(cluster==0) |> base::nrow()
+    K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
     
     ## Display data as 2D scatter plot
-    ggplot2::ggplot(clustered_data,ggplot2::aes(x=clustered_data[[1]],y=clustered_data[[2]],colour = cluster)) + 
+    ggplot2::ggplot(clustered_data,ggplot2::aes(x=X,y=Y,colour = cluster_label)) + 
       ggplot2::geom_point() + 
       ggplot2::scale_color_manual(
         values = c(
@@ -329,7 +328,9 @@ viewClusters <- function(data,clustering=NULL){
 ## Inputs:
 ## data,        a tibble with every row representing a data point.
 viewData <- function(data){
-  ggplot2::ggplot(data,ggplot2::aes(x=data[[1]],y=data[[2]])) + 
+  colnames(data) <- c('X','Y')
+  
+  ggplot2::ggplot(data,ggplot2::aes(x=X,y=Y)) + 
     ggplot2::geom_point() 
 }
 
@@ -391,6 +392,6 @@ maximumMetric <- function(x,y) base::max(x-y)
 ##
 ## Returns:
 ## numeric,   a real number >= 0.  
-pMetric(p) <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
+pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
 
 
