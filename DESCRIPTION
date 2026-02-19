@@ -1,0 +1,30 @@
+Package: Haufenbildung
+Type: Package
+Title: A collection of common clustering algorithms
+Version: 0.0.0.9000
+Authors@R: c(
+    person(
+      "Aaron", "Fath",
+      email = "aaron.fath@stud.uni-heidelberg.de",
+      role = "aut"
+    ),
+    person(
+      "Adam", "Fuge",
+      email = "adam.fuge@stud.uni-heidelberg.de",
+      role = "aut"
+    ),
+    person(
+      "Roman", "Hektor",
+      email = "roman.hektor@stud.uni-heidelberg.de",
+      role = "aut"
+    )
+  )
+Description: This package includes the algoriithms K-Means, K-Medioids, 
+    hierarchical clustering, DBSCAN and OPTICS. 
+    Also included are easy to use functions to 
+    - score the clusterings,
+    - view the clusterings, 
+    - generate clustered test data.
+License: 
+Encoding: UTF-8
+LazyData: true
