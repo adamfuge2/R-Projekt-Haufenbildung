@@ -128,41 +128,6 @@ innerInequalityAfterChangingMedioid <- function(data,o,centroids,m,metric){
 
 
 
-#' The Inequality of a vector to the data
-#'
-#' Sums the distances of a vector to all pints in the data set.
-#'
-#' @param data      a tibble with with every row representing a data point.
-#' @param vector    A vector (i.e. tibble row or atomic vector)
-#' @param metric    A metric whose inputs are of the data row type
-#'
-#' @returns a numeric >= 0
-#'
-sumOfDistancestTo <- function(data,vector,metric){
-  data |> dplyr::rowwise() |> dplyr::mutate(distance = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
-    dplyr::ungroup() |>
-    dplyr::summarise(sum = sum(distance)) |>
-    base::unlist()
-}
-
-
-#' Dissimilarity matrix
-#'
-#' Calculates the matrix encoding the differences inbetween all data points
-#'
-#' @param data      a tibble with with every row representing a data point.
-#' @param metric    A metric whose inputs are of the data row type
-#'
-#' @returns a dissimilarity matrix, a row and coloumn for every data point
-#'
-dissimilarityMatrix <-function(data,metric){
-  M <- base::matrix(base::rep(1:base::nrow(data),base::nrow(data)),ncol = base::nrow(data))
-  for(i in 1:base::nrow(data)){
-    M[,i] <- sapply(M[,i],function(x) metric(data[x,],data[i,]))
-  }
-
-  return(M)
-}
 
 
 

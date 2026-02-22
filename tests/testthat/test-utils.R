@@ -35,9 +35,9 @@ test_that('InnerInequality works',{
 
   data <- generateClusterTestDataSimple2D(n=100,n_clusters = 3)
 
-  clustering <- K_means_global(data,K=3,tries = 5)
+  clustering <- K_means_global(data,K=3,tries = 10)
 
-  testthat::expect_equal(innerInequality(data,clustering),0.481288352237503)
+  testthat::expect_equal(innerInequality(data,clustering),5.28324491312604)
 })
 
 
@@ -62,7 +62,7 @@ test_that('meanSilhouette works',{
 
   data <- data |> dplyr::add_row(tibble::tibble(X=0.15,Y=0.46))
 
-  testthat::expect_equal(meanSilhouette(data,clustering),0.4893013)
+  testthat::expect_equal(meanSilhouette(data,clustering),0.4268618)
 })
 
 test_that('tibbleAsPath works',{
@@ -77,6 +77,18 @@ test_that('tibbleAsPath works',{
   expect_equal(tibble::remove_rownames(path(0.5)),data.frame(X=c(0.3),Y=c(0.7)))
 
 })
+
+test_that('dissimilarityMatrix works',{
+  data <- generateClusterTestDataSimple2D(n=10)
+  testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,euclidean), as.matrix(stats::dist(data)))
+})
+
+test_that('sumOfDistancestTo works',{
+  data <- generateClusterTestDataSimple2D(n=10)
+  expect_equal(sumOfDistancestTo(data,data[1,],euclidean), sum(as.matrix(stats::dist(data))[1,]))
+})
+
+
 
 test_that('viewClusters works',{
   data <- data.frame(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))

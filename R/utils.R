@@ -271,6 +271,42 @@ tibbleAsPath <- function(data){
 }
 
 
+#' Dissimilarity matrix
+#'
+#' Calculates the matrix encoding the differences inbetween all data points
+#'
+#' @param data      a tibble with with every row representing a data point.
+#' @param metric    A metric whose inputs are of the data row type
+#'
+#' @returns a dissimilarity matrix, a row and coloumn for every data point
+#'
+dissimilarityMatrix <-function(data,metric){
+  basis <- array(base::rep(1:base::nrow(data),base::nrow(data)), dim=c(base::nrow(data),base::nrow(data) ))
+  M <- array(dim = c(base::nrow(data),base::nrow(data),2 ))
+  M[,,1] <- basis
+  M[,,2] <- t(basis)
+
+  return(apply(M,c(1,2),function(x) metric(data[x[1],],data[x[2],])))
+}
+
+#' The Inequality of a vector to the data
+#'
+#' Sums the distances of a vector to all pints in the data set.
+#'
+#' @param data      a tibble with with every row representing a data point.
+#' @param vector    A vector (i.e. tibble row or atomic vector)
+#' @param metric    A metric whose inputs are of the data row type
+#'
+#' @returns a numeric >= 0
+#'
+sumOfDistancestTo <- function(data,vector,metric){
+  data |> dplyr::rowwise() |> dplyr::mutate(distance = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
+    dplyr::ungroup() |>
+    dplyr::summarise(sum = sum(distance)) |>
+    base::unlist(use.names = FALSE)
+}
+
+
 
 
 
@@ -364,7 +400,7 @@ clusterLabeling <- function(x){
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
-euclidean <- function(x,y) base::sum((x-y)^2)
+euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 
 
 #' The standard Manhattan, taxi or maximum metric
