@@ -4,7 +4,7 @@
 \alias{findClusterAmountSilhouette}
 \title{Fining a best cluster amount using the 'Silhoutte coefficient'}
 \usage{
-findClusterAmountSilhouette(data, metric)
+findClusterAmountSilhouette(data, metric = euclidean)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}

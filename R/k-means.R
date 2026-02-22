@@ -193,21 +193,22 @@ findClusterAmountElbow <- function(data){
 #' @param data      a tibble with with every row representing a data point.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
-findClusterAmountSilhouette <- function(data,metric){
+findClusterAmountSilhouette <- function(data,metric=euclidean){
   clusterings <- list()
+  fit <- list()
   improvement <- Inf
   K <- 1
 
   while(improvement>0){
     print(paste0('checking K = ',K))
 
-    clusterings[[K]] <- K_medioids(data,K)
+    clusterings[[K]] <- K_medioids(data,K,metric)
 
-    fit <- lapply(clusterings,function(x) meanSilhouette(data,x,metric))
+    fit[[K]] <- meanSilhouette(data,clusterings[[K]],metric)
 
     plot(1:K,fit)
 
-    if(K>1)improvement <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
+    if(K>1) improvement <- fit[[K]] - fit[[K-1]]
 
 
     print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))

@@ -145,7 +145,7 @@ innerInequality <- function(data,clustering,metric=euclidean){
 #' @returns numeric, a real number between -1 and 1
 #'
 silhouette <- function(data,clustering,o,metric=euclidean){
-  ## if o is not part of data, append it. This is a suprise tool that might hel us later
+  ## if o is not part of data, append it. This is a surprise tool that might help us later
   data[base::nrow(data)+1,] <- o |>
     matrix(nrow=1) |>
     tibble::as_tibble(.name_repair = make.names)
@@ -181,6 +181,7 @@ silhouette <- function(data,clustering,o,metric=euclidean){
   ## remove o from the data set
   clustered_data <- clustered_data |>
     dplyr::ungroup()|>
+    dplyr::arrange(distance) |>
     dplyr::slice(-1)
 
 
