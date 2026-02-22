@@ -1,14 +1,12 @@
-############# Test Data Generators ######################
+############ Test Data Generators ######################
 
-## spherical test data generator
-##
-## Inputs:
-## n,           a positive integer. The number of total data points to be generated.
-## n_clusters,  a positive integer. The number of clusters to generate.
-##              If none given, choose a random amount < sqrt(n).
-##
-## Returns:
-## a tibble,    every row representing a data point.
+#' spherical test data generator
+#'
+#' @param n           a positive integer. The number of total data points to be generated.
+#' @param n_clusters  a positive integer. The number of clusters to generate.
+#'                    If none given, choose a random amount < sqrt(n).
+#'
+#' @returns a tibble, every row representing a data point.
 generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
   if(base::missing(n_clusters)){
     n_clusters <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
@@ -32,15 +30,13 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
 
 
 
-## nonspherical test data generator
-##
-## Inputs:
-## n,               a positive integer. The number of total data points to be generated.
-## list_of_paths,   a list containing tibbles. Each tibble containing points (in rows)
-##                  to be interpreted as paths along which the data is generated
-##
-## Returns:
-## a tibble,        every row representing a data point.
+#' Nonspherical test data generator
+#'
+#' @param n               a positive integer. The number of total data points to be generated.
+#' @param list_of_paths   a list containing tibbles. Each tibble containing points (in rows)
+#'                  to be interpreted as paths along which the data is generated
+#'
+#' @returns a tibble, every row representing a data point.
 generateClusterTestData2DFromPaths = function(n=100,list_of_paths){
 
   n_clusters <- length(list_of_paths)
@@ -68,28 +64,27 @@ generateClusterTestData2DFromPaths = function(n=100,list_of_paths){
 
 ################## Helpers ####################
 
-## Used to test if x is a whole number
-##
-## Inputs:
-## x        a numeric to be tested
-## tol      a numeric. An allowed tollerance, as not to fail at impercise calculations
-##
-## Returns:
-## logical  TRUE, if x is a whole number, FALSE if not
+#' Test if x is a whole number
+#'
+#' @param x        a numeric to be tested
+#' @param tol      a numeric. An allowed tolerance, as not to fail at imprecise calculations
+#'
+#' @returns a logical:  TRUE, if x is a whole number, FALSE if not
 is.wholenumber <- function(x, tol = base::.Machine$double.eps^0.5)  base::abs(x - base::round(x)) < tol
 
 
-## converts a tibble of cluster centers (centroids) to a clustering function
-##
-## Inputs:
-## centroids,   a tibble with every row being a centroid
-## metric,           a metric whose 2 inputs are of the centroids row type
-##
-## Returns:
-## function,    a clustering function relating any data point to their cluster.
-##              input: rows or atomic vectors Of the data row type
-##              returns: a whole number > 0, representing the related cluster
-##
+#' Coerce a data frame to clustering
+#'
+#' Coerces a tibble of cluster centers (centroids) to a clustering function
+#'
+#' @param centroids   a tibble with every row being a centroid
+#' @param metric           a metric whose 2 inputs are of the centroids row type
+#'
+#' Returns:
+#' function,    a clustering function relating any data point to their cluster.
+#'              input: rows or atomic vectors Of the data row type
+#'              returns: a whole number > 0, representing the related cluster
+#'
 clusteringFromCentroids<- function(centroids,metric=euclidean){
   function(x)
     1:base::nrow(centroids) |>
@@ -98,17 +93,17 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 }
 
 
-## Calculate the inner inequality of the clusters, also called cost
-## The lower the number, the heuristically better the clustering
-##
-## Inputs:
-## data,        a tibble with with every row representing a data point.
-## clustering,  a clustering function relating any data point to their cluster.
-## metric,      a metric whose 2 inputs are of the data row type.
-##
-## Returns:
-## numeric,     a real number > 0.
-##
+#' Calculate the inner inequality of the clusters, also called cost
+#'
+#' The lower the number, the heuristically better the clustering
+#'
+#'
+#' @param data,        a tibble with with every row representing a data point.
+#' @param clustering,  a clustering function relating any data point to their cluster.
+#' @param metric,      a metric whose 2 inputs are of the data row type.
+#'
+#' @returns numeric, a real number > 0.
+#'
 innerInequality <- function(data,clustering,metric=euclidean){
 
   clustered_data <- data |>
@@ -132,21 +127,23 @@ innerInequality <- function(data,clustering,metric=euclidean){
 }
 
 
-## Silhouette of a clustering on ONE SPECIFIC data point.
-## Gives insight as to how well the data point fits into its assigned cluster.
-## A value near -1 means bad fit, a value near 1 means good fit.
-## Be aware: Trivial cases outputs have been chosen arbitrarily/heuristically
-##
-## Inputs:
-## data,        a tibble with with every row representing a data point.
-## clustering,  a clustering function relating any data point to their cluster.
-## o,           an atomic vector or tibble row.
-##              This is the data point we calculate the silhouette of
-## metric,      a metric whose 2 inputs are of the data row type.
-##
-## Returns:
-## numeric,     a real number between -1 and 1
-##
+#' Silhouette of a clustering on ONE SPECIFIC data point.
+#'
+#' Gives insight as to how well the data point fits into its assigned cluster.
+#' A value near -1 means bad fit, a value near 1 means good fit.
+#'
+#' Be aware: Trivial cases outputs have been chosen arbitrarily/heuristically
+#'
+#'
+#' @param data        a tibble with with every row representing a data point.
+#' @param clustering  a clustering function relating any data point to their cluster.
+#' @param o           an atomic vector or tibble row.
+#'              This is the data point we calculate the silhouette of
+#' @param metric      a metric whose 2 inputs are of the data row type.
+#'
+#' Returns:
+#' @returns numeric, a real number between -1 and 1
+#'
 silhouette <- function(data,clustering,o,metric=euclidean){
   ## if o is not part of data, append it. This is a suprise tool that might hel us later
   data[base::nrow(data)+1,] <- o |>
@@ -213,20 +210,20 @@ silhouette <- function(data,clustering,o,metric=euclidean){
 }
 
 
-## Mean Silhouette of a clustering
-## Gives insight as to how well the clustering fits the data in general
-## by calculating the silhouette of all points and averaging them.
-## A value near -1 means bad fit, a value near 1 means good fit.
-## Be aware: Trivial cases outputs have been chosen arbitrarily/heuristically
-##
-## Inputs:
-## data,        a tibble with with every row representing a data point.
-## clustering,  a clustering function relating any data point to their cluster.
-## metric,      a metric whose 2 inputs are of the data row type.
-##
-## Returns:
-## numeric,     a real number between -1 and 1
-##
+#' Mean Silhouette of a clustering
+#'
+#' Gives insight as to how well the clustering fits the data in general
+#' by calculating the silhouette of all points and averaging them.
+#' A value near -1 means bad fit, a value near 1 means good fit.
+#'
+#' Be aware: Trivial cases outputs have been chosen arbitrarily/heuristically
+#'
+#' @param data        a tibble with with every row representing a data point.
+#' @param clustering  a clustering function relating any data point to their cluster.
+#' @param metric      a metric whose 2 inputs are of the data row type.
+#'
+#' @returns a numeric, a real number between -1 and 1
+#'
 meanSilhouette <- function(data,clustering,metric=euclidean){
 
   if( data |>
@@ -237,7 +234,7 @@ meanSilhouette <- function(data,clustering,metric=euclidean){
       base::nrow() == 1){
     ## If there's only one cluster, we cut the calculation short and return 0.
     ## Note that this is an ARBITRARY choice, but seems reasonable as it gives no info
-    ## about wether the clustering with 1 cluster is good ore bad
+    ## about whether the clustering with 1 cluster is good ore bad
     return(0)
   }
 
@@ -253,16 +250,15 @@ meanSilhouette <- function(data,clustering,metric=euclidean){
 
 
 
-## Coerce a tibble into a mathematical path
-##
-## Inputs:
-## data,        a tibble with every row representing a point along the path
-##
-## Returns:
-## path,        a function relating a one d variable t to the data space
-##              input: a numeric t in [0,1]
-##              returns: a data row type
-##
+#' Coerce a tibble into a mathematical path
+#'
+#' @param data        a tibble with every row representing a point along the path
+#'
+#'
+#' @returns path, a function relating a one dim variable t to the data space
+#'              input: a numeric t in [0,1]
+#'              returns: a data row type
+#'
 tibbleAsPath <- function(data){
   return(
     function(t){
@@ -284,13 +280,13 @@ tibbleAsPath <- function(data){
 
 ################# Viewers ######################
 
-## View clustered 2D data
-## acts as a wrapper for view_data() in the case of unclustered data
-##
-## Inputs:
-## data,        a tibble with every row representing a data point.
-## clustering,  a clustering function applicable to the data.
-##              If none given, the data will be displayed without clusters, wraps view_data().
+#' View clustered 2D data
+#'
+#' acts as a wrapper for view_data() in the case of unclustered data
+#'
+#' @param data        a tibble with every row representing a data point.
+#' @param clustering  a clustering function applicable to the data.
+#'    If none given, the data will be displayed without clusters, wraps view_data().
 viewClusters <- function(data,clustering=NULL){
   ## Invariant
   stopifnot('This function can currently only display clusterings of 2D data' = ncol(data)==2)
@@ -323,10 +319,10 @@ viewClusters <- function(data,clustering=NULL){
 
 
 
-## View 2D data as a simple scatter plot
-##
-## Inputs:
-## data,        a tibble with every row representing a data point.
+#' View 2D data as a simple scatter plot
+#'
+#' Inputs:
+#' @param data        a tibble with every row representing a data point.
 viewData <- function(data){
   colnames(data) <- c('X','Y')
 
@@ -361,170 +357,33 @@ clusterLabeling <- function(x){
 
 
 
-## The standard euclidean distance
-##
-## Inputs:
-## x,         an atomic vector or tibble row with only real numbers
-## y,         an atomic vector or tibble row with only real numbers
-##
-## Returns:
-## numeric,   a real number >= 0.
+#' The standard euclidean distance
+#'
+#' @param x         an atomic vector or tibble row with only real numbers
+#' @param y         an atomic vector or tibble row with only real numbers
+#'
+#' @returns numeric,   a real number >= 0.
 euclidean <- function(x,y) base::sum((x-y)^2)
 
 
-## The standard Manhattan, taxi or maximum metric
-##
-## Inputs:
-## x,         an atomic vector or tibble row with only real numbers
-## y,         an atomic vector or tibble row with only real numbers
-##
-## Returns:
-## numeric,   a real number >= 0.
+#' The standard Manhattan, taxi or maximum metric
+#'
+#' @param x         an atomic vector or tibble row with only real numbers
+#' @param y         an atomic vector or tibble row with only real numbers
+#'
+#' @returns numeric,   a real number >= 0.
 maximumMetric <- function(x,y) base::max(x-y)
 
 
-## The standard Lp metric
-##
-## Inputs:
-## x,         an atomic vector or tibble row with only real numbers
-## y,         an atomic vector or tibble row with only real numbers
-## p,         a real numeric with 1 <= p < Inf
-##
-## Returns:
-## numeric,   a real number >= 0.
+#' The standard Lp metric
+#'
+#'
+#' @param p         a real numeric with 1 <= p < Inf
+#'
+#'
+#' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
+#'   numerical output, a real number >= 0.
 pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
 
 
-
-
-
-## Centroid determinator.
-## Calculates the centroid of a tibble as the average of the
-## vectors given in the rows.
-##
-## Input:
-## data     a tibble with every row representing a point within the cluster
-##
-## Returns:
-## tibble   a tibble with one row and same dimension as data representing the centroid
-centroid_det <- function(data){   #determine centroid of a tibble (returns a tibble with one row)
-  data |>
-    dplyr::summarise(dplyr::across(tidyselect::everything(), ~ mean(.x, na.rm = TRUE)))
-}
-
-
-
-############# Linkage Modes ######################
-##
-## A linkage mode is a method of calculating the dissimilarity
-## of two clusters (of size >= 1) given a metric to determine a distance
-##
-## Inputs:
-## metric,    metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-
-
-
-## The distance between the centroids of the two clusters
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-centroid <- function(metric, data1, data2){
-  centr_1 <- centroid_det(data1)
-  centr_2 <- centroid_det(data2)
-  return(metric(centr_1, centr_2))
-}
-
-
-
-## Mean intercluster dissimilarity. The average of the distances of all
-## combinations between a point in cluster 1 and a point in cluster 2 given a metric
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-average <- function(metric, data1, data2){   #employ the average distance method
-  data1 |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      mean_dist = mean(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
-        })
-      )
-    ) |>
-    dplyr::select(mean_dist) |>
-    dplyr::ungroup() |>
-    dplyr::summarise(mean = mean(.data$mean_dist)) |>
-    dplyr::pull(mean)
-}
-
-
-
-## Minimal intercluster dissimilarity. Determines the smallest distance
-## between points in cluster 1 and points in cluster 2 given a metric.
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-single <- function(metric, data1, data2){
-  data1 |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      min_dist = min(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
-        })
-      )
-    ) |>
-    dplyr::select(min_dist) |>
-    dplyr::ungroup() |>
-    dplyr::summarise(min = min(.data$min_dist)) |>
-    dplyr::pull(min)
-}
-
-
-
-## Maximum intercluster dissimilarity. Determines the largest distance
-## between points in cluster 1 and points in cluster 2 given a metric.
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-complete <- function(metric, data1, data2){
-  data1 |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      max_dist = max(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
-        })
-      )
-    ) |>
-    dplyr::select(max_dist) |>
-    dplyr::ungroup() |>
-    dplyr::summarise(max = max(.data$max_dist)) |>
-    dplyr::pull(max)
-}
-
+NULL
