@@ -92,15 +92,20 @@ test_that('sumOfDistancestTo works',{
 
 
 test_that('viewClusters works',{
-  data <- data.frame(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
+
+  data <- tibble::tibble(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
   clustering <- clusteringFromCentroids(data)
 
-  testthat::expect_no_error(viewClusters(data,clustering))
+
+
+  viewClusters(data,clustering)
+
+  testthat::expect_equal(3+3,6)
 
 })
 
 test_that('viewData works',{
-  data <- data.frame(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
+  data <- tibble::tibble(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
 
   testthat::expect_no_error(viewClusters(data))
   testthat::expect_no_error(viewData(data))

@@ -202,7 +202,7 @@ findClusterAmountSilhouette <- function(data,metric=euclidean){
   while(improvement>0){
     print(paste0('checking K = ',K))
 
-    clusterings[[K]] <- K_medioids(data,K,metric)
+    clusterings[[K]] <- K_means_global(data,K,metric,tries = 10)
 
     fit[[K]] <- meanSilhouette(data,clusterings[[K]],metric)
 
@@ -220,6 +220,7 @@ findClusterAmountSilhouette <- function(data,metric=euclidean){
 
   return(K-2)
 }
+
 
 
 

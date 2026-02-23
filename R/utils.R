@@ -50,11 +50,7 @@ generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
   return(test_data)
 }
 
-data <- generateClusterTestDataSimple(100,cluster_amount = 5,dim = 3)
-viewData3D(data)
-K <- findClusterAmountSilhouette(data)
-clustering <- K_means(data,K=5)
-viewClusters3D(data,clustering)
+
 
 
 #' Nonspherical test data generator
@@ -135,7 +131,7 @@ innerInequality <- function(data,clustering,metric=euclidean){
 
   clustered_data <- data |>
     dplyr::rowwise() |>
-    dplyr::mutate(cluster=clustering(dplyr::c_across(dplyr::all_of(1:2))))
+    dplyr::mutate(cluster=clustering(dplyr::c_across(dplyr::everything())))
 
   centroids <- clustered_data |>
     dplyr::ungroup() |>
@@ -181,7 +177,7 @@ silhouette <- function(data,clustering,o,metric=euclidean){
   ## apply the clustering function to the data
   clustered_data <- data |>
     dplyr::rowwise() |>
-    dplyr::mutate(cluster = clustering(dplyr::c_across(dplyr::all_of(1:2)))) |>
+    dplyr::mutate(cluster = clustering(dplyr::c_across(dplyr::everything()))) |>
     dplyr::mutate(distance = metric(dplyr::c_across(1:base::ncol(data)), o))
 
   ## as set up above, o is now part of the data set with minimal distance to itself.
@@ -344,34 +340,6 @@ sumOfDistancestTo <- function(data,vector,metric){
 
 ################# Viewers ######################
 
-#' View clustered 2D data
-#'
-#' acts as a wrapper for view_data() in the case of unclustered data
-#'
-#' @param data        a tibble with every row representing a data point.
-#' @param clustering  a clustering function applicable to the data.
-#'    If none given, the data will be displayed without clusters, wraps view_data().
-viewClusters <- function(data,clustering=NULL){
-  ## Invariant
-  stopifnot('This function can currently only display clusterings of 1D to 3D data' = ncol(data)==2)
-
-
-  if(base::missing(clustering)) viewData(data)
-  else{
-    if(ncol(data)==1){
-      message('this functionality is still work in progress')
-      data |> colnames() <- 'X'
-      data <- data |> dplyr::mutate(Y = 0)
-      viewClusters2D(data,clustering)
-    }
-    else if(ncol(data)==2){
-      viewClusters2D(data,clustering)
-    }
-    else if(ncol(data)==3){
-      viewClusters3D(data,clustering)
-    }
-  }
-}
 
 viewClusters2D <-function(data,clustering){
   stopifnot('viewClusters2D can only display clusterings of 2D data' = 1<=dim & dim <= 3)
@@ -391,7 +359,6 @@ viewClusters2D <-function(data,clustering){
     ggplot2::coord_fixed()
 }
 
-data <- tibble::tibble(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4),Z=c(0.46,0.9,0.5,0.4))
 
 
 
@@ -417,24 +384,36 @@ viewClusters3D <-function(data,clustering){
   scatterplot3d::scatterplot3d(x,y,z,color = color,pch = 16)
 }
 
+#' View clustered 2D data
+#'
+#' acts as a wrapper for view_data() in the case of unclustered data
+#'
+#' @param data        a tibble with every row representing a data point.
+#' @param clustering  a clustering function applicable to the data.
+#'    If none given, the data will be displayed without clusters, wraps view_data().
+viewClusters <- function(data,clustering=NULL){
+  dim <- base::ncol(data)
+  ## Invariant
+  stopifnot('This function can only display clusterings of 1D to 3D data' = 1<=dim & dim<=3)
 
-viewData <- function(data){
-  dim <- ncol(data)
-  stopifnot('viewData can only display 1D to 3D data' = 1<=dim & dim <= 3)
 
-  if(dim==1){
-    message('this functionality is still work in progress')
-    data |> colnames() <- 'X'
-    data <- data |> dplyr::mutate(Y = 0)
-    viewData2D(data)
-  }
-  else if(dim==2){
-    viewData2D(data)
-  }
-  else if(dim==3){
-    viewData3D(data)
+  if(base::missing(clustering)) viewData(data)
+  else{
+    if(ncol(data)==1){
+      message('this functionality is still work in progress')
+      data |> colnames() <- 'X'
+      data <- data |> dplyr::mutate(Y = 0)
+      viewClusters2D(data,clustering)
+    }
+    else if(ncol(data)==2){
+      viewClusters2D(data,clustering)
+    }
+    else if(ncol(data)==3){
+      viewClusters3D(data,clustering)
+    }
   }
 }
+
 
 #' View 2D data as a simple scatter plot
 #'
@@ -452,6 +431,26 @@ viewData3D <- function(data){
 
   scatterplot3d::scatterplot3d(data,color = 'black')
 }
+
+viewData <- function(data){
+  dim <- base::ncol(data)
+  stopifnot('viewData can only display 1D to 3D data' = (1 <= dim && dim <= 3))
+
+  if(dim==1){
+    message('this functionality is still work in progress')
+    data |> colnames() <- 'X'
+    data <- data |> dplyr::mutate(Y = 0)
+    viewData2D(data)
+  }
+  else if(dim==2){
+    viewData2D(data)
+  }
+  else if(dim==3){
+    viewData3D(data)
+  }
+}
+
+
 
 
 clusterLabeling <- function(x){
