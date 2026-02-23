@@ -7,6 +7,7 @@
 #'                    If none given, choose a random amount < sqrt(n).
 #'
 #' @returns a tibble, every row representing a data point.
+#' @export
 generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
   if(base::missing(n_clusters)){
     n_clusters <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
@@ -28,6 +29,7 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
   return(test_data)
 }
 
+#' @export
 generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
   if(base::missing(cluster_amount)){
     cluster_amount <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
@@ -60,6 +62,7 @@ generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
 #'                  to be interpreted as paths along which the data is generated
 #'
 #' @returns a tibble, every row representing a data point.
+#' @export
 generateClusterTestData2DFromPaths = function(n=100,list_of_paths){
 
   n_clusters <- length(list_of_paths)
@@ -341,13 +344,24 @@ sumOfDistancestTo <- function(data,vector,metric){
 ################# Viewers ######################
 
 
-viewClusters2D <-function(data,clustering){
-  stopifnot('viewClusters2D can only display clusterings of 2D data' = 1<=dim & dim <= 3)
+viewClusters2D <-function(clustered_data){
 
-  colnames(data) <- c('X','Y')
+  dim <- ncol(clustered_data)-1
+  stopifnot('viewClusters2D can only display clusterings of 2D data' = dim==2)
 
-  ## apply the cluster function to the data
-  clustered_data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(all_of(1:2))), cluster_label = clusterLabeling(cluster))
+  prefered_colnames <- c('X','Y')
+  colname_index <- 1
+
+  for(i in 1:ncol(clustered_data)){
+    if(colnames(clustered_data)[i] != 'cluster'){
+      colnames(clustered_data)[i] <- prefered_colnames[colname_index]
+      colname_index <- colname_index+1
+    }
+  }
+
+
+  ## label the clusters
+  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate(cluster_label = clusterLabeling(cluster))
 
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
@@ -362,13 +376,25 @@ viewClusters2D <-function(data,clustering){
 
 
 
-viewClusters3D <-function(data,clustering){
-  stopifnot('viewClusters3D can only display clusterings of 3D data' = ncol(data)==3)
 
-  colnames(data) <- c('X','Y','Z')
+viewClusters3D <-function(clustered_data){
+  dim <- ncol(clustered_data)-1
+  stopifnot('viewClusters3D can only display clusterings of 3D data' = dim==3)
 
-  ## apply the cluster function to the data
-  clustered_data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(all_of(1:3))), cluster_label = clusterLabeling(cluster))
+  prefered_colnames <- c('X','Y','Z')
+  colname_index <- 1
+
+  for(i in 1:ncol(clustered_data)){
+    if(colnames(clustered_data)[i] != 'cluster'){
+      colnames(clustered_data)[i] <- prefered_colnames[colname_index]
+      colname_index <- colname_index+1
+    }
+  }
+
+
+  ## label the clusters
+  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate(cluster_label = clusterLabeling(cluster))
+
 
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
@@ -384,32 +410,44 @@ viewClusters3D <-function(data,clustering){
   scatterplot3d::scatterplot3d(x,y,z,color = color,pch = 16)
 }
 
-#' View clustered 2D data
+#' View clustered data
 #'
 #' acts as a wrapper for view_data() in the case of unclustered data
 #'
 #' @param data        a tibble with every row representing a data point.
 #' @param clustering  a clustering function applicable to the data.
 #'    If none given, the data will be displayed without clusters, wraps view_data().
+#' @export
 viewClusters <- function(data,clustering=NULL){
-  dim <- base::ncol(data)
-  ## Invariant
-  stopifnot('This function can only display clusterings of 1D to 3D data' = 1<=dim & dim<=3)
 
 
-  if(base::missing(clustering)) viewData(data)
+  if(base::missing(clustering) & !('cluster' %in% colnames(data))) {
+    viewData(data)
+  }
   else{
-    if(ncol(data)==1){
+    if(!('cluster' %in% colnames(data))){
+      data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
+    }
+
+    dim <- base::ncol(data)-1
+    ## Invariant
+    stopifnot('This function can only display clusterings of 1D to 3D data' = 1<=dim & dim<=3)
+
+
+
+    if(ncol(data)-1==1){
+
       message('this functionality is still work in progress')
-      data |> colnames() <- 'X'
+      if(colnames(data)[1] == 'cluster') data |> colnames() <- c('X','cluster')
+      else data |> colnames() <- c('cluster','X')
       data <- data |> dplyr::mutate(Y = 0)
-      viewClusters2D(data,clustering)
+      viewClusters2D(data)
     }
-    else if(ncol(data)==2){
-      viewClusters2D(data,clustering)
+    else if(ncol(data)-1==2){
+      viewClusters2D(data)
     }
-    else if(ncol(data)==3){
-      viewClusters3D(data,clustering)
+    else if(ncol(data)-1==3){
+      viewClusters3D(data)
     }
   }
 }
@@ -432,6 +470,7 @@ viewData3D <- function(data){
   scatterplot3d::scatterplot3d(data,color = 'black')
 }
 
+#' @export
 viewData <- function(data){
   dim <- base::ncol(data)
   stopifnot('viewData can only display 1D to 3D data' = (1 <= dim && dim <= 3))
@@ -449,7 +488,6 @@ viewData <- function(data){
     viewData3D(data)
   }
 }
-
 
 
 
@@ -485,6 +523,7 @@ clusterLabeling <- function(x){
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
+#' @export
 euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 
 
@@ -494,6 +533,7 @@ euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
+#' @export
 maximumMetric <- function(x,y) base::max(x-y)
 
 
@@ -505,7 +545,8 @@ maximumMetric <- function(x,y) base::max(x-y)
 #'
 #' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
 #'   numerical output, a real number >= 0.
-pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
+#' @export
+pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(1/p)
 
 
 ############# Linkage Modes ######################
