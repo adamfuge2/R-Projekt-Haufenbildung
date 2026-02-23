@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{viewClusters}
 \alias{viewClusters}
-\title{View clustered 2D data}
+\title{View clustered data}
 \usage{
 viewClusters(data, clustering = NULL)
 }

@@ -4,7 +4,7 @@
 #'
 #' The standard K-Medioids algorithm. Tries fitting the data into K many
 #' clusters centered around so called medioids, the data points closest to the
-#' centroids of the resulting cluster.
+#' centroids of the resulting
 #'
 #' The resulting function can be used for new unknown data!
 #'
@@ -18,7 +18,6 @@
 #' @returns a clustering function,  a function relating every data point to
 #'   their cluster. Can be used on new data! input: atomic vectors Of the data
 #'   row type returns: a number 1 to k, representing the related cluster.
-#'
 K_medioids <- function(data,K,metric = euclidean){
 
   ## some necessary variables

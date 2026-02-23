@@ -24,7 +24,7 @@ a clustering function,  a function relating every data point to
 \description{
 The standard K-Medioids algorithm. Tries fitting the data into K many
 clusters centered around so called medioids, the data points closest to the
-centroids of the resulting cluster.
+centroids of the resulting
 }
 \details{
 The resulting function can be used for new unknown data!

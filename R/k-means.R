@@ -21,7 +21,7 @@
 #'            Can be used on new data!
 #'            input: atomic vectors Of the data row type
 #'            returns: a number 1 to k, representing the related cluster
-#'
+#' @export
 K_means <- function(data,K,metric=euclidean){
 
   ## some necessary variables
@@ -98,7 +98,7 @@ K_means <- function(data,K,metric=euclidean){
 #'            Can be used on new data!
 #'            input: atomic vectors Of the data row type
 #'            returns: a number 1-k, representing the related cluster
-#'
+#' @export
 K_means_global <- function(data,K,metric=euclidean,tries=K){
 
 
@@ -154,6 +154,8 @@ K_means_global <- function(data,K,metric=euclidean,tries=K){
 #' @param data      a tibble with with every row representing a data point.
 #'
 #' @returns a positive integer, the 'optimal' clustering
+#'
+#' @export
 findClusterAmountElbow <- function(data){
   clusterings <- list()
   improvement <- 2
@@ -193,6 +195,8 @@ findClusterAmountElbow <- function(data){
 #' @param data      a tibble with with every row representing a data point.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
+#'
+#' @export
 findClusterAmountSilhouette <- function(data,metric=euclidean){
   clusterings <- list()
   fit <- list()
