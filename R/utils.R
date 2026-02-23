@@ -494,7 +494,7 @@ euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
-maximumMetric <- function(x,y) base::max(x-y)
+maximumMetric <- function(x,y) base::max(base::abs(x-y))
 
 
 #' The standard Lp metric
@@ -505,7 +505,7 @@ maximumMetric <- function(x,y) base::max(x-y)
 #'
 #' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
 #'   numerical output, a real number >= 0.
-pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(2/p)
+pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(1/p)
 
 
 ############# Linkage Modes ######################
