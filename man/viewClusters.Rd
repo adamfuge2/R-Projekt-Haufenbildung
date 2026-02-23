@@ -2,16 +2,49 @@
 % Please edit documentation in R/utils.R
 \name{viewClusters}
 \alias{viewClusters}
-\title{View clustered data}
+\title{View cluster data}
 \usage{
 viewClusters(data, clustering = NULL)
 }
 \arguments{
-\item{data}{a tibble with every row representing a data point.}
+\item{data}{a tibble with every row representing a data point. If \code{data}
+has a column named \code{'cluster'}, then this column will be used to color
+the data points}
 
-\item{clustering}{a clustering function applicable to the data.
-If none given, the data will be displayed without clusters, wraps view_data().}
+\item{clustering}{a clustering function applicable to the data. If none
+given, the data will be displayed with the clusters deferred from the
+column \code{'cluster'} of data or without clusters, using
+\code{viewData(data)}.}
 }
 \description{
-acts as a wrapper for view_data() in the case of unclustered data
+Displays 1D to 3D data points color coded by their cluster. Can be used for:
+\itemize{
+ \item \strong{data and an applicable clustering function}.
+ \item \strong{already clustered data},  in this case don't input a clustering function and make sure your data has a column \code{'cluster'}.
+ \item \strong{data without clusters}, in this case don't input a clustering function and make sure your data \strong{does not} have a column \code{'cluster'}.
+}
+Acts as a wrapper for viewClusters2D, viewClusters3D, viewData, viewData2D
+and viewData3D.\n
+Currently only works for clusters represented by numbers >= 0. Every data point
+in 'cluster' will be labeled as an 'Outlier'.
+}
+\examples{
+# 1D data without clusters
+data_1D <- generateClusterTestDataSimple(dim=1)
+viewClusters(data_1D)
+# 2D data without clusters
+data_2D <- generateClusterTestDataSimple(dim=2)
+viewClusters(data_2D)
+# 3D data without clusters
+data_3D <- generateClusterTestDataSimple(dim=3)
+viewClusters(data_3D)
+# 3D data with a clustering function
+clustering <- K_means(data_3D,K=5)
+viewClusters(data_3D,clustering)
+# 2D data with column 'cluster'
+clustering <- K_means(data_2D,K=5)
+clustered_data_2D <- data_2D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
+viewClusters(clustered_data_2D)
+
+
 }

@@ -2,13 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{viewData2D}
 \alias{viewData2D}
-\title{View 2D data as a simple scatter plot}
+\title{View 2D data as scatter plot}
 \usage{
 viewData2D(data)
 }
 \arguments{
-\item{data}{a tibble with every row representing a data point.}
+\item{data}{A tibble with every row representing a data point.}
 }
 \description{
-Inputs:
+View 2D data as scatter plot
+}
+\examples{
+data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
+viewData3D(data_3D)
+
 }
