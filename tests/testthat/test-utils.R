@@ -10,6 +10,7 @@ test_that('wholenumber check works',{
 
 test_that('generators output right dimension',{
   expect_equal(ncol(generateClusterTestDataSimple2D(10)),2)
+  expect_equal(ncol(generateClusterTestDataSimple(10,dim=3)),3)
   expect_equal(ncol(generateClusterTestData2DFromPaths(10,list(tibble::tibble(X=0.5,Y=0.5)))),2)
 })
 
