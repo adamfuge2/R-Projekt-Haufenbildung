@@ -12,12 +12,12 @@
 ## res        a tibble of same length as data with an entry 'cluster'
 hierarchical_clustering <- function(data, n, mode = centroid, metric = euclidean){
   data <- tibble::rowid_to_column(data, "cluster")   #assign each datapoint a cluster-ID
-  
+
   while(data$cluster |> unique() |> length() > n){
     min_dist <- Inf   #minimal distance between two points
     neighbors <- c(0,0)
     cluster <- data$cluster |> unique()
-    
+
     for (i in cluster){
       for (j in cluster[cluster != i]){
         tbl1 <- dplyr::filter(data, cluster == i) |> dplyr::mutate(cluster=NULL)  #remove the 'cluster' entry (otherwise it would add to the distance)

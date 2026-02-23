@@ -1,10 +1,10 @@
 #' @details
 #' Details
-#' @seqtion CLustering functions
-#' clustering functions are bla bla bla
+#' @section CLustering functions
+#'
 #' @references Richter
 #' @keywords internal
-'_Haufenbildung'
+"_PACKAGE"
 
 
 # The following block is used by usethis to automatically generate
@@ -14,4 +14,5 @@
 #' @import rlang
 #' @import dplyr
 #' @import tibble
+#' @import ggplot2
 NULL
