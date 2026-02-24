@@ -687,16 +687,14 @@ pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(1/p)
 ## numeric    a real number >= 0.
 
 
-
-## Centroid determinator.
-## Calculates the centroid of a tibble as the average of the
-## vectors given in the rows.
-##
-## Input:
-## data     a tibble with every row representing a point within the cluster
-##
-## Returns:
-## tibble   a tibble with one row and same dimension as data representing the centroid
+#' Centroid determinator
+#'
+#' The distance between the centroids of two clusters
+#'
+#' @param data a tibble with n(>=1) rows of dimension d
+#'
+#' @returns a tibble of dimension d with one row representing the centroid
+#' @export
 centroid_det <- function(data){   #determine centroid of a tibble (returns a tibble with one row)
   data |>
     dplyr::summarise(dplyr::across(tidyselect::everything(), ~ mean(.x, na.rm = TRUE)))
@@ -704,40 +702,43 @@ centroid_det <- function(data){   #determine centroid of a tibble (returns a tib
 
 
 
-## The distance between the centroids of the two clusters
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-centroid <- function(metric, data1, data2){
-  centr_1 <- centroid_det(data1)
-  centr_2 <- centroid_det(data2)
+#' Linkage mode: centroid
+#'
+#' The distance between the centroids of two clusters
+#'
+#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param data_1   a tibble with n(>=1) rows of dimension d
+#' @param data_2   a tibble with n(>=1) rows of dimension d
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+centroid <- function(metric, data_1, data_2){
+  centr_1 <- centroid_det(data_1)
+  centr_2 <- centroid_det(data_2)
   return(metric(centr_1, centr_2))
 }
 
 
 
-## Mean intercluster dissimilarity. The average of the distances of all
-## combinations between a point in cluster 1 and a point in cluster 2 given a metric
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-average <- function(metric, data1, data2){   #employ the average distance method
-  data1 |>
+#' Linkage mode: average
+#'
+#' Mean intercluster dissimilarity. The average of the distances of all
+#' combinations between a point in cluster 1 and a point in cluster 2 given
+#' a metric
+#'
+#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param data_1   a tibble with n(>=1) rows of dimension d
+#' @param data_2   a tibble with n(>=1) rows of dimension d
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+average <- function(metric, data_1, data_2){   #employ the average distance method
+  data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       mean_dist = mean(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
+        sapply(1:nrow(data_2), function(j){
+          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
@@ -749,23 +750,24 @@ average <- function(metric, data1, data2){   #employ the average distance method
 
 
 
-## Minimal intercluster dissimilarity. Determines the smallest distance
-## between points in cluster 1 and points in cluster 2 given a metric.
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-single <- function(metric, data1, data2){
-  data1 |>
+#' Linkage mode: single
+#'
+#' Minimal intercluster dissimilarity. Determines the smallest distance between
+#' points in cluster and 1 and points in cluster 2 given a metric.
+#'
+#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param data_1   a tibble with n(>=1) rows of dimension d
+#' @param data_2   a tibble with n(>=1) rows of dimension d
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+single <- function(metric, data_1, data_2){
+  data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       min_dist = min(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
+        sapply(1:nrow(data_2), function(j){
+          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
@@ -777,23 +779,24 @@ single <- function(metric, data1, data2){
 
 
 
-## Maximum intercluster dissimilarity. Determines the largest distance
-## between points in cluster 1 and points in cluster 2 given a metric.
-##
-## Inputs:
-## metric,    a metric as defined above
-## data1,     a tibble with n(>=1) rows of dimension d
-## data2      a tibble with m(>=1) rows of dimension d
-##
-## Returns:
-## numeric    a real number >= 0.
-complete <- function(metric, data1, data2){
-  data1 |>
+#' Linkage mode: complete
+#'
+#' Maximum intercluster dissimilarity. Determines the largest distance
+#' between points in cluster 1 and points in cluster 2 given a metric.
+#'
+#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param data_1   a tibble with n(>=1) rows of dimension d
+#' @param data_2   a tibble with n(>=1) rows of dimension d
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+complete <- function(metric, data_1, data_2){
+  data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       max_dist = max(
-        sapply(1:nrow(data2), function(j){
-          metric(data1[dplyr::cur_group_rows(), ], data2[j, ])
+        sapply(1:nrow(data_2), function(j){
+          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
