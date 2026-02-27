@@ -24,14 +24,15 @@ gaussKernelWeights <- function(data,gamma){
 spectralReduction <- function(data,
                               gamma,
                               k,
-                              kernel = gaussKernel,
+                              mercian_kernel = 'gauss',
+                              custom_mercian_kernel = NULL,
                               metric = NULL,
                               epsilon = NULL){
   n <- nrow(data)
 
 
 
-  if(missing(custom_mercian_kernel)){
+  if(is.null(custom_mercian_kernel)){
     if(mercian_kernel == 'gauss') W <- gaussKernelWeights(data,gamma)
     else stop('Unknown mercian kernel and no custom mercian kernel provided')
   }
@@ -72,8 +73,53 @@ spectralReduction <- function(data,
 
 }
 
+
+spectralClustering <- function(data,
+                            gamma,
+                            k,
+                            mercian_kernel = 'gauss',
+                            custom_mercian_kernel = NULL,
+                            metric = NULL,
+                            custom_metric = NULL,
+                            epsilon = NULL,
+                            cluster_algorithm = 'K-Means',
+                            ...){
+
+  spectral_reduction <- spectralReduction(data=data,
+                                          gamma=gamma,
+                                          k=k,
+                                          mercian_kernel = mercian_kernel,
+                                          custom_mercian_kernel = custom_mercian_kernel,
+                                          metric = metric,
+                                          epsilon = epsilon)
+
+  cat('test')
+
+  if(cluster_algorithm == 'K-Means'){
+    clustering <- k_means(spectral_reduction$reduced_data, metric=euclidean, ... )
+  }
+  else if(cluster_algorithm == 'K-Medioids'){
+    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+  }
+  else if(cluster_algorithm == 'hierachicalClustering'){
+    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+  }
+  else if(cluster_algorithm == 'DBSCAN'){
+    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+  }
+  else if(cluster_algorithm == 'OPTICS'){
+    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+  }
+  else{
+    stop('Unknown clustering algorithm')
+  }
+
+  return(clustering)
+}
+
 data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 2)
 
 viewClusters(data)
-viewClusters(spectralReduction(data,gamma=5,k=1)$reduced_data)
+viewClusters(dataspectralClustering(data,gamma=5,k=1,cluster_algorithm = 'K-Means',K=2))
 viewClusters(reduced_data)
+
