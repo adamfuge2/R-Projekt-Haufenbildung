@@ -4,6 +4,9 @@
 gaussKernelWeights <- function(data,gamma){
   base::exp(- gamma * base::as.matrix(stats::dist(data)))
 }
+gaussKernel <- function(x,y,gamma){
+  base::exp(- gamma * sqrt(sum((x-y)^2)))
+}
 
 
 #' Spectral Reduction
@@ -33,7 +36,10 @@ spectralReduction <- function(data,
 
 
   if(is.null(custom_mercian_kernel)){
-    if(mercian_kernel == 'gauss') W <- gaussKernelWeights(data,gamma)
+    if(mercian_kernel == 'gauss') {
+      W <- gaussKernelWeights(data,gamma)
+      K <- gaussKernel
+    }
     else stop('Unknown mercian kernel and no custom mercian kernel provided')
   }
   else {
@@ -69,7 +75,17 @@ spectralReduction <- function(data,
   # useful names
   colnames(reduced_data) <- paste0('X_',1:k)
 
-  return(list(reduced_data = reduced_data, transform_function = function(...) stop('not implemented yet')))
+  # To calculate the projection function. but wtf no clue
+  #
+  #volume <- sum(D) - n
+  #
+  #K_hat <- function(x,y) K(x,y) - sum(apply(1:n,function(i) K(data[i,],x)))*sum(apply(1:n,function(i) K(y,data[i,])))*1/volume
+  #
+  #lambda <- eigen(D_sqrt %*% L %*% D_sqrt, symmetric=TRUE)
+  #
+  #projection_function <- function(x)
+
+  return(list(reduced_data = reduced_data, projection_function = function(...) stop('not implemented yet')))
 
 }
 
@@ -93,13 +109,17 @@ spectralClustering <- function(data,
                                           metric = metric,
                                           epsilon = epsilon)
 
-  cat('test')
+
+
 
   if(cluster_algorithm == 'K-Means'){
     clustering <- k_means(spectral_reduction$reduced_data, metric=euclidean, ... )
   }
   else if(cluster_algorithm == 'K-Medioids'){
     clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+    # do this when implemented
+    #clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'hierachicalClustering'){
     clustering <- K_medioids(spectral_reduction$reduced_data, ...)
@@ -120,6 +140,6 @@ spectralClustering <- function(data,
 data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 2)
 
 viewClusters(data)
-viewClusters(dataspectralClustering(data,gamma=5,k=1,cluster_algorithm = 'K-Means',K=2))
+viewClusters(spectralClustering(data,gamma=5,k=1,cluster_algorithm = 'K-Means',K=2))
 viewClusters(reduced_data)
 
