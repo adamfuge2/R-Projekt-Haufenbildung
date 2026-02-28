@@ -13,12 +13,22 @@
 #'   sample size and called n.
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
-#' @param metric    A metric whose inputs are the rows of data.
+#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}
+#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_metric A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
+#' @param .print_info A logical. Prints some useful information for debugging.
 #'
-#' @returns a clustering function,  a function relating every data point to
-#'   their cluster. Can be used on new data! input: atomic vectors Of the data
-#'   row type returns: a number 1 to k, representing the related cluster.
-kMedioids <- function(data,K,metric = euclidean){
+#' @returns A list of the class 'clustering'. Contains \itemize{
+#'   \item{\strong{\code{'clustered_data'}}} a tibble of original data with a new column called \code{'cluster'}
+#'   \item{\strong{\code{'clustering_function'}}} a function applicable to known and
+#'   unknown data points. Returns the cluster the data point belongs to.
+#'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medioids.
+#'   }
+#' @export
+kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
 
   ## some necessary variables
   n <- base::nrow(data)
@@ -27,14 +37,32 @@ kMedioids <- function(data,K,metric = euclidean){
   old_centroids <- tibble::tibble()
 
 
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      metric <- euclidean
+    else if(metric=='maximum')
+      metric <- maximumMetric
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      metric <- pMetric(p)
+      }
+    else if(metric=='manhattan')
+      metric <- pMetric(1)
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else metric <- custom_metric
+
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
 
+  ## As we will never need to handle new data points, calculate all distances
+  ## between the data points now.
   D <- dissimilarityMatrix(data,metric = metric)
 
-  ## (BUILD) Define starting centroids
+  ## (BUILD) Define starting medioids
   medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
 
 
@@ -42,17 +70,15 @@ kMedioids <- function(data,K,metric = euclidean){
   new_min_cost <-  D[medioid_indeces,] |> apply(c(2),min) |>  sum()
 
   while(new_min_cost < old_min_cost){
-    ## Weve found a new, better medioids configuration!
+    ## We've found a new, better medioids configuration!
     if(.print_info)
       base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
 
-    ## Save old centroids, to compare with next centroids
+    ## Save old medioids, to compare with next medioids
     old_medioid_indeces <- medioid_indeces
     old_min_cost <- new_min_cost
 
     ## calculate which changed medioids would diminsh the inner inequality most
-
-
     costs <- base::matrix(base::rep(1:n,base::nrow(centroids)),ncol = base::nrow(centroids))
     for(k in 1:base::nrow(centroids)){
       costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedioid(x,medioid_indeces,k,dissimilarity_matrix=D))
