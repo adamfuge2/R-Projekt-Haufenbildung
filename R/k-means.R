@@ -15,91 +15,14 @@
 #' @param K          A whole number between 0 and n+1.
 #'            The amount of Clusters the algorithm tries to find in the data
 #' @param metric          A metric whose inputs are the rows of data as atomic vectors
-#'
+#' @param tries ToDo
 #'
 #' @returns a clustering function,  a function relating every data point to their cluster.
 #'            Can be used on new data!
 #'            input: atomic vectors Of the data row type
 #'            returns: a number 1 to k, representing the related cluster
 #' @export
-K_means <- function(data,K,metric=euclidean){
-
-  ## some necessary variables
-  n <- base::nrow(data)
-  dim <- base::ncol(data)
-  minimal_cost <- Inf
-  old_centroids <- tibble::tibble()
-
-
-  ## Invariants: test the input
-  base::stopifnot('Data must have more than 0 rows' = n>0)
-  base::stopifnot('K is not a whole number' = is.wholenumber(K))
-  base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
-
-
-  ## Define starting centroids
-  centroids <- data[,1:dim] |>
-    dplyr::ungroup() |>
-    dplyr::slice_sample(n=K)
-
-
-  ## Main loop: repeat iterating the cluster means, until no more change
-  while(!base::identical(centroids, old_centroids)){
-
-    ## Calculate distances to centroids
-    for(centroid_number in 1:base::nrow(centroids)){
-      data <- data |> dplyr::rowwise() |> dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := metric(dplyr::c_across(all_of(1:dim)),base::unlist(centroids[centroid_number,])))
-    }
-
-    ## Defer the clustering with respect to the centroid
-    data <- data |> dplyr::mutate(cluster = base::which.min(dplyr::c_across((dim+1):(dim+K))))
-
-    ## Save old centroids, to compare with next centroids
-    old_centroids <- centroids
-
-    ## Calculate new centroids as the MEAN of the clusters
-    ## THIS is where this algorithm gets its name from
-    centroids <- data |>
-      dplyr::ungroup() |>
-      dplyr::group_by(cluster) |>
-      dplyr::summarise_at(1:dim,mean) |>
-      dplyr::select(-cluster)
-  }
-
-  ## return a function returning the cluster a datapoint (atomic vector) belongs to
-  return(function(x) {
-    distances <- base::numeric()
-    for(k in 1:K){
-      distances = c(distances,metric(x,base::unlist(centroids[k,])))
-    }
-    return(base::which.min(distances))})
-}
-
-
-#' Globally best K-Means clustering
-#'
-#' The K-means-Algorithm wraped to look for GLOBAL optimal clusters
-#' Tries fitting the data into K many clusters centered around so called
-#' centroids which are derived from the mean value of guessed clusters.
-#' This process is then repeated a number of times and only the best clustering
-#' with respect to inner Inequality is returned.
-#'
-#' @param data      a tibble with with every row representing a data point.
-#'            The number columns is therefore the dimensionality,
-#'            The number of rows is the sample size and called n.
-#' @param K         a whole number between 0 and n+1.
-#'            The amount of Clusters the algorithm tries to find in the data
-#' @param metric         a metric whose inputs are the rows of data as atomic vectors
-#' @param tries     an integer greater than one.
-#'            The amount of times the algorithms should try to find a globally best
-#'            clustering.
-#'
-#' @returns a clustering function, a function relating every data point to their cluster.
-#'            Can be used on new data!
-#'            input: atomic vectors Of the data row type
-#'            returns: a number 1-k, representing the related cluster
-#' @export
-K_means_global <- function(data,K,metric=euclidean,tries=K){
+kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
 
 
   ## some necessary variables
@@ -119,26 +42,64 @@ K_means_global <- function(data,K,metric=euclidean,tries=K){
   ## Try 5 times, to minimize the dependency on random chance
   for(repeats in 1:tries){
 
-    clustering <- K_means(data,K,metric)
+    ## Define starting centroids
+    centroids <- data[,1:dim] |>
+      dplyr::ungroup() |>
+      dplyr::slice_sample(n=K)
+
+
+    ## Main loop: repeat iterating the cluster means, until no more change
+    while(!base::identical(centroids, old_centroids)){
+
+      ## Calculate distances to centroids
+      for(centroid_number in 1:base::nrow(centroids)){
+        data <- data |> dplyr::rowwise() |> dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := metric(dplyr::c_across(all_of(1:dim)),base::unlist(centroids[centroid_number,])))
+      }
+
+      ## Defer the clustering with respect to the centroid
+      data <- data |> dplyr::mutate(cluster = base::which.min(dplyr::c_across((dim+1):(dim+K))))
+
+      ## Save old centroids, to compare with next centroids
+      old_centroids <- centroids
+
+      ## Calculate new centroids as the MEAN of the clusters
+      ## THIS is where this algorithm gets its name from
+      centroids <- data |>
+        dplyr::ungroup() |>
+        dplyr::group_by(cluster) |>
+        dplyr::summarise_at(1:dim,mean) |>
+        dplyr::select(-cluster)
+    }
 
     ## Calculate the cost of the found cluster,
     ## meaning the sum over all distances of the points to their cluster centroid
-    cost <- innerInequality(data,clustering)
+    cost <- data |> dplyr::mutate(cost = min(dplyr::c_across((dim+1):(dim+K)))) |> dplyr::ungroup() |> dplyr::summarise(sum(cost))
 
     ## Check if the found cluster has minimal cost and if so,
     ## update the currently best clustering guess
     if(cost < minimal_cost){
       minimal_cost <- cost
-      best_clustering <- clustering
+      best_centroids <- centroids
+      best_clustered_data <- data[,c(1:dim,dim+K+1)]
 
-      base::print(base::paste0('found new best clustering with cost ',cost))
+      if(.print_info)
+        base::print(base::paste0('Found a new best clustering with cost ',cost))
     }
   }
 
 
 
-  ## return a function returning the cluster a datapoint (atomic vector) belongs to
-  return(best_clustering)
+  ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
+  return(structure(
+              list(
+                clustered_data = best_clustered_data,
+                clustering_function = function(x) 1:k |>
+                  sapply(function(k) metric(x,base::unlist(centroids[k,]))) |>
+                  base::which.min()),
+              description = 'Data clustered by K-Means algorithm',
+              class= 'clustering'
+             )
+        )
 }
 
 
@@ -156,13 +117,15 @@ K_means_global <- function(data,K,metric=euclidean,tries=K){
 #' @returns a positive integer, the 'optimal' clustering
 #'
 #' @export
-findClusterAmountElbow <- function(data){
+findClusterAmountElbow <- function(data, .print_info = FALSE){
   clusterings <- list()
   improvement <- 2
   K <- 1
 
   while(improvement>1){
-    print(paste0('checking K = ',K))
+
+    if(.print_info)
+      print(paste0('checking K = ',K))
 
     clusterings[[K]] <- K_means_global(data,K,tries = 10)
 
@@ -173,7 +136,9 @@ findClusterAmountElbow <- function(data){
     if(K>1)improvement <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
 
 
-    print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
+
+    if(.print_info)
+      print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
 
     K <- K+1
 
@@ -197,14 +162,15 @@ findClusterAmountElbow <- function(data){
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountSilhouette <- function(data,metric=euclidean){
+findClusterAmountSilhouette <- function(data,metric=euclidean, .print_info = FALSE){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
   K <- 1
 
   while(improvement>0){
-    print(paste0('checking K = ',K))
+    if(.print_info)
+      print(paste0('checking K = ',K))
 
     clusterings[[K]] <- K_means_global(data,K,metric,tries = 10)
 
@@ -215,7 +181,8 @@ findClusterAmountSilhouette <- function(data,metric=euclidean){
     if(K>1) improvement <- fit[[K]] - fit[[K-1]]
 
 
-    print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
+    if(.print_info)
+      print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
 
     K <- K+1
 
@@ -225,9 +192,15 @@ findClusterAmountSilhouette <- function(data,metric=euclidean){
   return(K-2)
 }
 
+kMeans(data,4)
 
 
+K<-4
+tries <- 5
+metric <- euclidean
+data
 
+clustering <- kMeans(data,K=5)
 
 
 ## Example:
@@ -240,7 +213,7 @@ findClusterAmountSilhouette <- function(data,metric=euclidean){
 #
 ###################################################
 ### Apply the K-means-algorithm with K = 4       ##
-#clustering <- K_means(data, K = 4)
+#clustering <- kMeans(data, K = 4)
 ### (This may take a while)                      ##
 ###################################################
 #
