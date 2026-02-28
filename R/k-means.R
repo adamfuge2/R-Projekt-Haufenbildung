@@ -22,14 +22,21 @@
 #'            input: atomic vectors Of the data row type
 #'            returns: a number 1 to k, representing the related cluster
 #' @export
-kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
-
-
+kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_info = FALSE){
   ## some necessary variables
   n <- base::nrow(data)
   dim <- base::ncol(data)
   minimal_cost <- Inf
   old_centroids <- tibble::tibble()
+
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      metric <- euclidean
+    else if(metric=='maximum')
+      metric <- maximumMetric
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else metric <- custom_metric
 
 
   ## Invariants: test the input
@@ -39,7 +46,7 @@ kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
 
 
   ## Start of actual algorithm
-  ## Try 5 times, to minimize the dependency on random chance
+  ## Try multiple times, to minimize the dependency on random chance
   for(repeats in 1:tries){
 
     ## Define starting centroids
@@ -48,16 +55,18 @@ kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
       dplyr::slice_sample(n=K)
 
 
+
     ## Main loop: repeat iterating the cluster means, until no more change
     while(!base::identical(centroids, old_centroids)){
 
-      ## Calculate distances to centroids
-      for(centroid_number in 1:base::nrow(centroids)){
-        data <- data |> dplyr::rowwise() |> dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := metric(dplyr::c_across(all_of(1:dim)),base::unlist(centroids[centroid_number,])))
-      }
+      if(.print_info)
+        base::print(base::paste0('iterating'))
 
-      ## Defer the clustering with respect to the centroid
-      data <- data |> dplyr::mutate(cluster = base::which.min(dplyr::c_across((dim+1):(dim+K))))
+      distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){metric(x,centroid)})}) |> t()
+
+      ## Defer the clusters, every point to their nearest centroid
+      cluster <- apply(distances,2,which.min)
+      data$cluster <- cluster
 
       ## Save old centroids, to compare with next centroids
       old_centroids <- centroids
@@ -73,14 +82,14 @@ kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
 
     ## Calculate the cost of the found cluster,
     ## meaning the sum over all distances of the points to their cluster centroid
-    cost <- data |> dplyr::mutate(cost = min(dplyr::c_across((dim+1):(dim+K)))) |> dplyr::ungroup() |> dplyr::summarise(sum(cost))
+    cost <- apply(distances,2,min) |> sum()
 
     ## Check if the found cluster has minimal cost and if so,
     ## update the currently best clustering guess
     if(cost < minimal_cost){
       minimal_cost <- cost
       best_centroids <- centroids
-      best_clustered_data <- data[,c(1:dim,dim+K+1)]
+      best_clustered_data <- data
 
       if(.print_info)
         base::print(base::paste0('Found a new best clustering with cost ',cost))
@@ -93,9 +102,11 @@ kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
   return(structure(
               list(
                 clustered_data = best_clustered_data,
-                clustering_function = function(x) 1:k |>
-                  sapply(function(k) metric(x,base::unlist(centroids[k,]))) |>
-                  base::which.min()),
+                clustering_function = function(x)
+                  best_centroids |>
+                  apply(1,function(centroid) metric(x,centroid)) |>
+                  base::which.min(),
+                inner_inequality = minimal_cost),
               description = 'Data clustered by K-Means algorithm',
               class= 'clustering'
              )
@@ -119,7 +130,8 @@ kMeans <- function(data,K,metric=euclidean,tries=K, .print_info = FALSE){
 #' @export
 findClusterAmountElbow <- function(data, .print_info = FALSE){
   clusterings <- list()
-  improvement <- 2
+  inner_inequalities <- numeric()
+  improvement <- Inf
   K <- 1
 
   while(improvement>1){
@@ -127,9 +139,9 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
     if(.print_info)
       print(paste0('checking K = ',K))
 
-    clusterings[[K]] <- K_means_global(data,K,tries = 10)
+    clusterings[[K]] <- kMeans(data,K,tries = 10)
 
-    inner_inequalities <- lapply(clusterings,function(x) innerInequality(data,x))
+    inner_inequalities[[K]] <- clusterings[[K]]$inner_inequality
 
     plot(1:K,inner_inequalities,asp=1)
 
@@ -192,21 +204,11 @@ findClusterAmountSilhouette <- function(data,metric=euclidean, .print_info = FAL
   return(K-2)
 }
 
-kMeans(data,4)
 
-
-K<-4
-tries <- 5
-metric <- euclidean
-data
-
-clustering <- kMeans(data,K=5)
-
-
-## Example:
-
+### Example:
+#
 ### Lets create some test data
-#data <- generateClusterTestDataSimple2D(n=100, n_clusters = 4)
+#data <- generateClusterTestDataSimple2D(n=100, n_clusters = 7)
 #
 ### This is what it looks like
 #viewClusters(data)
@@ -214,52 +216,107 @@ clustering <- kMeans(data,K=5)
 ###################################################
 ### Apply the K-means-algorithm with K = 4       ##
 #clustering <- kMeans(data, K = 4)
-### (This may take a while)                      ##
+###                                              ##
 ###################################################
 #
 #
-### Lets look at the results
-#viewClusters(data,clustering)
+### Lets look at the result
+#clustering
+#viewClusters(clustering$clustered_data)
 #
-#innerInequality(data,clustering)
+### we also learn how good this minimizes the inner inequalities
+#clustering$inner_inequality
+#
+#
+###################################################
+### Apply the K-means-algorithm with larger K    ##
+#clustering <- kMeans(data, K = 7)
+###                                              ##
+###################################################
+#
+#
+### Lets look at the result
+#clustering
+#viewClusters(clustering$clustered_data)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+### 2nd Example: Vary the amount of tries
+#
+#data <- generateClusterTestDataSimple(dim = 3,cluster_amount = 10)
 #
 #######################################################
-### Apply the K-means-algorithm with K = 4           ##
-### But now look for global minimum of costs         ##
-#clustering <- K_means_global(data, K = 4, tries=10)
+### Apply the K-means-algorithm ONCE                 ##
+#clustering <- kMeans(data, K = 5, tries = 1)
 ### (This may take a while)                          ##
 #######################################################
 #
 ### Lets look at the results
-#viewClusters(data,clustering)
+#viewClusters(clustering$clustered_data)
+#clustering$inner_inequality
 #
-###################################################
-### Now try the K-means-algorithm with larger K  ##
-#clustering <- K_means_global(data, K = 6, tries=10)
+#######################################################
+### Apply the K-means-algorithm, retrying multiple times
+### to improve chances on finding a globally best clustering
+#clustering <- kMeans(data, K = 5, tries=10)
 ### (This may take a while)                      ##
 ###################################################
 #
-#
 ### Better!
-#viewClusters(data,clustering)
-#
-### Giving new data:
-#new_data <- tibble::tibble(X = stats::runif(5000,min=0,max=1), Y = stats::runif(5000,min=0,max=1))
-#
-### view the clustering applied to unknown data
-#viewClusters(new_data,clustering)
+#viewClusters(clustering$clustered_data)
+#clustering$inner_inequality
 #
 #
 #
 #
 #
 #
+### 3rd Example: New Data
+## The resulting function does take inputs not of the original data set
+## note that the amount of unkown data is vastly greater than the training data
+#clusters <- list(tibble::tibble(X=0.05,Y=0.05),
+#                 tibble::tibble(X=0.03,Y=0.02),
+#                 tibble::tibble(X=0.03,Y=0.08),
+#                 tibble::tibble(X=0.07,Y=0.04))
+#training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
+#unknown_data <- generateClusterTestData2DFromPaths(n=1000, clusters)
+#more <- tibble::as_tibble(matrix(runif(20000,min=0,max = 0.1),ncol = 2))
+#
+## derive a clustering using K-Means
+#clustering <- kMeans(training_data,metric='maximum',4)
+## this would take ages for 1000 data points
+#
+## lets take a look
+#viewClusters(training_data,clustering$clustering_function)
+#viewClusters(unknown_data,clustering$clustering_function)
+#viewClusters(more_data,clustering$clustering_function)
 #
 #
 #
 #
 #
-### Another example: What if we dont know the amount of clusters?
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+### 4th example: What if we dont know the amount of clusters?
 ###
 #
 #data <- generateClusterTestDataSimple2D(n=100, n_clusters=base::floor(stats::runif(1,1,10)))
@@ -268,10 +325,10 @@ clustering <- kMeans(data,K=5)
 #
 ### Use find_cluster_amount, to calculate K, using K_means an the 'elbow-graph-approach'
 ### be careful, this is a heuristic approach
-#K <- findClusterAmountElbow(data)
+#K <- findClusterAmountElbow(data, .print_info = TRUE)
 #
-#clustering <- K_means_global(data, K,tries = 10)
-#viewClusters(data,clustering)
+#clustering <- kMeans(data, K, tries = 10)
+#viewClusters(clustering$clustered_data)
 #
 #
 #
@@ -287,14 +344,13 @@ clustering <- kMeans(data,K=5)
 ### there are, rather obviously, 2 clusters
 #viewData(data)
 #
-### lets try k_mean
-#clustering <- K_means(data,K = 2)
+### lets try  KMeans
+#clustering <- kMeans(data,K = 2)
 #
 ### not very succsessful
-#viewClusters(data,clustering)
+#viewClusters(clustering$clustered_data))
 #
 #
 #
 #
-
-
+#

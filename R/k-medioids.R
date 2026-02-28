@@ -43,7 +43,8 @@ kMedioids <- function(data,K,metric = euclidean){
 
   while(new_min_cost < old_min_cost){
     ## Weve found a new, better medioids configuration!
-    base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
+    if(.print_info)
+      base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
 
     ## Save old centroids, to compare with next centroids
     old_medioid_indeces <- medioid_indeces
@@ -80,7 +81,8 @@ kMedioids <- function(data,K,metric = euclidean){
   return(structure(
     list(
       clustered_data = best_clustered_data,
-      clustering_function = clustering_function),
+      clustering_function = clustering_function,
+      inner_innequality = new_min_cost),
     description = 'Data clustered by K-Medioids algorithm',
     class= 'clustering'
   )
@@ -132,21 +134,24 @@ innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarit
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
 #' @param metric    A metric whose inputs are the rows of data.
+#' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
-#' @returns A tibble with every row representing a medioid
+#' @returns The indeces of good-enough clustering medioid in the \code{data}
 greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_matrix=NULL){
 
-
+  # Invariants
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must positive' = (0 < K))
 
-
+  # if not already given, calculate dissimilarity matrix
   if(is.null(dissimilarity_matrix)) M <- dissimilarityMatrix(data,metric)
   else M <- dissimilarity_matrix
 
-
+  # we choose the first medioid as the data point minimizing th sum of distances to all data points
   medioid_index <- M |> base::apply(c(1),sum) |> which.min()
   medioids <- data[medioid_index,]
+
+  # ignore chosen medioid in fourther decisions
   M <- M[-medioid_index,-medioid_index]
 
   medioid_indeces <- medioid_index
