@@ -4,7 +4,7 @@
 \alias{meanSilhouette}
 \title{Mean Silhouette of a clustering}
 \usage{
-meanSilhouette(data, clustering, metric = euclidean)
+meanSilhouette(data, clustering, metric = "euclidean", custom_metric = NULL)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}

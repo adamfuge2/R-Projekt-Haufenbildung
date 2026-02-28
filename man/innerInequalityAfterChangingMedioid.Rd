@@ -4,21 +4,23 @@
 \alias{innerInequalityAfterChangingMedioid}
 \title{Inner Inequality after changing Medioids}
 \usage{
-innerInequalityAfterChangingMedioid(data, o, centroids, m, metric)
+innerInequalityAfterChangingMedioid(
+  o,
+  medioid_indeces,
+  m,
+  dissimilarity_matrix
+)
 }
 \arguments{
-\item{data}{a tibble with with every row representing a data point.}
-
-\item{o}{an index of a row in \code{data}. Represents the data point
+\item{o}{an index of a data point (of external data)
 to exchange with the medioid}
 
-\item{centroids}{a tibble with with every row representing a
+\item{medioid_indeces}{The indeces of the original medioids
 centroid/medioid.}
 
-\item{m}{an index of a row in \code{centroids}. Represents the data
-point to exchange with the medioid}
+\item{m}{an index of a data point to exchange with the medioid}
 
-\item{metric}{A metric whose inputs are the rows of data.}
+\item{dissimilarity_matrix}{A matrix having encoded all distances between data points}
 }
 \value{
 the inner inequality, called cost, after the exchange of medioids

@@ -13,12 +13,22 @@
 #'   sample size and called n.
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
-#' @param metric    A metric whose inputs are the rows of data.
+#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}
+#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_metric A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
+#' @param .print_info A logical. Prints some useful information for debugging.
 #'
-#' @returns a clustering function,  a function relating every data point to
-#'   their cluster. Can be used on new data! input: atomic vectors Of the data
-#'   row type returns: a number 1 to k, representing the related cluster.
-K_medioids <- function(data,K,metric = euclidean){
+#' @returns A list of the class 'clustering'. Contains \itemize{
+#'   \item{\strong{\code{'clustered_data'}}} a tibble of original data with a new column called \code{'cluster'}
+#'   \item{\strong{\code{'clustering_function'}}} a function applicable to known and
+#'   unknown data points. Returns the cluster the data point belongs to.
+#'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medioids.
+#'   }
+#' @export
+kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.print_info = FALSE){
 
   ## some necessary variables
   n <- base::nrow(data)
@@ -27,69 +37,87 @@ K_medioids <- function(data,K,metric = euclidean){
   old_centroids <- tibble::tibble()
 
 
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      metric <- euclidean
+    else if(metric=='maximum')
+      metric <- maximumMetric
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      metric <- pMetric(p)
+      }
+    else if(metric=='manhattan')
+      metric <- pMetric(1)
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else metric <- custom_metric
+
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
 
+  if(.print_info) print('calculating dissimilarity matrix')
+
+  ## As we will never need to handle new data points, calculate all distances
+  ## between the data points now.
+  D <- dissimilarityMatrix(data,metric = metric)
+
+  if(.print_info) print('Done. \n now find starting medioids')
+
+  ## (BUILD) Define starting medioids
+  medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
 
 
-  ## (BUILD) Define starting centroids
-  centroids <- greedySearchMedioids(data,K,metric)
-
-
-  ## Calculate distances to centroids
-  for(centroid_number in 1:base::nrow(centroids)){
-    data <- data |> dplyr::rowwise() |>
-      dplyr::mutate(!!base::paste0('distanceToCentroid',centroid_number) := metric(dplyr::c_across(dplyr::all_of(1:dim)),base::unlist(centroids[centroid_number,])))
-  }
-
-  ## Defer the clustering with respect to the centroid
-  data <- data |> dplyr::mutate(cluster = base::which.min(dplyr::c_across((dim+1):(dim+K))))
-
-  clustering <- function(x) {
-    distances <- base::numeric()
-    for(k in 1:K){
-      distances = c(distances,metric(x,base::unlist(centroids[k,])))
-    }
-    return(base::which.min(distances))}
-
-
-  new_min_cost <- innerInequality(data[,1:dim],clustering)
+  new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
 
   while(new_min_cost < old_min_cost){
-    ## Weve found a new, better medioids configuration!
-    base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
+    ## We've found a new, better medioids configuration!
+    if(.print_info)
+      base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
 
-    ## Save old centroids, to compare with next centroids
-    old_centroids <- centroids
+    ## Save old medioids, to compare with next medioids
+    old_medioid_indeces <- medioid_indeces
     old_min_cost <- new_min_cost
 
     ## calculate which changed medioids would diminsh the inner inequality most
-    costs <- base::matrix(base::rep(1:n,base::nrow(centroids)),ncol = base::nrow(centroids))
-    for(k in 1:base::nrow(centroids)){
-      costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedioid(data[,1:dim],x,centroids,k,metric))
+    costs <- base::matrix(base::rep(1:n,length(medioid_indeces)),ncol = length(medioid_indeces))
+    for(k in 1:length(medioid_indeces)){
+      costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedioid(x,medioid_indeces,k,dissimilarity_matrix=D))
     }
 
     ## Save which indeces of data point o and medioid m would have the lower cost
     m_opt <- arrayInd(which.min(costs), dim(costs))[2]
     o_opt <- arrayInd(which.min(costs), dim(costs))[1]
 
-
+    if(.print_info)
+      print(paste0('changing medioid ', m_opt, ' with data point ', o_opt))
     # change medioid
-    centroids[m_opt,] <- data[o_opt,1:dim]
+
+    medioid_indeces[m_opt] <- o_opt
 
     # new minimal
     new_min_cost <- costs[o_opt,m_opt]
   }
 
+  clustering_function <- function(x) 1:K |>
+    sapply(function(k) metric(x,base::unlist(data[medioid_indeces[k],]))) |>
+    base::which.min()
+
+  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),which.min))
 
 
-  ## return a function returning the cluster a datapoint (atomic vector) belongs to
-
-  return(   function(x) 1:k |>
-              sapply(function(k) metric(x,base::unlist(centroids[k,]))) |>
-              base::which.min() )
+  ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
+  return(structure(
+    list(
+      clustered_data = best_clustered_data,
+      clustering_function = clustering_function,
+      inner_innequality = new_min_cost),
+    description = 'Data clustered by K-Medioids algorithm',
+    class= 'clustering'
+  )
+  )
 }
 
 
@@ -99,30 +127,26 @@ K_medioids <- function(data,K,metric = euclidean){
 #'
 #' Helper function for K-Medioids
 #'
-#' @param data      a tibble with with every row representing a data point.
-#' @param o         an index of a row in \code{data}. Represents the data point
+#' @param o         an index of a data point (of external data)
 #'   to exchange with the medioid
-#' @param centroids a tibble with with every row representing a
+#' @param medioid_indeces The indeces of the original medioids
 #'   centroid/medioid.
-#' @param m         an index of a row in \code{centroids}. Represents the data
-#'   point to exchange with the medioid
-#' @param metric    A metric whose inputs are the rows of data.
+#' @param m         an index of a data point to exchange with the medioid
+#' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
 #' @returns the inner inequality, called cost, after the exchange of medioids
-innerInequalityAfterChangingMedioid <- function(data,o,centroids,m,metric){
+innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarity_matrix){
 
   # change medioid
-  centroids[m,] <- data[o,]
+  medioid_indeces[m] <- o
 
-  if(!base::identical(centroids,dplyr::distinct(centroids))){
+  # dont reward changes, which would result in a lower than promised cluster amount
+  if(!base::identical(medioid_indeces,unique(medioid_indeces))){
     return(Inf)
   }
 
-  # calculate clustering
-  clustering <- function(x) {base::which.min(sapply(1:base::nrow(centroids),function(k) metric(x,base::unlist(centroids[k,]))))}
-
   # return the costs
-  return( innerInequality(data,clustering,metric))
+  return(structure(dissimilarity_matrix[medioid_indeces,],dim=c(length(medioid_indeces),nrow(dissimilarity_matrix))) |> apply(c(2),min) |>  sum() )
 }
 
 
@@ -141,21 +165,24 @@ innerInequalityAfterChangingMedioid <- function(data,o,centroids,m,metric){
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
 #' @param metric    A metric whose inputs are the rows of data.
+#' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
-#' @returns A tibble with every row representing a medioid
-greedySearchMedioids <- function(data,K,metric=euclidean){
+#' @returns The indeces of good-enough clustering medioid in the \code{data}
+greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_matrix=NULL){
 
-
+  # Invariants
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must positive' = (0 < K))
 
+  # if not already given, calculate dissimilarity matrix
+  if(is.null(dissimilarity_matrix)) M <- dissimilarityMatrix(data,metric)
+  else M <- dissimilarity_matrix
 
-  M <- dissimilarityMatrix(data,metric)
-
-
-
+  # we choose the first medioid as the data point minimizing th sum of distances to all data points
   medioid_index <- M |> base::apply(c(1),sum) |> which.min()
   medioids <- data[medioid_index,]
+
+  # ignore chosen medioid in fourther decisions
   M <- M[-medioid_index,-medioid_index]
 
   medioid_indeces <- medioid_index
@@ -194,7 +221,7 @@ greedySearchMedioids <- function(data,K,metric=euclidean){
       medioids <- dplyr::add_row(medioids, data[medioid_index,])
     }
   }
-  return(medioids)
+  return(medioid_indeces)
 }
 
 
@@ -208,7 +235,7 @@ greedySearchMedioids <- function(data,K,metric=euclidean){
 #
 ###############################################################
 ## Apply the K-Medioids algortithm                           ##
-#clustering <- K_medioids(data,K=5)
+#clustering <- kMedioids(data,K=5)
 ## as K-medioids has O(n²) runtime this may take a while     ##
 ###############################################################
 #
@@ -222,7 +249,7 @@ greedySearchMedioids <- function(data,K,metric=euclidean){
 #meanSilhouette(data,clustering)
 #
 #
-#viewClusters(data,clustering)
+#viewClusters(clustering$clustered_data)
 #
 #
 #
@@ -297,7 +324,7 @@ greedySearchMedioids <- function(data,K,metric=euclidean){
 #
 #####################################################
 ## Use greedy search, to find medioids fast        ##
-#medioids <- greedySearchMedioids(data,K=5)
+#medioids <- greedySearchMedioidIndeces(data,K=5)
 ##                                                 ##
 #####################################################
 #

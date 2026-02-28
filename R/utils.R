@@ -167,7 +167,6 @@ innerInequality <- function(data,clustering,metric=euclidean){
 #'              This is the data point we calculate the silhouette of
 #' @param metric      a metric whose 2 inputs are of the data row type.
 #'
-#' Returns:
 #' @returns numeric, a real number between -1 and 1
 #'
 silhouette <- function(data,clustering,o,metric=euclidean){
@@ -251,7 +250,25 @@ silhouette <- function(data,clustering,o,metric=euclidean){
 #'
 #' @returns a numeric, a real number between -1 and 1
 #'
-meanSilhouette <- function(data,clustering,metric=euclidean){
+meanSilhouette <- function(data,clustering,metric='euclidean',custom_metric=NULL){
+
+
+
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      metric <- euclidean
+    else if(metric=='maximum')
+      metric <- maximumMetric
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      metric <- pMetric(p)
+    }
+    else if(metric=='manhattan')
+      metric <- pMetric(1)
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else metric <- custom_metric
 
   if( data |>
       dplyr::rowwise() |>

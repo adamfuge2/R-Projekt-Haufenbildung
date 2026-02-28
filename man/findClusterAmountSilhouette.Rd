@@ -4,10 +4,12 @@
 \alias{findClusterAmountSilhouette}
 \title{Fining a best cluster amount using the 'Silhoutte coefficient'}
 \usage{
-findClusterAmountSilhouette(data, metric = euclidean)
+findClusterAmountSilhouette(data, metric = "euclidean", .print_info = FALSE)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
+
+\item{.print_info}{A logical. Prints some useful information for debugging.}
 }
 \value{
 a positive integer, the 'optimal' amount of clusters
