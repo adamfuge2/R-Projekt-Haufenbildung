@@ -58,6 +58,7 @@ kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_
   base::stopifnot('Data must have more than 0 rows' = n>0)
   base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
   base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
+  base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
 
   ## Start of actual algorithm
   ## Try multiple times, to minimize the dependency on random chance
@@ -186,7 +187,7 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountSilhouette <- function(data,metric=euclidean, .print_info = FALSE){
+findClusterAmountSilhouette <- function(data,metric='euclidean', .print_info = FALSE){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
@@ -195,8 +196,9 @@ findClusterAmountSilhouette <- function(data,metric=euclidean, .print_info = FAL
   while(improvement>0){
     if(.print_info)
       print(paste0('checking K = ',K))
+    print(metric)
 
-    clusterings[[K]] <- kMedioids(data,K,metric)
+    clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric, .print_info = .print_info)
 
     fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric)
 

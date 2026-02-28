@@ -14,9 +14,7 @@ silhouette(data, clustering, o, metric = euclidean)
 \item{o}{an atomic vector or tibble row.
 This is the data point we calculate the silhouette of}
 
-\item{metric}{a metric whose 2 inputs are of the data row type.
-
-Returns:}
+\item{metric}{a metric whose 2 inputs are of the data row type.}
 }
 \value{
 numeric, a real number between -1 and 1

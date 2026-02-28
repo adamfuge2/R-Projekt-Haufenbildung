@@ -28,7 +28,7 @@
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medioids.
 #'   }
 #' @export
-kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
+kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.print_info = FALSE){
 
   ## some necessary variables
   n <- base::nrow(data)
@@ -58,16 +58,19 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
 
+  if(.print_info) print('calculating dissimilarity matrix')
+
   ## As we will never need to handle new data points, calculate all distances
   ## between the data points now.
   D <- dissimilarityMatrix(data,metric = metric)
+
+  if(.print_info) print('Done. \n now find starting medioids')
 
   ## (BUILD) Define starting medioids
   medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
 
 
-
-  new_min_cost <-  D[medioid_indeces,] |> apply(c(2),min) |>  sum()
+  new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
 
   while(new_min_cost < old_min_cost){
     ## We've found a new, better medioids configuration!
@@ -79,8 +82,8 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
     old_min_cost <- new_min_cost
 
     ## calculate which changed medioids would diminsh the inner inequality most
-    costs <- base::matrix(base::rep(1:n,base::nrow(centroids)),ncol = base::nrow(centroids))
-    for(k in 1:base::nrow(centroids)){
+    costs <- base::matrix(base::rep(1:n,length(medioid_indeces)),ncol = length(medioid_indeces))
+    for(k in 1:length(medioid_indeces)){
       costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedioid(x,medioid_indeces,k,dissimilarity_matrix=D))
     }
 
@@ -88,8 +91,10 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
     m_opt <- arrayInd(which.min(costs), dim(costs))[2]
     o_opt <- arrayInd(which.min(costs), dim(costs))[1]
 
-
+    if(.print_info)
+      print(paste0('changing medioid ', m_opt, ' with data point ', o_opt))
     # change medioid
+
     medioid_indeces[m_opt] <- o_opt
 
     # new minimal
@@ -97,10 +102,10 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL){
   }
 
   clustering_function <- function(x) 1:K |>
-    sapply(function(k) metric(x,base::unlist(data[medioid_indeces(k),]))) |>
+    sapply(function(k) metric(x,base::unlist(data[medioid_indeces[k],]))) |>
     base::which.min()
 
-  best_clustered_data <- data |> dplyr::mutate(cluster = D[medioid_indeces,] |> apply(c(2),which.min))
+  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),which.min))
 
 
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
@@ -141,7 +146,7 @@ innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarit
   }
 
   # return the costs
-  return(dissimilarity_matrix[medioid_indeces,] |> apply(c(2),min) |>  sum() )
+  return(structure(dissimilarity_matrix[medioid_indeces,],dim=c(length(medioid_indeces),nrow(dissimilarity_matrix))) |> apply(c(2),min) |>  sum() )
 }
 
 

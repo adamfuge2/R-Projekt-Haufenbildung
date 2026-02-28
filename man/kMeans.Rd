@@ -21,17 +21,24 @@ The number of rows is the sample size and called n.}
 \item{K}{A whole number between 0 and n+1.
 The amount of Clusters the algorithm tries to find in the data}
 
-\item{metric}{A metric whose inputs are the rows of data as atomic vectors}
+\item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
+
+\item{custom_metric}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
 
 \item{tries}{A positive integer. The amount of times the algorithm should retry with new starting centroids}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
+
+\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 }
 \value{
 A list of the class 'clustering'. Contains \itemize{
   \item{\strong{\code{'clustered_data'}}} a tibble of original data with a new column called \code{'cluster'}
   \item{\strong{\code{'clustering_function'}}} a function applicable to known and
-  unknown data points. Returns the cluster the data point bolongs to
+  unknown data points. Returns the cluster the data point belongs to.
   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
   }
 }

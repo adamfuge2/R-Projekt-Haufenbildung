@@ -4,7 +4,14 @@
 \alias{kMedioids}
 \title{K-Medioids}
 \usage{
-kMedioids(data, K, metric = "euclidean", p = NULL, custom_metric = NULL)
+kMedioids(
+  data,
+  K,
+  metric = "euclidean",
+  p = NULL,
+  custom_metric = NULL,
+  .print_info = FALSE
+)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point. The
@@ -26,10 +33,12 @@ two of the \code{data} row type.}
 \item{.print_info}{A logical. Prints some useful information for debugging.}
 }
 \value{
-A list of the class 'clustering'. Contains elements like 1.
-  'clustered_data' a tibble of original data with a new column called
-  'cluster', 2. 'clustering_function' a function applicable to known and
-  unknown data
+A list of the class 'clustering'. Contains \itemize{
+  \item{\strong{\code{'clustered_data'}}} a tibble of original data with a new column called \code{'cluster'}
+  \item{\strong{\code{'clustering_function'}}} a function applicable to known and
+  unknown data points. Returns the cluster the data point belongs to.
+  \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medioids.
+  }
 }
 \description{
 The standard K-Medioids algorithm. Tries fitting the data into K many
