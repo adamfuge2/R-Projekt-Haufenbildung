@@ -1,4 +1,4 @@
-Package: Haufenbildung
+Package: clusterfuck
 Type: Package
 Title: A collection of common clustering algorithms
 Version: 0.0.0.9000
@@ -23,7 +23,7 @@ Description: This package includes the algoriithms K-Means, K-Medioids,
     hierarchical clustering, DBSCAN and OPTICS. 
     Also included are easy to use functions to 
     - score the clusterings,
-    - view the clusterings, 
+    - plot the clusterings, 
     - generate clustered test data.
 License: MIT + file LICENSE
 Encoding: UTF-8

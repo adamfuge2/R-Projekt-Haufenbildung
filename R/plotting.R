@@ -280,7 +280,7 @@ clusterLabeling <- function(n){
 
 #################### as method for clustering class ######################
 
-
+#' @export
 print.clustering <- function(x){
   viewClusters(x$clustered_data)
 }
