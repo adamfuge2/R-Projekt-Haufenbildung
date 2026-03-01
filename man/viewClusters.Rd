@@ -7,9 +7,9 @@
 viewClusters(data, clustering = NULL)
 }
 \arguments{
-\item{data}{a tibble with every row representing a data point. If \code{data}
-has a column named \code{'cluster'}, then this column will be used to color
-the data points}
+\item{data}{a tibble with every row representing a data point. If
+\code{data} has a column named \code{'cluster'}, then this column will be
+used to color the data points}
 
 \item{clustering}{a clustering function applicable to the data. If none
 given, the data will be displayed with the clusters deferred from the
@@ -24,9 +24,8 @@ Displays 1D to 3D data points color coded by their cluster. Can be used for:
  \item \strong{data without clusters}, in this case don't input a clustering function and make sure your data \strong{does not} have a column \code{'cluster'}.
 }
 Acts as a wrapper for viewClusters2D, viewClusters3D, viewData, viewData2D
-and viewData3D.\n
-Currently only works for clusters represented by numbers >= 0. Every data point
-in 'cluster' will be labeled as an 'Outlier'.
+and viewData3D. Currently only works for clusters represented by numbers >=
+0. Every data point in 'cluster' will be labeled as an 'Outlier'.
 }
 \examples{
 # 1D data without clusters

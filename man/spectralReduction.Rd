@@ -11,6 +11,8 @@ spectralReduction(
   mercian_kernel = "gauss",
   custom_mercian_kernel = NULL,
   metric = NULL,
+  p = NULL,
+  custom_metric = NULL,
   epsilon = NULL
 )
 }
@@ -22,11 +24,20 @@ points}
 
 \item{k}{dimensional reduction (output will be of dimension k)}
 
-\item{metric}{metric used in kernel function}
+\item{mercian_kernel}{a mercian kernel. One of the following: 'gauss'.}
+
+\item{custom_mercian_kernel}{a custom mercian kernel function}
+
+\item{metric}{A character, ametric used in kernel function and then the clustering alorithm.. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
+
+\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
+\item{custom_metric}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
 
 \item{epsilon}{minimal distance for reduction}
-
-\item{kernel}{kernel function (see algorithm description)}
 }
 \value{
 tibble with eigenvectors of reduced dimension k

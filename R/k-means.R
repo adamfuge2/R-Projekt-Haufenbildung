@@ -30,7 +30,7 @@
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
 #'   }
 #' @export
-kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_info = FALSE){
+kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, .print_info = FALSE){
   ## some necessary variables
   n <- base::nrow(data)
   dim <- base::ncol(data)
@@ -182,12 +182,18 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
 #' Be careful with its result, it is only heuristically optimal.
 #'
 #' @param data      a tibble with with every row representing a data point.
+#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}.
+#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_metric A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountSilhouette <- function(data,metric='euclidean', .print_info = FALSE){
+findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
@@ -198,7 +204,7 @@ findClusterAmountSilhouette <- function(data,metric='euclidean', .print_info = F
       print(paste0('checking K = ',K))
     print(metric)
 
-    clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric, .print_info = .print_info)
+    clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric,p=p,custom_metric=custom_metric, .print_info = .print_info)
 
     fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric)
 

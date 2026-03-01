@@ -7,7 +7,7 @@
 viewClusters3D(clustered_data)
 }
 \arguments{
-\item{clusterd_data}{A tibble with every row representing a data point.
+\item{clustered_data}{A tibble with every row representing a data point.
 Must contain a column called 'cluster' in which the cluster belonging to
 the respective data point is stored.}
 }

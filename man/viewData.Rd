@@ -10,7 +10,7 @@ viewData(data)
 \item{data}{A tibble with every row representing a data point.}
 }
 \description{
-Displays 1D to 3D data points color.\n
+Displays 1D to 3D data points color.
 Acts as a wrapper for viewData2D and viewData3D.
 }
 \examples{

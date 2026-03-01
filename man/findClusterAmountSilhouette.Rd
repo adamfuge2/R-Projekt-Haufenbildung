@@ -4,10 +4,25 @@
 \alias{findClusterAmountSilhouette}
 \title{Fining a best cluster amount using the 'Silhoutte coefficient'}
 \usage{
-findClusterAmountSilhouette(data, metric = "euclidean", .print_info = FALSE)
+findClusterAmountSilhouette(
+  data,
+  metric = "euclidean",
+  p = NULL,
+  custom_metric = NULL,
+  .print_info = FALSE
+)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
+
+\item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
+
+\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
+\item{custom_metric}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
 }

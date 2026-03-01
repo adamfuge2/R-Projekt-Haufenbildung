@@ -9,7 +9,7 @@
 #' }Currently only works for clusters represented by numbers >=
 #' 0. Every data point in 'cluster' will be labeled as an 'Outlier'.
 #'
-#' @param clusterd_data   A tibble with every row representing a data point.
+#' @param clustered_data   A tibble with every row representing a data point.
 #'   Must contain a column called 'cluster' in which the cluster belonging to
 #'   the respective data point is stored.
 #'
@@ -60,7 +60,7 @@ viewClusters2D <-function(clustered_data){
 #' }Currently only works for clusters represented by numbers >=
 #' 0. Every data point in 'cluster' will be labeled as an 'Outlier'.
 #'
-#' @param clusterd_data   A tibble with every row representing a data point.
+#' @param clustered_data   A tibble with every row representing a data point.
 #'   Must contain a column called 'cluster' in which the cluster belonging to
 #'   the respective data point is stored.
 #'
@@ -115,13 +115,12 @@ viewClusters3D <-function(clustered_data){
 #'  \item \strong{data without clusters}, in this case don't input a clustering function and make sure your data \strong{does not} have a column \code{'cluster'}.
 #' }
 #' Acts as a wrapper for viewClusters2D, viewClusters3D, viewData, viewData2D
-#' and viewData3D.\n
-#' Currently only works for clusters represented by numbers >= 0. Every data point
-#' in 'cluster' will be labeled as an 'Outlier'.
+#' and viewData3D. Currently only works for clusters represented by numbers >=
+#' 0. Every data point in 'cluster' will be labeled as an 'Outlier'.
 #'
-#' @param data        a tibble with every row representing a data point. If \code{data}
-#'   has a column named \code{'cluster'}, then this column will be used to color
-#'   the data points
+#' @param data        a tibble with every row representing a data point. If
+#'   \code{data} has a column named \code{'cluster'}, then this column will be
+#'   used to color the data points
 #' @param clustering  a clustering function applicable to the data. If none
 #'   given, the data will be displayed with the clusters deferred from the
 #'   column \code{'cluster'} of data or without clusters, using
@@ -217,7 +216,7 @@ viewData3D <- function(data){
 
 #' View data as scatter plot
 #'
-#' Displays 1D to 3D data points color.\n
+#' Displays 1D to 3D data points color.
 #' Acts as a wrapper for viewData2D and viewData3D.
 #'
 #' @param data   A tibble with every row representing a data point.
@@ -256,7 +255,7 @@ viewData <- function(data){
 
 #' Derive cluster label from cluster number
 #'
-#' Helper function.\n
+#' Helper function.
 #' Converts an identification (generally integers) of a cluster to a more descriptive cluster label.
 #' The 0th cluster gets labeled as the Outliers cluster.
 #'
@@ -266,10 +265,10 @@ viewData <- function(data){
 #'
 #' @examples
 #' # example code
-#' clusterLabeling(36)
-#' clusterLabeling('siebzehn')
-#' clusterLabeling(0)
-#' clusterLabeling('0')
+#' clusterfuck::clusterLabeling(36)
+#' clusterfuck::clusterLabeling('siebzehn')
+#' clusterfuck::clusterLabeling(0)
+#' clusterfuck::clusterLabeling('0')
 #'
 #'
 clusterLabeling <- function(n){
@@ -281,7 +280,7 @@ clusterLabeling <- function(n){
 #################### as method for clustering class ######################
 
 #' @export
-print.clustering <- function(x){
+print.clustering <- function(x, ...){
   viewClusters(x$clustered_data)
 }
 

@@ -11,7 +11,7 @@ This package includes the algoriithms K-Means, K-Medioids, hierarchical clusteri
 \details{
 Details
 }
-\section{CLustering functions}{
+\section{Clustering functions}{
 NA
 }
 

@@ -156,11 +156,16 @@ silhouette <- function(data,clustering,o,metric=euclidean){
 #'
 #' @param data        a tibble with with every row representing a data point.
 #' @param clustering  a clustering function relating any data point to their cluster.
-#' @param metric      a metric whose 2 inputs are of the data row type.
+#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}.
+#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_metric A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
 #'
 #' @returns a numeric, a real number between -1 and 1
 #'
-meanSilhouette <- function(data,clustering,metric='euclidean',custom_metric=NULL){
+meanSilhouette <- function(data,clustering,metric='euclidean',p=NULL,custom_metric=NULL){
 
 
 

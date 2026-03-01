@@ -14,8 +14,6 @@ test_that("K-Means works", {
   testthat::expect_equal(ncol(clustering$clustered_data),ncol(data)+1)
   testthat::expect_equal(length(unique(clustering$clustered_data$cluster)),3)
 
-  kmeans(tibble::tibble(X=c(0,0,0)),2)
-
   testthat::expect_no_error(kMeans(data,K=1,tries=1))
   testthat::expect_no_error(kMeans(data,K=10,tries=1))
   testthat::expect_no_error(kMeans(data,K=1,tries=10))
