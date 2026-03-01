@@ -15,9 +15,8 @@
 #'
 #' @examples
 #' data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
-#' clustering <- K_means(data_2D,K=5)
-#' clustered_data_2D <- data_2D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-#' viewClusters2D(clustered_data_2D)
+#' clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
+#' clusterfuck:::viewClusters2D(clustered_data_2D)
 #'
 viewClusters2D <-function(clustered_data){
 
@@ -44,7 +43,7 @@ viewClusters2D <-function(clustered_data){
   ## Display data as 2D scatter plot
   print(ggplot2::ggplot(clustered_data,ggplot2::aes(x=X,y=Y,colour = cluster_label)) +
           ggplot2::geom_point() +
-          ggplot2::scale_color_manual(values = c("Outlier" = "black", setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
+          ggplot2::scale_color_manual(values = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
           ggplot2::coord_fixed()
   )
 }
@@ -66,9 +65,8 @@ viewClusters2D <-function(clustered_data){
 #'
 #' @examples
 #' data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
-#' clustering <- K_means(data_3D,K=5)
-#' clustered_data_3D <- data_3D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-#' viewClusters3D(clustered_data_3D)
+#' clustered_data_3D <- kMeans(data_3D,K=5)$clustered_data
+#' clusterfuck:::viewClusters3D(clustered_data_3D)
 #'
 viewClusters3D <-function(clustered_data){
   dim <- ncol(clustered_data)-1
@@ -95,7 +93,7 @@ viewClusters3D <-function(clustered_data){
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
 
-  clustered_data <- clustered_data |> dplyr::mutate(color = c("Outlier" = "black", setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[cluster_label])
+  clustered_data <- clustered_data |> dplyr::mutate(color = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[cluster_label])
 
   x<- clustered_data$X
   y<- clustered_data $Y
@@ -137,12 +135,11 @@ viewClusters3D <-function(clustered_data){
 #' data_3D <- generateClusterTestDataSimple(dim=3)
 #' viewClusters(data_3D)
 #' # 3D data with a clustering function
-#' clustering <- K_means(data_3D,K=5)
-#' viewClusters(data_3D,clustering)
+#' clustered_data <- kMeans(data_3D,K=5)$clustered_data
+#' viewClusters(clustered_data)
 #' # 2D data with column 'cluster'
-#' clustering <- K_means(data_2D,K=5)
-#' clustered_data_2D <- data_2D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-#' viewClusters(clustered_data_2D)
+#' clustering_function <- kMeans(data_2D,K=5)$clustering_function
+#' viewClusters(data_2D,clustering_function)
 #'
 #'
 #' @export
@@ -187,7 +184,7 @@ viewClusters <- function(data,clustering=NULL){
 #'
 #' @examples
 #' data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
-#' viewData3D(data_3D)
+#' clusterfuck:::viewData3D(data_3D)
 #'
 viewData2D <- function(data){
   colnames(data) <- c('X','Y')
@@ -203,7 +200,7 @@ viewData2D <- function(data){
 #'
 #' @examples
 #' data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
-#' viewData2D(data_2D)
+#' clusterfuck:::viewData2D(data_2D)
 #'
 viewData3D <- function(data){
 
@@ -265,10 +262,10 @@ viewData <- function(data){
 #'
 #' @examples
 #' # example code
-#' clusterfuck::clusterLabeling(36)
-#' clusterfuck::clusterLabeling('siebzehn')
-#' clusterfuck::clusterLabeling(0)
-#' clusterfuck::clusterLabeling('0')
+#' clusterfuck:::clusterLabeling(36)
+#' clusterfuck:::clusterLabeling('siebzehn')
+#' clusterfuck:::clusterLabeling(0)
+#' clusterfuck:::clusterLabeling('0')
 #'
 #'
 clusterLabeling <- function(n){

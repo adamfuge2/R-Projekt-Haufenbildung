@@ -46,5 +46,6 @@ maximumMetric <- function(x,y) base::max(base::abs(x-y))
 #' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
 #'   numerical output, a real number >= 0.
 #' @export
-pMetric <- function(p) function(x,y) base::sum(base::abs(x-y)^p)^(1/p)
+pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 
+NULL

@@ -239,6 +239,7 @@ tibbleAsPath <- function(data){
 #' @returns a dissimilarity matrix, a row and coloumn for every data point
 #'
 dissimilarityMatrix <-function(data,metric){
+  data <- as.matrix(data)
   basis <- array(base::rep(1:base::nrow(data),base::nrow(data)), dim=c(base::nrow(data),base::nrow(data) ))
   M <- array(dim = c(base::nrow(data),base::nrow(data),2 ))
   M[,,1] <- basis

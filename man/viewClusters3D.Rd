@@ -20,8 +20,7 @@ Displays 3D data points color coded by their cluster. Can be used for:
 }
 \examples{
 data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
-clustering <- K_means(data_3D,K=5)
-clustered_data_3D <- data_3D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-viewClusters3D(clustered_data_3D)
+clustered_data_3D <- kMeans(data_3D,K=5)$clustered_data
+clusterfuck:::viewClusters3D(clustered_data_3D)
 
 }

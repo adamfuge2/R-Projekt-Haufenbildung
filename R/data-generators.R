@@ -2,6 +2,8 @@
 
 #' spherical test data generator
 #'
+#'
+#'
 #' @param n           a positive integer. The number of total data points to be generated.
 #' @param n_clusters  a positive integer. The number of clusters to generate.
 #'                    If none given, choose a random amount < sqrt(n).
@@ -9,6 +11,8 @@
 #' @returns a tibble, every row representing a data point.
 #' @export
 generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
+  warning('This function has been superseded by generateClusterTestDataSimple')
+
   if(base::missing(n_clusters)){
     n_clusters <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
   }
@@ -29,6 +33,14 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
   return(test_data)
 }
 
+#' spherical test data generator
+#'
+#' @param n           a positive integer. The number of total data points to be generated.
+#' @param cluster_amount  a positive integer. The number of clusters to generate.
+#'                    If none given, choose a random amount < sqrt(n).
+#' @param dim A positive integer. The dimension of the data points to be generated
+#'
+#' @returns a tibble, every row representing a data point.
 #' @export
 generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
   if(base::missing(cluster_amount)){
@@ -72,9 +84,9 @@ generateClusterTestData2DFromPaths = function(n=100,list_of_paths){
 
 
   for(i in 1:n){
-    which_cluster <- base::floor(runif(1,1,n_clusters+1))
-    points <- tibble::add_row(points,paths[[which_cluster]](runif(1,0,1))+
-                                tibble::tibble(X=rnorm(1,0,sd_clusters[which_cluster]), Y=rnorm(1,0,sd_clusters[which_cluster])))
+    which_cluster <- base::floor(stats::runif(1,1,n_clusters+1))
+    points <- tibble::add_row(points,paths[[which_cluster]](stats::runif(1,0,1))+
+                                tibble::tibble(X=stats::rnorm(1,0,sd_clusters[which_cluster]), Y=stats::rnorm(1,0,sd_clusters[which_cluster])))
   }
 
 

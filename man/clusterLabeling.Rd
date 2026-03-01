@@ -19,10 +19,10 @@ The 0th cluster gets labeled as the Outliers cluster.
 }
 \examples{
 # example code
-clusterfuck::clusterLabeling(36)
-clusterfuck::clusterLabeling('siebzehn')
-clusterfuck::clusterLabeling(0)
-clusterfuck::clusterLabeling('0')
+clusterfuck:::clusterLabeling(36)
+clusterfuck:::clusterLabeling('siebzehn')
+clusterfuck:::clusterLabeling(0)
+clusterfuck:::clusterLabeling('0')
 
 
 }

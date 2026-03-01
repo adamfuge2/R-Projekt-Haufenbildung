@@ -14,6 +14,6 @@ View 3D data as scatter plot
 }
 \examples{
 data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
-viewData2D(data_2D)
+clusterfuck:::viewData2D(data_2D)
 
 }

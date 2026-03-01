@@ -38,12 +38,11 @@ viewClusters(data_2D)
 data_3D <- generateClusterTestDataSimple(dim=3)
 viewClusters(data_3D)
 # 3D data with a clustering function
-clustering <- K_means(data_3D,K=5)
-viewClusters(data_3D,clustering)
+clustered_data <- kMeans(data_3D,K=5)$clustered_data
+viewClusters(clustered_data)
 # 2D data with column 'cluster'
-clustering <- K_means(data_2D,K=5)
-clustered_data_2D <- data_2D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-viewClusters(clustered_data_2D)
+clustering_function <- kMeans(data_2D,K=5)$clustering_function
+viewClusters(data_2D,clustering_function)
 
 
 }

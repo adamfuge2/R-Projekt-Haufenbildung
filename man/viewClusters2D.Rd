@@ -20,8 +20,7 @@ Displays 2D data points color coded by their cluster. Can be used for:
 }
 \examples{
 data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
-clustering <- K_means(data_2D,K=5)
-clustered_data_2D <- data_2D |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
-viewClusters2D(clustered_data_2D)
+clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
+clusterfuck:::viewClusters2D(clustered_data_2D)
 
 }

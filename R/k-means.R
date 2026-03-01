@@ -191,9 +191,8 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
-#'
 #' @export
-findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE){
+findClusterAmountSilhouettePlease <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
@@ -202,11 +201,10 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
   while(improvement>0){
     if(.print_info)
       print(paste0('checking K = ',K))
-    print(metric)
 
     clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric,p=p,custom_metric=custom_metric, .print_info = .print_info)
 
-    fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric)
+    fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric=metric,p=p,custom_metric=custom_metric)
 
     plot(1:K,fit)
 
