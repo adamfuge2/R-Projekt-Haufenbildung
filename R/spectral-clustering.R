@@ -139,7 +139,7 @@ spectralProjection <- function(data,
   dim(a) <- c(k,n)
 
   # save the data points in tibble as usual
-  projected_data <- tibble::as_tibble(t(a),.name_repair = 'minimal')
+  projected_data <- tibble::as_tibble(t(a),.name_repair = 'unique')
 
   # useful names
   colnames(projected_data) <- paste0('X_',1:k)
@@ -235,6 +235,6 @@ spectralClustering <- function(data,
 #spectral_clustering <- spectralClustering(connected_circles_data,k=3,gamma=50,cluster_algorithm = 'K-Means',K=2)
 #spectral_clustering
 
-clustering <- spectralClustering(study_courses_data,k=2,gamma=1,custom_metric=studies_difference,K=6)
+#clustering <- spectralClustering(study_courses_data,k=2,gamma=1,custom_metric=studies_difference,K=6)
 
 

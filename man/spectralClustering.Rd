@@ -13,7 +13,7 @@ spectralClustering(
   metric = NULL,
   p = NULL,
   custom_metric = NULL,
-  epsilon = NULL,
+  kernel_epsilon = Inf,
   cluster_algorithm = "K-Means",
   ...
 )
@@ -36,7 +36,7 @@ points}
 
 \item{custom_metric}{a custom metric used in kernel function}
 
-\item{epsilon}{maximal distance at which data points are still considered neighbored.}
+\item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
 
 \item{cluster_algorithm}{A cluster algorithm to be used on the spectral
 projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},

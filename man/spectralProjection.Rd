@@ -13,7 +13,8 @@ spectralProjection(
   metric = NULL,
   p = NULL,
   custom_metric = NULL,
-  kernel_epsilon = Inf
+  kernel_epsilon = Inf,
+  .print_info = FALSE
 )
 }
 \arguments{
@@ -34,7 +35,7 @@ points}
 
 \item{custom_metric}{a custom metric used in kernel function}
 
-\item{epsilon}{maximal distance at which data points are still considered neighbored.}
+\item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
 }
 \value{
 tibble with eigenvectors of projected dimension k
