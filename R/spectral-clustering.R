@@ -24,7 +24,7 @@ gaussKernelByCustomMetric <- function(metric,gamma)
 #' @param metric metric used in kernel function
 #' @param p if metric is 'Lp', thi value will be used for p
 #' @param custom_metric a custom metric used in kernel function
-#' @param epsilon maximal distance at which data points are still considered neighbored.
+#' @param kernel_epsilon maximal distance at which data points are still considered neighbored.
 #'
 #' @returns tibble with eigenvectors of projected dimension k
 #'
@@ -37,14 +37,23 @@ spectralProjection <- function(data,
                               metric = NULL,
                               p = NULL,
                               custom_metric = NULL,
-                              kernel_epsilon = Inf){
+                              kernel_epsilon = Inf,
+                              .print_info = FALSE){
   n <- nrow(data)
 
+  if(.print_info) print(all(c(is.null(custom_mercer_kernel),
+                              is.null(metric),
+                              is.null(custom_metric),
+                              kernel_epsilon==Inf)))
+  if(.print_info) print(c(is.null(custom_mercer_kernel),
+                              is.null(metric),
+                              is.null(custom_metric),
+                              kernel_epsilon==Inf))
 
   if(all(c(is.null(custom_mercer_kernel),
            is.null(metric),
            is.null(custom_metric),
-           is.null(epsilon)))){
+           kernel_epsilon==Inf))){
     if(mercer_kernel == 'gauss') {
       stopifnot('Please provide a non negative value for gamma'= !is.null(gamma) && gamma >= 0)
       W <- gaussKernelWeights(data,gamma)
@@ -56,17 +65,17 @@ spectralProjection <- function(data,
     if(!is.null(custom_mercer_kernel)){
       if(any(c(!is.null(metric),
                !is.null(custom_metric),
-               !is.null(epsilon))))
-        warning('Custom Kernel provided, other parameters metric, custom_metric or epsilon discarded')
+               !is.null(kernel_epsilon))))
+        warning('Custom Kernel provided, other parameters metric, custom_metric or kernel_epsilon discarded')
       W <- dissimilarityMatrix(data,custom_mercer_kernel)
       K <- custom_mercer_kernel}
     else{
-      almost_metric <- getDistanceFunction(metric,p,custom_metric,epsilon)
-      if(epsilon < Inf) metric <- function(x,y) almost_metric(x,y)* (epsilon >= almost_metric(x,y))
+      almost_metric <- getDistanceFunction(metric,p,custom_metric)
+      if(kernel_epsilon < Inf) metric <- function(x,y) almost_metric(x,y)* (kernel_epsilon >= almost_metric(x,y))
       else metric <- almost_metric
 
       almost_kernel <- gaussKernelByCustomMetric(metric,gamma)
-      if(epsilon < Inf) K <- function(x,y) almost_kernel(x,y)* (epsilon >= almost_metric(x,y))
+      if(kernel_epsilon < Inf) K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_metric(x,y))
       else K <- almost_kernel
 
       W <- dissimilarityMatrix(data,K)
@@ -97,7 +106,7 @@ spectralProjection <- function(data,
   dim(a) <- c(k,n)
 
   # save the data points in tibble as usual
-  projected_data <- tibble::as_tibble(t(a))
+  projected_data <- tibble::as_tibble(t(a),.name_repair = 'minimal')
 
   # useful names
   colnames(projected_data) <- paste0('X_',1:k)
@@ -119,11 +128,11 @@ spectralProjection <- function(data,
 
 #' Spectral Clustering
 #'
-#' Algorithm to project a dataset to k dimensional space and then cluster it.
+#' Algorithm to project a data set to k dimensional space and then cluster it.
 #' @inheritParams spectralProjection
 #' @param cluster_algorithm A cluster algorithm to be used on the spectral
-#'   projected data. One of: \code('K-Means'), \code('K-Medioids'),
-#'   \code('hierarchical Clustering), \code(DBSCAN), \code(OPTICS)
+#'   projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},
+#'   \code{'hierarchical Clustering'}, \code{'DBSCAN'}, \code{'OPTICS'}
 #' @param ... Further parameters to pass on to the clustering algorithm.
 #'
 #' @returns a clustering object
@@ -137,11 +146,11 @@ spectralClustering <- function(data,
                                metric = NULL,
                                p = NULL,
                                custom_metric = NULL,
-                               epsilon = NULL,
+                               kernel_epsilon = Inf,
                                cluster_algorithm = 'K-Means',
                                ...){
 
-  spectral_projection <- spectralprojection(data=data,
+  spectral_projection <- spectralProjection(data=data,
                                           k=k,
                                           mercer_kernel = mercer_kernel,
                                           gamma=gamma,
@@ -149,18 +158,22 @@ spectralClustering <- function(data,
                                           metric = metric,
                                           p = p,
                                           custom_metric = custom_metric,
-                                          epsilon = epsilon)
+                                          kernel_epsilon = kernel_epsilon)
 
 
 
 
   if(cluster_algorithm == 'K-Means'){
+
     clustering <- kMeans(spectral_projection$projected_data, ... )
+    clustering$projected_clustered_data <- clustering$clustered_data
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'K-Medioids'){
     clustering <- kMedioids(spectral_projection$projected_data, ...)
-    # do this when implemented
-    #clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+    clustering$projected_clustered_data <- clustering$clustered_data
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   }
   else if(cluster_algorithm == 'hierarchical Clustering'){
@@ -184,5 +197,11 @@ spectralClustering <- function(data,
 #viewClusters(data)
 #viewClusters(spectralprojection(data,k=1,gamma=1)$projected_data)
 #viewClusters(projected_data)
+
+#spectral_projection <- spectralProjection(connected_circles_data,k=1,gamma=10,.print_info = TRUE)
+#spectral_clustering <- spectralClustering(connected_circles_data,k=3,gamma=50,cluster_algorithm = 'K-Means',K=2)
+#spectral_clustering
+
+spectralClustering(study_courses_data,k=1,gamma=50,custom_metric=studies_difference,K=6)
 
 

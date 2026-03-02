@@ -49,5 +49,5 @@ test_that("findClusterAmountSilhouettePlease works", {
 
   data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
 
-  expect_equal(findClusterAmountSilhouettePlease(data),3)
+  expect_equal(findClusterAmountSilhouette(data),3)
 })
