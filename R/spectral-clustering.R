@@ -121,9 +121,12 @@ spectralProjection <- function(data,
 #'
 #' Algorithm to project a dataset to k dimensional space and then cluster it.
 #' @inheritParams spectralProjection
-#' @param cluster_algorithm A cluster algorithm to be used on the spectral projected data. One of: \code('K-Means'), \code('K-Medioids'), \code('hierarchical Clustering), \code(DBSCAN), \code(OPTICS)
+#' @param cluster_algorithm A cluster algorithm to be used on the spectral
+#'   projected data. One of: \code('K-Means'), \code('K-Medioids'),
+#'   \code('hierarchical Clustering), \code(DBSCAN), \code(OPTICS)
+#' @param ... Further parameters to pass on to the clustering algorithm.
 #'
-#' @returns tibble with eigenvectors of projected dimension k
+#' @returns a clustering object
 #'
 #' @export
 spectralClustering <- function(data,
@@ -155,7 +158,7 @@ spectralClustering <- function(data,
     clustering <- kMeans(spectral_projection$projected_data, ... )
   }
   else if(cluster_algorithm == 'K-Medioids'){
-    clustering <- kMeans(spectral_projection$projected_data, ...)
+    clustering <- kMedioids(spectral_projection$projected_data, ...)
     # do this when implemented
     #clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
@@ -176,10 +179,10 @@ spectralClustering <- function(data,
   return(clustering)
 }
 
-data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)
-
-viewClusters(data)
-viewClusters(spectralprojection(data,k=1,gamma=1)$projected_data)
-viewClusters(projected_data)
+#data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)
+#
+#viewClusters(data)
+#viewClusters(spectralprojection(data,k=1,gamma=1)$projected_data)
+#viewClusters(projected_data)
 
 
