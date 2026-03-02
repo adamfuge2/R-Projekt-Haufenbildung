@@ -122,20 +122,20 @@ studies_difference <- function(x,y) studies_differences[[unlist(x),unlist(y)]]
 subjects_data <- tibble::as_tibble(study_curses)
 
 
-#viewData(students_data)
-#
-#
-#clustering <- kMedioids(students_data,K=4,custom_metric=studies_difference,.print_info = TRUE)
-#
-#clustering$clustered_data
-#
-#data <- students_data
-#custom_metric <- studies_difference
-#
-#silhouette(data,clustering$clustering_function,o=15,custom_metric)
-#
-#NULL
-#
+viewData(subjects_data)
+
+
+clustering <- kMedioids(subjects_data,K=6,custom_metric=studies_difference,.print_info = TRUE)
+
+clustering$clustered_data
+
+data <- students_data
+custom_metric <- studies_difference
+
+silhouette(data,clustering$clustering_function,o=15,custom_metric)
+
+NULL
+
 
 
 

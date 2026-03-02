@@ -1,13 +1,46 @@
 # spectral clustering
 
-
+#' Gauss Kernel Weights
+#'
+#' Function to determine the weights using euclidean metric. (shortcut)
+#'
+#' @param data a tibble or atomic vector with n rows representing d-dimensional
+#' points
+#' @param gamma reduction factor for Kernel (large value means large reduction of
+#' far distances)
+#'
+#' @returns n x n matrix with values between 0 and 1
+#' @export
 gaussKernelWeights <- function(data,gamma){
   base::exp(- gamma * base::as.matrix(stats::dist(data)))
 }
+
+
+#' Gauss Kernel
+#'
+#' Kernel function using the euclidean norm
+#'
+#' @param x tibble with one row or atomic vector
+#' @param y tibble with one row or atomic vector
+#'
+#' @returns numeric bewteen 0 and 1
+#' @export
 gaussKernel <- function(x,y,gamma){
   base::exp(- gamma * sqrt(sum((x-y)^2)))
 }
-gaussKernelByCustomMetric <- function(metric,gamma)
+
+
+#' Gauss Kernel (Custom Metric)
+#'
+#' Function operator generating a kernel with a custom metric
+#'
+#' @param metric a metric function taking two arguments
+#' @param gamma reduction factor for Kernel (large value means large reduction of
+#' far distances)
+#'
+#' @returns kernel function with this custom metric
+#' @export
+kernelByCustomMetric <- function(metric,gamma)
   function(x,y) base::exp(- gamma * metric(x,y))
 
 
@@ -90,10 +123,10 @@ spectralProjection <- function(data,
   D_sqrt <- 1/sqrt(D)    #D^(-1/2)
   D_sqrt[D_sqrt == Inf] <- 0
 
-  # calculate eigenvectors
+  # calculate eigenvectors from smallest to biggest
   b <- eigen(D_sqrt %*% L %*% D_sqrt, symmetric=TRUE)$vectors[,n:1]
 
-  # transform to be solutions of our optiization problem
+  # transform to be solutions of our optimization problem
   beta <- apply(b,c(2),function(x) n^(-1/2)*D_sqrt %*% x)
 
   # retrieve the new transformed data points (columns of a).
@@ -202,6 +235,6 @@ spectralClustering <- function(data,
 #spectral_clustering <- spectralClustering(connected_circles_data,k=3,gamma=50,cluster_algorithm = 'K-Means',K=2)
 #spectral_clustering
 
-spectralClustering(study_courses_data,k=1,gamma=50,custom_metric=studies_difference,K=6)
+clustering <- spectralClustering(study_courses_data,k=2,gamma=1,custom_metric=studies_difference,K=6)
 
 

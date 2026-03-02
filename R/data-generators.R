@@ -128,4 +128,4 @@ oh_no_ive_spilled_my_pacman_dots <- dplyr::mutate(generateClusterTestDataSimple(
 
 more_pacman_dots <- generateFullTestData(n=100,min = c(0,0), max = c(26,30))
 
-study_courses_data <- tibble::as_tibble(study_curses)
+study_courses_data <- tibble::as_tibble(study_courses)
