@@ -7,6 +7,8 @@ gaussKernelWeights <- function(data,gamma){
 gaussKernel <- function(x,y,gamma){
   base::exp(- gamma * sqrt(sum((x-y)^2)))
 }
+gaussKernelByCustomMetric <- function(metric,gamma)
+  function(x,y) base::exp(- gamma * metric(x,y))
 
 
 #' Spectral Reduction
@@ -25,25 +27,47 @@ gaussKernel <- function(x,y,gamma){
 #'
 #' @export
 spectralReduction <- function(data,
-                              gamma,
                               k,
                               mercian_kernel = 'gauss',
+                              gamma = NULL,
                               custom_mercian_kernel = NULL,
                               metric = NULL,
-                              epsilon = NULL){
+                              p = NULL,
+                              custom_metric = NULL,
+                              epsilon = Inf){
   n <- nrow(data)
 
 
-
-  if(is.null(custom_mercian_kernel)){
+  if(all(c(is.null(custom_mercian_kernel),
+           is.null(metric),
+           is.null(custom_metric),
+           is.null(epsilon)))){
     if(mercian_kernel == 'gauss') {
+      stopifnot('Please provide a non negative value for gamma'= !is.null(gamma) && gamma >= 0)
       W <- gaussKernelWeights(data,gamma)
       K <- gaussKernel
     }
     else stop('Unknown mercian kernel and no custom mercian kernel provided')
   }
   else {
-    W <- dissimilarityMatrix(data,custom_mercian_kernel)
+    if(!is.null(custom_mercian_kernel)){
+      if(any(c(!is.null(metric),
+               !is.null(custom_metric),
+               !is.null(epsilon))))
+        warning('Custom Kernel provided, other parameters metric, custom_metric or epsilon discarded')
+      W <- dissimilarityMatrix(data,custom_mercian_kernel)
+      K <- custom_mercian_kernel}
+    else{
+      almost_metric <- getDistanceFunction(metric,p,custom_metric,epsilon)
+      if(epsilon < Inf) metric <- function(x,y) almost_metric(x,y)* (epsilon >= almost_metric(x,y))
+      else metric <- almost_metric
+
+      almost_kernel <- gaussKernelByCustomMetric(metric,gamma)
+      if(epsilon < Inf) K <- function(x,y) almost_kernel(x,y)* (epsilon >= almost_metric(x,y))
+      else K <- almost_kernel
+
+      W <- dissimilarityMatrix(data,K)
+    }
   }
 
 
@@ -91,44 +115,47 @@ spectralReduction <- function(data,
 
 
 spectralClustering <- function(data,
-                            gamma,
-                            k,
-                            mercian_kernel = 'gauss',
-                            custom_mercian_kernel = NULL,
-                            metric = NULL,
-                            custom_metric = NULL,
-                            epsilon = NULL,
-                            cluster_algorithm = 'K-Means',
-                            ...){
+                               k,
+                               mercian_kernel = 'gauss',
+                               gamma = NULL,
+                               custom_mercian_kernel = NULL,
+                               metric = NULL,
+                               p = NULL,
+                               custom_metric = NULL,
+                               epsilon = NULL,
+                               cluster_algorithm = 'K-Means',
+                               ...){
 
   spectral_reduction <- spectralReduction(data=data,
-                                          gamma=gamma,
                                           k=k,
                                           mercian_kernel = mercian_kernel,
+                                          gamma=gamma,
                                           custom_mercian_kernel = custom_mercian_kernel,
                                           metric = metric,
+                                          p = p,
+                                          custom_metric = custom_metric,
                                           epsilon = epsilon)
 
 
 
 
   if(cluster_algorithm == 'K-Means'){
-    clustering <- k_means(spectral_reduction$reduced_data, metric=euclidean, ... )
+    clustering <- kMeans(spectral_reduction$reduced_data, ... )
   }
   else if(cluster_algorithm == 'K-Medioids'){
-    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+    clustering <- kMeans(spectral_reduction$reduced_data, ...)
     # do this when implemented
     #clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   }
   else if(cluster_algorithm == 'hierachicalClustering'){
-    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+    clustering <- hierarchical_clustering(spectral_reduction$reduced_data, ...)
   }
   else if(cluster_algorithm == 'DBSCAN'){
-    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+    clustering <- DBSCAN(spectral_reduction$reduced_data, ...)
   }
   else if(cluster_algorithm == 'OPTICS'){
-    clustering <- K_medioids(spectral_reduction$reduced_data, ...)
+    clustering <- OPTICS(spectral_reduction$reduced_data, ...)
   }
   else{
     stop('Unknown clustering algorithm')
@@ -137,9 +164,10 @@ spectralClustering <- function(data,
   return(clustering)
 }
 
-data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 2)
+data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)
 
 viewClusters(data)
-viewClusters(spectralClustering(data,gamma=5,k=1,cluster_algorithm = 'K-Means',K=2))
+viewClusters(spectralReduction(data,k=1,gamma=1)$reduced_data)
 viewClusters(reduced_data)
+
 
