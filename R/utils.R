@@ -239,7 +239,8 @@ tibbleAsPath <- function(data){
 #' @returns a dissimilarity matrix, a row and coloumn for every data point
 #'
 dissimilarityMatrix <-function(data,metric){
-  data <- as.matrix(data)
+  if(length(unique(lapply(data,typeof))) == 1){
+    data <- as.matrix(data)}
   basis <- array(base::rep(1:base::nrow(data),base::nrow(data)), dim=c(base::nrow(data),base::nrow(data) ))
   M <- array(dim = c(base::nrow(data),base::nrow(data),2 ))
   M[,,1] <- basis
@@ -247,6 +248,8 @@ dissimilarityMatrix <-function(data,metric){
 
   return(apply(M,c(1,2),function(x) metric(data[x[1],],data[x[2],])))
 }
+
+
 
 #' The Inequality of a vector to the data
 #'
@@ -264,9 +267,6 @@ sumOfDistancestTo <- function(data,vector,metric){
     dplyr::summarise(sum = sum(distance)) |>
     base::unlist(use.names = FALSE)
 }
-
-
-
 
 
 
