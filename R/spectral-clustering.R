@@ -11,52 +11,55 @@ gaussKernelByCustomMetric <- function(metric,gamma)
   function(x,y) base::exp(- gamma * metric(x,y))
 
 
-#' Spectral Reduction
+#' Spectral projection
 #'
-#' Algorithm to decrease the dimension of a dataset to use for spectral clustering.
+#' Algorithm to project a dataset to k dimensional space to use for spectral clustering.
 #'
 #' @param data a tibble or atomic vector with n rows representing d-dimensional
 #' points
-#' @param gamma reduction faktor for the kernel function
-#' @param k dimensional reduction (output will be of dimension k)
-#' @param kernel kernel function (see algorithm description)
+#' @param k output dimension
+#' @param mercer_kernel kernel function (see algorithm description)
+#' @param gamma projection faktor for the kernel function
+#' @param custom_mercer_kernel kernel function (see algorithm description)
 #' @param metric metric used in kernel function
-#' @param epsilon minimal distance for reduction
+#' @param p if metric is 'Lp', thi value will be used for p
+#' @param custom_metric a custom metric used in kernel function
+#' @param epsilon maximal distance at which data points are still considered neighbored.
 #'
-#' @returns tibble with eigenvectors of reduced dimension k
+#' @returns tibble with eigenvectors of projected dimension k
 #'
 #' @export
-spectralReduction <- function(data,
+spectralProjection <- function(data,
                               k,
-                              mercian_kernel = 'gauss',
+                              mercer_kernel = 'gauss',
                               gamma = NULL,
-                              custom_mercian_kernel = NULL,
+                              custom_mercer_kernel = NULL,
                               metric = NULL,
                               p = NULL,
                               custom_metric = NULL,
-                              epsilon = Inf){
+                              kernel_epsilon = Inf){
   n <- nrow(data)
 
 
-  if(all(c(is.null(custom_mercian_kernel),
+  if(all(c(is.null(custom_mercer_kernel),
            is.null(metric),
            is.null(custom_metric),
            is.null(epsilon)))){
-    if(mercian_kernel == 'gauss') {
+    if(mercer_kernel == 'gauss') {
       stopifnot('Please provide a non negative value for gamma'= !is.null(gamma) && gamma >= 0)
       W <- gaussKernelWeights(data,gamma)
       K <- gaussKernel
     }
-    else stop('Unknown mercian kernel and no custom mercian kernel provided')
+    else stop('Unknown mercer kernel and no custom mercer kernel provided')
   }
   else {
-    if(!is.null(custom_mercian_kernel)){
+    if(!is.null(custom_mercer_kernel)){
       if(any(c(!is.null(metric),
                !is.null(custom_metric),
                !is.null(epsilon))))
         warning('Custom Kernel provided, other parameters metric, custom_metric or epsilon discarded')
-      W <- dissimilarityMatrix(data,custom_mercian_kernel)
-      K <- custom_mercian_kernel}
+      W <- dissimilarityMatrix(data,custom_mercer_kernel)
+      K <- custom_mercer_kernel}
     else{
       almost_metric <- getDistanceFunction(metric,p,custom_metric,epsilon)
       if(epsilon < Inf) metric <- function(x,y) almost_metric(x,y)* (epsilon >= almost_metric(x,y))
@@ -94,10 +97,10 @@ spectralReduction <- function(data,
   dim(a) <- c(k,n)
 
   # save the data points in tibble as usual
-  reduced_data <- tibble::as_tibble(t(a))
+  projected_data <- tibble::as_tibble(t(a))
 
   # useful names
-  colnames(reduced_data) <- paste0('X_',1:k)
+  colnames(projected_data) <- paste0('X_',1:k)
 
   # To calculate the projection function. but wtf no clue
   #
@@ -109,16 +112,25 @@ spectralReduction <- function(data,
   #
   #projection_function <- function(x)
 
-  return(list(reduced_data = reduced_data, projection_function = function(...) stop('not implemented yet')))
+  return(list(projected_data = projected_data, projection_function = function(...) stop('not implemented yet')))
 
 }
 
 
+#' Spectral Clustering
+#'
+#' Algorithm to project a dataset to k dimensional space and then cluster it.
+#' @inheritParams spectralProjection
+#' @param cluster_algorithm A cluster algorithm to be used on the spectral projected data. One of: \code('K-Means'), \code('K-Medioids'), \code('hierarchical Clustering), \code(DBSCAN), \code(OPTICS)
+#'
+#' @returns tibble with eigenvectors of projected dimension k
+#'
+#' @export
 spectralClustering <- function(data,
                                k,
-                               mercian_kernel = 'gauss',
+                               mercer_kernel = 'gauss',
                                gamma = NULL,
-                               custom_mercian_kernel = NULL,
+                               custom_mercer_kernel = NULL,
                                metric = NULL,
                                p = NULL,
                                custom_metric = NULL,
@@ -126,11 +138,11 @@ spectralClustering <- function(data,
                                cluster_algorithm = 'K-Means',
                                ...){
 
-  spectral_reduction <- spectralReduction(data=data,
+  spectral_projection <- spectralprojection(data=data,
                                           k=k,
-                                          mercian_kernel = mercian_kernel,
+                                          mercer_kernel = mercer_kernel,
                                           gamma=gamma,
-                                          custom_mercian_kernel = custom_mercian_kernel,
+                                          custom_mercer_kernel = custom_mercer_kernel,
                                           metric = metric,
                                           p = p,
                                           custom_metric = custom_metric,
@@ -140,22 +152,22 @@ spectralClustering <- function(data,
 
 
   if(cluster_algorithm == 'K-Means'){
-    clustering <- kMeans(spectral_reduction$reduced_data, ... )
+    clustering <- kMeans(spectral_projection$projected_data, ... )
   }
   else if(cluster_algorithm == 'K-Medioids'){
-    clustering <- kMeans(spectral_reduction$reduced_data, ...)
+    clustering <- kMeans(spectral_projection$projected_data, ...)
     # do this when implemented
     #clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   }
-  else if(cluster_algorithm == 'hierachicalClustering'){
-    clustering <- hierarchical_clustering(spectral_reduction$reduced_data, ...)
+  else if(cluster_algorithm == 'hierarchical Clustering'){
+    clustering <- hierarchical_clustering(spectral_projection$projected_data, ...)
   }
   else if(cluster_algorithm == 'DBSCAN'){
-    clustering <- DBSCAN(spectral_reduction$reduced_data, ...)
+    clustering <- DBSCAN(spectral_projection$projected_data, ...)
   }
   else if(cluster_algorithm == 'OPTICS'){
-    clustering <- OPTICS(spectral_reduction$reduced_data, ...)
+    clustering <- OPTICS(spectral_projection$projected_data, ...)
   }
   else{
     stop('Unknown clustering algorithm')
@@ -167,7 +179,7 @@ spectralClustering <- function(data,
 data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)
 
 viewClusters(data)
-viewClusters(spectralReduction(data,k=1,gamma=1)$reduced_data)
-viewClusters(reduced_data)
+viewClusters(spectralprojection(data,k=1,gamma=1)$projected_data)
+viewClusters(projected_data)
 
 
