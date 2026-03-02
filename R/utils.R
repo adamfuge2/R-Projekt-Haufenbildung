@@ -249,7 +249,26 @@ dissimilarityMatrix <-function(data,metric){
   return(apply(M,c(1,2),function(x) metric(data[x[1],],data[x[2],])))
 }
 
-
+#' Coverts standardized metric inputs to real metric function
+#'
+#'
+getDistanceFunction <- function(metric,p,custom_metric){
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      return(euclidean)
+    else if(metric=='maximum')
+      return(maximumMetric)
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      return(pMetric(p))
+    }
+    else if(metric=='manhattan')
+      return(pMetric(1))
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else return(custom_metric)
+}
 
 #' The Inequality of a vector to the data
 #'
