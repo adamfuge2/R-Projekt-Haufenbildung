@@ -70,9 +70,11 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
       dplyr::slice_sample(n=K)
 
 
+    if(.print_info) print(centroids)
 
     ## Main loop: repeat iterating the cluster means, until no more change
     while(!base::identical(centroids, old_centroids)){
+      if(.print_info) print(centroids)
 
       ## calculate all the points distances to the centroids
       distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){metric(x,centroid)})}) |> t()
@@ -142,12 +144,12 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountElbow <- function(data, .print_info = FALSE){
+findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
   inner_inequalities <- numeric()
-  improvement <- Inf
+  improvement <- list(Inf)
   K <- 1
 
-  while(improvement>1){
+  while(improvement[[K]]>1 ){
 
     if(.print_info)
       print(paste0('checking K = ',K))
@@ -157,19 +159,20 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
     if(.print_info)
       plot(1:K,inner_inequalities,asp=1)
 
-    if(K>1)improvement <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
+    if(K>1) improvement[[K]] <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
 
 
 
     if(.print_info)
-      print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
+      print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement[[K]]))
 
     K <- K+1
 
   }
 
+  improvement[improvement<1] <- Inf
 
-  return(K-2)
+  return(which.min(improvement))
 }
 
 
@@ -192,13 +195,13 @@ findClusterAmountElbow <- function(data, .print_info = FALSE){
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #' @export
-findClusterAmountSilhouettePlease <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE){
+findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE ,check_min = 1){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
   K <- 1
 
-  while(improvement>0){
+  while(improvement>0 || K <= check_min){
     if(.print_info)
       print(paste0('checking K = ',K))
 
@@ -219,7 +222,7 @@ findClusterAmountSilhouettePlease <- function(data,metric='euclidean',p=NULL,cus
   }
 
 
-  return(K-2)
+  return(which.max(fit))
 }
 
 
