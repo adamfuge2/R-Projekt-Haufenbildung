@@ -1,4 +1,4 @@
-Package: Haufenbildung
+Package: clusterfuck
 Type: Package
 Title: A collection of common clustering algorithms
 Version: 0.0.0.9000
@@ -23,9 +23,9 @@ Description: This package includes the algoriithms K-Means, K-Medioids,
     hierarchical clustering, DBSCAN and OPTICS. 
     Also included are easy to use functions to 
     - score the clusterings,
-    - view the clusterings, 
+    - plot the clusterings, 
     - generate clustered test data.
-License: MIT + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
@@ -35,5 +35,12 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
-    rlang
+    dplyr (>= 1.2.0),
+    ggplot2 (>= 4.0.2),
+    rlang,
+    scatterplot3d,
+    tibble (>= 3.3.1),
+    tidyselect (>= 1.2.1)
+Depends:
+    R (>= 4.1.0)
 VignetteBuilder: knitr

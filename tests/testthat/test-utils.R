@@ -34,11 +34,11 @@ test_that('InnerInequality',{
 
   set.seed(13456)
 
-  data <- generateClusterTestDataSimple2D(n=100,n_clusters = 3)
+  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
 
-  clustering <- K_means_global(data,K=3,tries = 10)
+  clustering <- kMeans(data,K=3,tries = 10)
 
-  testthat::expect_equal(innerInequality(data,clustering),5.28324491312604)
+  testthat::expect_equal(clustering$inner_inequality,3.59440075)
 })
 
 

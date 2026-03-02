@@ -4,13 +4,15 @@
 \alias{findClusterAmountElbow}
 \title{Fining a best cluster amount using the 'Elbow-method'}
 \usage{
-findClusterAmountElbow(data)
+findClusterAmountElbow(data, .print_info = FALSE, check_min = 1)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
+
+\item{.print_info}{A logical. Prints some useful information for debugging.}
 }
 \value{
-a positive integer, the 'optimal' clustering
+a positive integer, the 'optimal' amount of clusters
 }
 \description{
 Tries finding a K-Means Clustering for increasing K and stops if the

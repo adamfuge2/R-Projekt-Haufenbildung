@@ -15,27 +15,27 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(Haufenbildung)
+library(clusterfuck)
 ```
 
 
 Lets create some test data
 ```{r}
-data <- generateClusterTestDataSimple2D(n=100, n_clusters = 4)
+data <- generateClusterTestDataSimple(n=100, cluster_amount = 4)
 ```
 
 This is what it looks like
 ```{r}
-viewClusters(data)
+viewData(data)
 ```
 
 **Apply the K-means-algorithm with K = 4**       
 ```{r}
-clustering <- K_means(data, K = 4)
+clustering <- kMeans(data, K = 4)
 ```
-(This may take a while)    
 
+Lets take a look at the clusters
 ```{r}
-viewClusters(data,clustering)
+clustering
 ```
 

@@ -1,6 +1,6 @@
 #' @details
 #' Details
-#' @section CLustering functions
+#' @section Clustering functions
 #'
 #' @references Richter
 #' @keywords internal
