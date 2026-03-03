@@ -101,7 +101,7 @@ generateFullTestData <- function(n=100,min,max){
     values <- c(values,runif(n,min=min[i],max = max[i]))
   }
 
-  tibble::as_tibble(matrix(values,ncol =length(min)))
+  tibble::as_tibble(matrix(values,ncol =length(min)),.name_repair='minimal')
 }
 
 circle <- function(r) tibble::tibble(X=c(r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0,r/sqrt(2),r),Y=c(0,r/sqrt(2),r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0))
