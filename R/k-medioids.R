@@ -195,8 +195,10 @@ greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_mat
 
       D <- sapply(1:base::nrow(data),function(o) min(sapply(1:(k-1), function(m) metric(data[o,],medioids[m,]))))
 
+
+
       # Remove the already chosen medioids and format to a matrix (for later)
-      D <- D[D != 0] |> base::rep(base::nrow(data)-k+1) |>
+      D <- D[-medioid_indeces] |> base::rep(base::nrow(data)-k+1) |>
         base::matrix(ncol = base::nrow(data)-k+1, byrow = TRUE)
 
 
@@ -215,7 +217,7 @@ greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_mat
       M <- M[-medioid_index,-medioid_index]
 
       # account for the removed rows from M
-      for(x in medioid_indeces) if(medioid_index >= x){medioid_index<-medioid_index+1}
+      for(x in sort(medioid_indeces)) if(medioid_index >= x) medioid_index<-medioid_index+1
 
       # lastly: add the newly found medioid
       medioid_indeces <- c(medioid_indeces,medioid_index)
