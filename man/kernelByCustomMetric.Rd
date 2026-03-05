@@ -2,7 +2,7 @@
 % Please edit documentation in R/spectral-clustering.R
 \name{kernelByCustomMetric}
 \alias{kernelByCustomMetric}
-\title{Gauss Kernel (Custom Metric)}
+\title{Kernel Generator (Custom Metric)}
 \usage{
 kernelByCustomMetric(metric, gamma)
 }

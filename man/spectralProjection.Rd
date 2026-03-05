@@ -25,13 +25,13 @@ points}
 
 \item{mercer_kernel}{kernel function (see algorithm description)}
 
-\item{gamma}{projection faktor for the kernel function}
+\item{gamma}{projection factor for the kernel function}
 
 \item{custom_mercer_kernel}{kernel function (see algorithm description)}
 
 \item{metric}{metric used in kernel function}
 
-\item{p}{if metric is 'Lp', thi value will be used for p}
+\item{p}{if metric is 'Lp', this value will be used for p}
 
 \item{custom_metric}{a custom metric used in kernel function}
 
