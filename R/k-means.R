@@ -31,6 +31,7 @@
 #'   }
 #' @export
 kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_info = FALSE){
+  start <- Sys.time()
   ## some necessary variables
   n <- base::nrow(data)
   dim <- base::ncol(data)
@@ -59,6 +60,7 @@ kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_
   base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
   base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
   base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
+  if(.print_info) print(Sys.time() - start)
 
   ## Start of actual algorithm
   ## Try multiple times, to minimize the dependency on random chance
@@ -101,6 +103,7 @@ kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_
     ## update the currently best clustering guess
     if(cost < minimal_cost){
       minimal_cost <- cost
+      best_distances <- distances |> apply(2,min)
       best_centroids <- centroids
       best_clustered_data <- data
 
@@ -108,20 +111,31 @@ kMeans <- function(data,K,metric='euclidean',custom_metric=NULL,tries=K, .print_
         base::print(base::paste0('Found a new best clustering with cost ',cost))
     }
   }
+  if(.print_info) print(Sys.time() - start)
 
 
+  f <- function(x)
+    best_centroids |>
+    apply(1,function(centroid) metric(x,centroid)) |>
+    base::which.min()
+  if(.print_info) print(Sys.time() - start)
+
+  D <- dissimilarityMatrix(data,metric)
+
+  if(.print_info) print(Sys.time() - start)
 
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
   return(structure(
               list(
                 clustered_data = best_clustered_data,
-                clustering_function = function(x)
-                  best_centroids |>
-                  apply(1,function(centroid) metric(x,centroid)) |>
-                  base::which.min(),
-                inner_inequality = minimal_cost),
+                clustering_function = f,
+                centroids = best_centroids,
+                inner_inequality = minimal_cost,
+                sum_of_squares = best_distances^2 |> sum(),
+                mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(best_clustered_data,index,D)) |> mean()
+                ),
               description = 'Data clustered by K-Means algorithm',
-              class= 'clustering'
+              class= c('K-Means-clustering',  'clustering')
              )
         )
 }
