@@ -120,8 +120,8 @@ generateFullTestData <- function(n=100,min,max){
 
 ###################### premade data #####################
 
-hours_of_a_day <- tibble::as_tibble(0:23)
-hours_data <- tibble::as_tibble((24*generateClusterTestDataSimple(dim=1,cluster_amount = 4,n=200))%%24)
+hours_of_a_day <- tibble::as_tibble(0:23,.name_repair = 'minimal')
+hours_data <- tibble::as_tibble((24*generateClusterTestDataSimple(dim=1,cluster_amount = 4,n=200))%%24,.name_repair = 'minimal')
 more_hours_data <- generateFullTestData(n=100,min = c(-180,-90), max = c(180,  90))
 
 oh_no_ive_spilled_my_pacman_dots <- dplyr::mutate(generateClusterTestDataSimple(dim=2,cluster_amount = 5,n=200), X_1=X_1%%1*26, X_2=X_2%%1*30)
