@@ -9,6 +9,7 @@ optics <- function(data, epsilon, min_Pts) {
   reachability <- rep(NA, data_entries)
   core_distance <- rep(NA, data_entries)
   ordered <- integer(0)
+  predecessor <- rep(NA_integer_, data_entries)
   
   getNeighbors <- function(point) {
     which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
@@ -19,7 +20,7 @@ optics <- function(data, epsilon, min_Pts) {
       return(NA)
     }
     dists <- dist_x[point, neighbors]
-    return(sort(dists)[min_Pts])
+    return(dists[order(dists)][min_Pts])
   }
   
   update <- function(neighbors, point, seeds_points, seeds_reach) {
@@ -30,10 +31,12 @@ optics <- function(data, epsilon, min_Pts) {
         if(is.na(reachability[o])) { # if (o.reachability-distance = NULL)
           # o not in Seeds:
           reachability[o] <<- new_reach #o.reachability-distance = new-reach-dist
+          predecessor[o] <<- point # for spanning tree (see wiki article)
           seeds_points <- c(seeds_points, o) # Seeds.insert(o, new-reach-dist)
           seeds_reach <- c(seeds_reach, new_reach)
         } else if(new_reach < reachability[o]) { #else: o in Seeds, check improvement// if (new-reach-dist < o.reachability-distance)
           reachability[o] <<- new_reach # o.reachability-distance = new-reach-dist
+          predecessor[o] <<- point
           # Seeds.move-up(o, new-reach-dist)
           i <- which(seeds_points == o)
           if(length(i) > 0) {
@@ -42,10 +45,18 @@ optics <- function(data, epsilon, min_Pts) {
         }
       }
     }
-  list(points = seeds_points, reach = seeds_reach)
+    return(structure(
+      list(
+        order = ordered,
+        reachdist = reachability,
+        coredist = core_distance,
+        predecessor = predecessor
+      ),
+      class = "optics"
+    ))
   }
   
-  for(point in 1:data_entries) {  # for each point in data
+  for(point in seq_len(data_entries)) {  # for each point in data
     # point.reachability-distance = NULL
     # we can save one more for loop? maybe? 
     if(processed[point] == FALSE) {   # for each unprocessed point in data
@@ -75,6 +86,7 @@ optics <- function(data, epsilon, min_Pts) {
             processed[q] <- TRUE # mark q as processed
             ordered <- c(ordered, q) # place q in ordered list
             core_distance[q] <- coreDistance(q, neighbors_q)
+            
             if(!is.na(core_distance[q])) { # if (core-distance(q, epsilon, min_Pts) != NULL)
               seeds <- update(neighbors_q, q, seeds_points, seeds_reach) # update(N', q, Seeds, epsilon, min_Pts)# update(N', q, Seeds, epsilon, min_Pts)              
               seeds_points <- seeds$points
@@ -85,9 +97,60 @@ optics <- function(data, epsilon, min_Pts) {
       }
     }
   }
-  return(list(order = ordered, reachability = reachability, core_distance = core_distance))
-    
+  return(structure(
+    list(
+      order = ordered,
+      reachdist = reachability,
+      coredist = core_distance
+    ),
+    class = "optics"
+  ))
 }
 
-# not looking at the results today, we believe this is correct <3
-# es fehlen noch reachability-graph und clustering-graph, das kommt noch!
+# let's try!
+#data <- generateClusterTestDataSimple2D(n = 100)
+#result <- optics(data, epsilon = 0.1, min_Pts = 5)
+
+# Reihenfolge als Rang speichern
+#order_rank <- integer(nrow(data))
+#order_rank[result$order] <- seq_along(result$order)
+#data$order_rank <- order_rank
+
+# Visualisierung: Punkte eingefärbt nach OPTICS-Reihenfolge
+#ggplot2::ggplot(data, ggplot2::aes(X, Y, color = order_rank)) +
+#  ggplot2::geom_point() +
+#  ggplot2::scale_color_viridis_c()
+
+
+data <- generateClusterTestDataSimple2D(n = 200, nclusters = 3)
+result <- optics(data, epsilon = 0.1, min_Pts = 10)
+order_rank <- integer(nrow(data))
+order_rank[result$order] <- seq_along(result$order)
+data$order_rank <- order_rank
+cluster <- extractClusters(result, eps = 0.15)
+table(cluster)
+cols <- cluster_colors(cluster)
+
+ggplot2::ggplot(data, aes(X, Y)) +
+  geom_point(color = cols)
+
+plot(result, eps = 0.1)
+
+###
+path1 <- function(t) tibble::tibble(X = 0.2, Y = 0.3)
+path2 <- function(t) tibble::tibble(X = 0.5, Y = 0.8)
+path3 <- function(t) tibble::tibble(X = 0.8, Y = 0.4)
+cluster_paths <- list(path1, path2, path3)
+data <- generateClusterTestData2DFromPaths(n = 450, list_of_paths = cluster_paths)
+result <- optics(data, epsilon = 0.1, min_Pts = 10)
+order_rank <- integer(nrow(data))
+order_rank[result$order] <- seq_along(result$order)
+data$order_rank <- order_rank
+cluster <- extractClusters(result, eps = 0.15)
+table(cluster)
+cols <- cluster_colors(cluster)
+
+ggplot2::ggplot(data, aes(X, Y)) +
+  geom_point(color = cols)
+
+plot(result, eps = 0.1)
