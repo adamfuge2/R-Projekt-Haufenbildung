@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(Haufenbildung)
+library(clusterfuck)
 
-test_check("Haufenbildung")
+test_check("clusterfuck")

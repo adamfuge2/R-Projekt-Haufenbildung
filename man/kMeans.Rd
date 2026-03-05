@@ -8,6 +8,7 @@ kMeans(
   data,
   K,
   metric = "euclidean",
+  p = NULL,
   custom_metric = NULL,
   tries = K,
   .print_info = FALSE
@@ -24,15 +25,15 @@ The amount of Clusters the algorithm tries to find in the data}
 \item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
+\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
 \item{custom_metric}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
 
 \item{tries}{A positive integer. The amount of times the algorithm should retry with new starting centroids}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
-
-\item{p}{A numeric greater than or equal to 1. If \code{metric} was
-chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 }
 \value{
 A list of the class 'clustering'. Contains \itemize{

@@ -4,7 +4,7 @@
 \alias{silhouette}
 \title{Silhouette of a clustering on ONE SPECIFIC data point.}
 \usage{
-silhouette(data, clustering, o, metric = euclidean)
+silhouette(data, clustering, o, metric = euclidean, is_part_of_data = TRUE)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}

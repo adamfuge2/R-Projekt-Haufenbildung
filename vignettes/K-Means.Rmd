@@ -32,11 +32,12 @@ data <- generateClusterTestDataSimple(n=100, cluster_amount = 4)
 
 This is what it looks like
 ```{r}
-viewClusters(data)
+viewData(data)
 ```
 
 **Apply the K-means-algorithm with K = 4**       
 ```{r}
+<<<<<<< HEAD
 kMeans(data, K = 4)
 ```
 
@@ -179,8 +180,14 @@ WIDE_euclidean <- function(x,y) {
 kMeans(data_1, K=4, custom_metric = WIDE_euclidean)
 ```
 
+=======
+clustering <- kMeans(data, K = 4)
+```
+>>>>>>> a7dd1b01c192101fd12938aee64cdb679762e76d
 
+Lets take a look at the clusters
 ```{r}
+<<<<<<< HEAD
 ## the custom function for distance on a globe
 #distanceByLongitudeAndLatitude #TODO
 #
@@ -189,6 +196,9 @@ kMeans(data_1, K=4, custom_metric = WIDE_euclidean)
 #slice_of_the_world <- #tibble::as_tibble(dplyr::slice_sample(n=100,maps::world.cities[,c('long','lat')]#))
 #
 #kMeans(slice_of_the_world, K=7, custom_metric = distanceByLongitudeAndLatitude)
+=======
+clustering
+>>>>>>> a7dd1b01c192101fd12938aee64cdb679762e76d
 ```
 
 ### 2.6 tries

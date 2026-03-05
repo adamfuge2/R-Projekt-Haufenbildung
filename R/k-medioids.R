@@ -98,6 +98,7 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
     # new minimal
     new_min_cost <- costs[o_opt,m_opt]
+
   }
 
   clustering_function <- function(x) 1:K |>
@@ -115,7 +116,7 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
       inner_innequality = new_min_cost),
     description = 'Data clustered by K-Medioids algorithm',
     class= 'clustering'
-  )
+    )
   )
 }
 
