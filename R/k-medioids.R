@@ -55,8 +55,8 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
-  base::stopifnot('K is not a whole number' = is.wholenumber(K))
-  base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
+  base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
+  base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
 
   if(.print_info) print('calculating dissimilarity matrix')
 
@@ -68,7 +68,6 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
   ## (BUILD) Define starting medioids
   medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
-
 
   new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
 
@@ -170,9 +169,17 @@ innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarit
 #' @returns The indeces of good-enough clustering medioid in the \code{data}
 greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_matrix=NULL){
 
-  # Invariants
-  base::stopifnot('K is not a whole number' = is.wholenumber(K))
-  base::stopifnot('K must positive' = (0 < K))
+
+  ## Invariants: test the input
+  base::stopifnot('Data must have more than 0 rows' = n>0)
+  base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
+  base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
+
+  if(K == nrow(unique(data))) return(data |>
+                                       dplyr::mutate(index = row(data)) |>
+                                       dplyr::summarise(index=dplyr::first(index)     , .by = all_of(1:ncol(data))) |>
+                                       dplyr::select(index) |>
+                                       unlist(use.names = FALSE))
 
   # if not already given, calculate dissimilarity matrix
   if(is.null(dissimilarity_matrix)) M <- dissimilarityMatrix(data,metric)
