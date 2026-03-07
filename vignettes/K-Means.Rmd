@@ -1,0 +1,41 @@
+---
+title: "K-Means"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{K-Means}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(clusterfuck)
+```
+
+
+Lets create some test data
+```{r}
+data <- generateClusterTestDataSimple(n=100, cluster_amount = 4)
+```
+
+This is what it looks like
+```{r}
+viewData(data)
+```
+
+**Apply the K-means-algorithm with K = 4**       
+```{r}
+clustering <- kMeans(data, K = 4)
+```
+
+Lets take a look at the clusters
+```{r}
+clustering
+```
+

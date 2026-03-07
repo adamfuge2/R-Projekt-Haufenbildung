@@ -1,0 +1,46 @@
+Package: clusterfuck
+Type: Package
+Title: A collection of common clustering algorithms
+Version: 0.0.0.9000
+Authors@R: c(
+    person(
+      "Aaron", "Fath",
+      email = "aaron.fath@stud.uni-heidelberg.de",
+      role = "aut"
+    ),
+    person(
+      "Adam", "Fuge",
+      email = "adam.fuge@stud.uni-heidelberg.de",
+      role = "aut"
+    ),
+    person(
+      "Roman", "Hektor",
+      email = "roman.hektor@stud.uni-heidelberg.de",
+      role = c("aut",'cre')
+    )
+  )
+Description: This package includes the algoriithms K-Means, K-Medioids, 
+    hierarchical clustering, DBSCAN and OPTICS. 
+    Also included are easy to use functions to 
+    - score the clusterings,
+    - plot the clusterings, 
+    - generate clustered test data.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    dplyr (>= 1.2.0),
+    ggplot2 (>= 4.0.2),
+    rlang,
+    scatterplot3d,
+    tibble (>= 3.3.1),
+    tidyselect (>= 1.2.1)
+Depends:
+    R (>= 4.1.0)
+VignetteBuilder: knitr
