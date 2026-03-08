@@ -54,7 +54,7 @@ manhattan <- function(x,y) base::sum(base::abs(x-y))
 
 #' names for some study courses
 #' @export
-study_curses <- c('architecture',
+study_courses <- c('architecture',
                   'special education',
                   'english',
                   'physics',
@@ -96,8 +96,8 @@ studies_differences_upper <- matrix(c(00,15,10,03,03,08,12,13,07,02,03,03,03,16,
                                      00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,05,01,
                                      00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,05,
                                      00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00),
-                                   ncol = length(study_curses),
-                                   dimnames = list(study_curses,study_curses),
+                                   ncol = length(study_courses),
+                                   dimnames = list(study_courses,study_courses),
                                    byrow = TRUE)
 
 #' Difference matrix of study courses
@@ -119,8 +119,7 @@ studies_difference <- function(x,y) studies_differences[[unlist(x),unlist(y)]]
 #' Data of some subjects
 #'
 #' @export
-subjects_data <- tibble::as_tibble(study_curses)
-
+study_courses_data <- structure(tibble::as_tibble(study_courses,.name_repair = 'minimal'),colnames = 'value')
 
 #viewData(students_data)
 #

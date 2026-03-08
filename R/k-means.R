@@ -120,7 +120,7 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
     base::which.min()
   if(.print_info) print(Sys.time() - start)
 
-  D <- dissimilarityMatrix(data,metric)
+  D <- dissimilarityMatrix(data[,1:dim],metric)
 
   if(.print_info) print(Sys.time() - start)
 
