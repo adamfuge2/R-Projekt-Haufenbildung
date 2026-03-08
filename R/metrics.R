@@ -51,75 +51,15 @@ pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 manhattan <- function(x,y) base::sum(base::abs(x-y))
 
 ##################### Study courses metric ####################
-
-#' names for some study courses
-#' @export
-study_courses <- c('architecture',
-                  'special education',
-                  'english',
-                  'physics',
-                  'mathematics',
-                  'computer science',
-                  'biology',
-                  'chemistry',
-                  'geography',
-                  'geology',
-                  'greek history',
-                  'economics',
-                  'egyptoligy',
-                  'medical studies',
-                  'law',
-                  'music',
-                  'philosophy',
-                  'translation',
-                  'theater education')
-
-#' The differences of study courses
+#' A distance function on study courses
 #'
-#' only upper matrix part. Do not use
-studies_differences_upper <- matrix(c(00,15,10,03,03,08,12,13,07,02,03,03,03,16,11,07,20,20,05,
-                                     00,00,19,13,09,13,12,19,13,19,21,11,22,20,09,03,05,06,04,
-                                     00,00,00,10,16,07,10,04,11,20,19,17,18,04,20,05,08,01,06,
-                                     00,00,00,00,02,04,06,03,04,06,16,08,15,06,16,02,15,16,10,
-                                     00,00,00,00,00,01,05,03,07,06,15,03,14,06,04,08,03,05,18,
-                                     00,00,00,00,00,00,04,05,07,08,16,04,18,05,08,05,15,06,04,
-                                     00,00,00,00,00,00,00,05,08,08,19,18,19,01,14,18,08,16,18,
-                                     00,00,00,00,00,00,00,00,17,05,10,18,11,03,14,17,20,21,15,
-                                     00,00,00,00,00,00,00,00,00,01,10,09,09,12,10,20,09,08,16,
-                                     00,00,00,00,00,00,00,00,00,00,02,07,02,19,22,20,24,05,19,
-                                     00,00,00,00,00,00,00,00,00,00,00,22,01,18,06,14,01,03,07,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,21,08,02,21,15,06,13,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,10,23,19,20,04,17,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,17,12,04,14,12,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,17,04,04,17,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,03,06,01,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,05,01,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,05,
-                                     00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00),
-                                   ncol = length(study_courses),
-                                   dimnames = list(study_courses,study_courses),
-                                   byrow = TRUE)
-
-#' Difference matrix of study courses
+#' The data for this relies on literally nothing.
+#' It is purely to serve as an example of an exotic distance function
 #'
-studies_differences <- studies_differences_upper + t(studies_differences_upper)
-
-
-#' A difference function on study courses
-#'
-#' The data for this relies on nothing. It is purely to serve as an example of
-#' an exotic distance function
-#'
-#' @param x         a character. A studies subject. One of:
-#' @param y         a character. A studies subject like \code{x}.
+#' @param x,y   a character of length 1. A studies subject. One of TODO
 #'
 #' @export
-studies_difference <- function(x,y) studies_differences[[unlist(x),unlist(y)]]
-
-#' Data of some subjects
-#'
-#' @export
-study_courses_data <- structure(tibble::as_tibble(study_courses,.name_repair = 'minimal'),colnames = 'value')
+study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
 
 #viewData(students_data)
 #
