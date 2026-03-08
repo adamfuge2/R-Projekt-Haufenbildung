@@ -15,7 +15,8 @@ spectralClustering(
   custom_metric = NULL,
   kernel_epsilon = Inf,
   cluster_algorithm = "K-Means",
-  ...
+  ...,
+  .print_info = FALSE
 )
 }
 \arguments{
