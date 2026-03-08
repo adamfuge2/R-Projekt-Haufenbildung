@@ -119,13 +119,12 @@ studies_difference <- function(x,y) studies_differences[[unlist(x),unlist(y)]]
 #' Data of some subjects
 #'
 #' @export
-subjects_data <- tibble::as_tibble(study_courses, .name_repair = 'unique')
+study_courses_data <- structure(tibble::as_tibble(study_courses,.name_repair = 'minimal'),colnames = 'value')
 
-
-#viewData(subjects_data)
+#viewData(students_data)
 #
 #
-#clustering <- kMedioids(subjects_data,K=6,custom_metric=studies_difference,.print_info = TRUE)
+#clustering <- kMedioids(students_data,K=4,custom_metric=studies_difference,.print_info = TRUE)
 #
 #clustering$clustered_data
 #

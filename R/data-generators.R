@@ -104,10 +104,10 @@ generateFullTestData <- function(n=100,min,max){
   tibble::as_tibble(matrix(values,ncol =length(min)),.name_repair='minimal')
 }
 
-circle <- function(r) tibble::tibble(X=c(r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0,r/sqrt(2),r),Y=c(0,r/sqrt(2),r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0))
+#circle <- function(r) tibble::tibble(X=c(r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0,r/sqrt(2),r),Y=c(0,r/sqrt(2),r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0))
 
-circles <- list(circle(0.5),circle(1),circle(1),circle(1))
-connected_circles <- list(circle(0.5),circle(0.5),circle(0.5),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),tibble::tibble(X=c(0,0),Y=c(0.5,1)))
+#circles <- list(circle(0.5),circle(1),circle(1),circle(1))
+#connected_circles <- list(circle(0.5),circle(0.5),circle(0.5),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),tibble::tibble(X=c(0,0),Y=c(0.5,1)))
 
 #circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  circles)
 #connected_circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  connected_circles)
@@ -120,8 +120,8 @@ connected_circles <- list(circle(0.5),circle(0.5),circle(0.5),circle(1),circle(1
 
 ###################### premade data #####################
 
-hours_of_a_day <- tibble::as_tibble(0:23, .name_repair = 'unique')
-hours_data <- tibble::as_tibble((24*generateClusterTestDataSimple(dim=1,cluster_amount = 4,n=200))%%24, .name_repair = 'unique')
+hours_of_a_day <- tibble::as_tibble(0:23,.name_repair = 'minimal')
+hours_data <- tibble::as_tibble((24*generateClusterTestDataSimple(dim=1,cluster_amount = 4,n=200))%%24,.name_repair = 'minimal')
 more_hours_data <- generateFullTestData(n=100,min = c(-180,-90), max = c(180,  90))
 
 oh_no_ive_spilled_my_pacman_dots <- dplyr::mutate(generateClusterTestDataSimple(dim=2,cluster_amount = 5,n=200), X_1=X_1%%1*26, X_2=X_2%%1*30)

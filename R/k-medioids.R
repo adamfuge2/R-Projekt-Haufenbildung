@@ -55,6 +55,7 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
+
   base::stopifnot('K is not a whole number' = is.wholenumber(K))
   base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
 
@@ -69,6 +70,9 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
   ## (BUILD) Define starting medioids
   medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
 
+
+
+  if(.print_info) print('Done. \n now calculating first costs')
 
   new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
 
@@ -103,10 +107,10 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
   }
 
   clustering_function <- function(x) 1:K |>
-    sapply(function(k) metric(x,base::unlist(data[medioid_indeces[k],]))) |>
+    sapply(function(k) metric(x,base::unlist(data[old_medioid_indeces[k],]))) |>
     base::which.min()
 
-  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),which.min))
+  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[old_medioid_indeces,],dim=c(K,n)) |> apply(c(2),which.min))
 
 
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
@@ -114,10 +118,14 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
     list(
       clustered_data = best_clustered_data,
       clustering_function = clustering_function,
-      inner_innequality = new_min_cost),
+      medioids = data[old_medioid_indeces,],
+      inner_inequality = old_min_cost,
+      sum_of_squares = structure(D[old_medioid_indeces,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
+      mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(best_clustered_data,index,D)) |> mean()
+    ),
     description = 'Data clustered by K-Medioids algorithm',
-    class= 'clustering'
-    )
+    class= c('K-Medioids-clustering',  'clustering')
+  )
   )
 }
 
@@ -171,12 +179,22 @@ innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarit
 #' @returns The indeces of good-enough clustering medioid in the \code{data}
 greedySearchMedioidIndeces <- function(data,K,metric=euclidean,dissimilarity_matrix=NULL){
 
-  # Invariants
-  base::stopifnot('K is not a whole number' = is.wholenumber(K))
-  base::stopifnot('K must positive' = (0 < K))
+
+  ## Invariants: test the input
+  base::stopifnot('Data must have more than 0 rows' = ncol(data)>0)
+  base::stopifnot('K must be an integer larger than 0' = is.wholenumber(K) && (0 < K))
+  base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
+
+  if(K == nrow(unique(data))) return(data |>
+                                       dplyr::mutate(index = row(data[1])) |>
+                                       dplyr::summarise(index=dplyr::first(index)     , .by = all_of(1:ncol(data))) |>
+                                       dplyr::select(index) |>
+                                       unlist(use.names = FALSE))
 
   # if not already given, calculate dissimilarity matrix
-  if(is.null(dissimilarity_matrix)) M <- dissimilarityMatrix(data,metric)
+  if(is.null(dissimilarity_matrix)) {
+    M <- dissimilarityMatrix(data,metric)
+    }
   else M <- dissimilarity_matrix
 
   # we choose the first medioid as the data point minimizing th sum of distances to all data points

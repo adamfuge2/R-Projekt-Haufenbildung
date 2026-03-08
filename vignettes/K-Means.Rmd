@@ -1,8 +1,11 @@
 ---
-title: "K-Means"
-output: rmarkdown::html_vignette
+title: "The K-Means Clustering Algorithm"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    tabset: true
 vignette: >
-  %\VignetteIndexEntry{K-Means}
+  %\VignetteIndexEntry{The K-Means Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,30 +15,286 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+knitr::opts_chunk$set(
+  fig.align = 'center',
+  fig.width = 7
+)
 ```
 
-```{r setup}
+```{r setup, results=FALSE , message=FALSE, warning=FALSE}
 library(clusterfuck)
 ```
 
 
+Here we will go over all information needed to use the kMeans function of the clusterfuck package
+
+
+## 1. General use
+This will illustrate the most basic use case for this clustering function:
+
 Lets create some test data
-```{r}
+```{r general_use_1}
 data <- generateClusterTestDataSimple(n=100, cluster_amount = 4)
 ```
 
 This is what it looks like
-```{r}
+```{r general_use_2}
 viewData(data)
 ```
 
 **Apply the K-means-algorithm with K = 4**       
-```{r}
-clustering <- kMeans(data, K = 4)
+```{r general_use_3}
+kMeans(data, K = 4, tries = 4)
 ```
 
-Lets take a look at the clusters
-```{r}
-clustering
+
+
+## 2. Parameters
+
+### 2.1 data (necessary)
+This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point. 
+
+- Must have at least 1 data point.
+- **`mean()` must be applicable** on the types which represent a data point. If this is an exclusion criterion for your data set, maybe try [K-Medioids](K-Medioids.html).
+
+Here some examples: 
+```{r data_definitions}
+data_1 <- generateClusterTestDataSimple(n = 100, cluster_amount = 7)
+data_2 <- generateClusterTestDataSimple(n = 1)
 ```
 
+The data could even have multiple types, although `mean()` has to still make sense on it.
+
+
+Lets go clustering!
+```{r}
+kMeans(data_1,K=3)
+kMeans(data_2,K=1)
+```
+
+### 2.2 K
+The number of clusters the algorithm tries to fit the data in.
+This number must be
+- a positive integer 
+- larger than 0
+- at maximum equal to the amount of unique data points in `data`
+
+Some examples:
+```{r K_examples}
+kMeans(data_1,K=3)
+kMeans(data_1,K=5)
+kMeans(data_1,K=10)
+kMeans(data_2,K=1)
+# kMeans(data_1,K=5) throws error
+```
+
+### 2.3 metric
+This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
+
+- `'euclidean'` (default)
+- `'maximum'`
+- `'manhattan'`
+- `'Lp'` (see more in [2.4](#2.4))
+
+The differences can be visualized using the Voronoi cells:
+```{r mertric_generate_full_data, echo=FALSE}
+full_data <- clusterfuck:::generateFullTestData(n=1000,min = c(0,0),max= c(1,1))
+colnames(full_data) <- c('X','Y')
+```
+
+
+#### Examples {.tabset}
+
+##### euclidean
+```{r mertric_examples_euclidean}
+set.seed(123)
+euclidean_clustering <- kMeans(data_1,K=4, metric = 'euclidean', tries=10)
+viewClusters(full_data,euclidean_clustering$clustering_function)
+```
+
+##### maximum
+```{r mertric_examples_maximum}
+set.seed(123)
+maximum_clustering <- kMeans(data_1,K=4, metric = 'maximum', tries=10)
+viewClusters(full_data,maximum_clustering$clustering_function)
+```
+
+##### manhattan
+```{r mertric_examples_manhattan}
+set.seed(123)
+manhattan_clustering <- kMeans(data_1,K=4, metric = 'manhattan', tries=10)
+viewClusters(full_data,manhattan_clustering$clustering_function)
+```
+
+
+### 2.4 p
+If you chose `'Lp'` for the parameter `metric` (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
+
+#### Examples {.tabset}
+
+##### p = 1 (manhattan)
+```{r p_examples_1}
+set.seed(123)
+p_clustering_1 <- kMeans(data_1,K=4, metric = 'Lp', p=1 , tries=10)
+viewClusters(full_data,p_clustering_1$clustering_function)
+```
+
+##### p = 1.5 
+```{r p_examples_1_5}
+set.seed(123)
+p_clustering_1_5 <- kMeans(data_1,K=4, metric = 'Lp', p=1.5 , tries=10)
+viewClusters(full_data,p_clustering_1_5$clustering_function)
+```
+
+##### p = 2 (euclidean)
+```{r p_examples_2}
+set.seed(123)
+p_clustering_2 <- kMeans(data_1,K=4, metric = 'Lp', p=2 , tries=10)
+viewClusters(full_data,p_clustering_2$clustering_function)
+```
+
+##### p = 4 
+```{r p_examples_4}
+set.seed(123)
+p_clustering_4 <- kMeans(data_1,K=4, metric = 'Lp', p=4 , tries=10)
+viewClusters(full_data,p_clustering_4$clustering_function)
+```
+
+##### p = 8 
+```{r p_examples_8}
+set.seed(123)
+p_clustering_8 <- kMeans(data_1,K=4, metric = 'Lp', p=8 , tries=10)
+viewClusters(full_data,p_clustering_8$clustering_function)
+```
+
+### 2.5 custom_metric
+You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters `metric` (2.3) and `p` (2.4) are ignored. 
+
+But please consider:
+- Your custom metric must applicable on the data (on which `mean()` must be applicable)
+- Non continous custom metrics can cause loops
+- **Using an unoptimized custom metric can slow** the calculation of kMeans down significantly! 
+- (For unusual custom metrics comsider using [kMedioids](K-Medioid.Rmd) instead)
+
+
+Inputs:   
+- `x` and `y` : Two of the data row type. (The internally chosen names do not matter)
+
+Output: 
+- Must be greater or equal to 0 (semi-definite)
+- Must be zero, if `x` and `y` are identical
+- Must have the same output, when the values of `x` and `y` are switched. (symmetry)
+
+
+Example:
+```{r custom_metric_example_1}
+discrete_distance <- function(x,y) !identical(x,y) |> as.numeric()
+kMeans(data_1, K=4, custom_metric = discrete_distance)
+```
+
+Because this is a main feature of the package, here is another example:
+```{r custom_metric_example_2}
+WIDE_euclidean <- function(x,y) {
+  x[[1]] <- 0.1*x[[1]]
+  y[[1]] <- 0.1*y[[1]]
+  euclidean(x,y)
+  }
+kMeans(data_1, K=4, custom_metric = WIDE_euclidean)
+```
+
+### 2.6 tries
+K-Means depends heavily on the starting centroids. You can account for bad luck by increasing the amount of times the algorithm is chooses new starting centroids. The clustering with minimal Inner Inequality will be returned.
+
+Example:
+```{r tries_example}
+data_5 <- generateClusterTestDataSimple(n=1000, cluster_amount = 7, dim = 3)
+kMeans(data_5,K=7,tries = 1)$inner_inequality
+kMeans(data_5,K=7,tries = 10)$inner_inequality
+```
+
+
+### 2.7 .print_info
+A logical of length 1
+This is useful for debugging or finding loops caused by custom metrics (2.5). If `TRUE` some extra info will be displayed in the console
+
+Example: 
+```{r .print_info_example}
+set.seed(12345)
+kMeans(data_1,K=7,tries = 50, .print_info = TRUE)
+```
+
+## 3 Output
+The output is a clustering object:
+A list of the class clustering with at least an element called `'clustered_data'`.
+Reed more about clustering objects here TODO
+
+A clustering generated by K-Means also has the following properties (elements of the list):
+
+### 3.1. clustered_data
+The original data with a column called `'cluster'` added.
+
+```{r clustered_data}
+kMeans(data_1,K=4)$clustered_data
+```
+
+### 3.2 clustering_function
+A function which can relate any data point to their cluster. 
+Why this is special with K-Means: **This clustering function CAN be applied to new data!**
+
+```{r clustering_function}
+clusters <- list(tibble::tibble(X=0.05,Y=0.05),
+                 tibble::tibble(X=0.03,Y=0.02),
+                 tibble::tibble(X=0.03,Y=0.08),
+                 tibble::tibble(X=0.07,Y=0.04))
+training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
+unknown_data <- generateClusterTestData2DFromPaths(n=100, clusters)
+more_data <- tibble::as_tibble(matrix(runif(10000,min=0,max = 0.1),ncol = 2), .name_repair = 'unique')
+
+# derive a clustering using K-Means
+f <- kMeans(training_data,K=4)$clustering_function
+
+f
+f(c(0.5,0.5))
+
+# lets take a look
+viewClusters(training_data,f)
+viewClusters(unknown_data,f)
+viewClusters(more_data,f)
+```
+
+### 3.3 centroids
+The clustering is calculated by the distance of the data points to the centroids (means) of each cluster. These centroids are also part of the output.
+
+```{r centroids}
+kMeans(data_1,K=4)$centroids
+```
+
+### 3.4 inner_inequality
+This is the sum of the distances of all data points to their cluster.
+For fixed K this value can score the clustering: The lower, the better.
+Be Aware: This is not enough, to directly* find an optimal value for `K`, as this sum will always decrease for K \rightarrow n.
+* Although the inner inequality  can be used in the so called 'elbow-method'. More here TODO
+
+```{r inner_inequality}
+kMeans(data_1,K=4)$inner_inequality
+```
+
+### 3.5 sum_of_squares
+Similar to `inner_inequality` (3.4) but the distances are squared before being summed up.
+
+```{r sum_of_squares}
+kMeans(data_1,K=4)$sum_of_squares
+```
+
+### 3.6 mean_silhouette
+The mean silhouette quantifies how good the data fits into the derived clusters.
+It can be valued between -1 and 1:
+
+- near 1: A very good clustering
+- near 0: A worse clustering
+- exactly 0: Most likely the clustering is a of a special case i.e. only one data point. In this case the mean silhouette gives no information about how good the clustering is.
+- less than 0: A wrong clustering, in the sense that there are data points who should have been assigned to other clusters.
+
+```{r mean_silhouette}
+kMeans(data_1,K=4)$mean_silhouette
+```
