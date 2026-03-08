@@ -128,7 +128,7 @@ silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
   clusters <- clustered_data$cluster
 
 
-  distances_to_o <- D[index_of_o,-index_of_o]
+  distances_to_o <- dissimilarity_matrix[index_of_o,-index_of_o]
 
 
 
@@ -255,7 +255,6 @@ dissimilarityMatrix <-function(data,metric){
 
   return(apply(M,c(1,2),function(x) metric(data[x[1],],data[x[2],])))
 }
-
 
 
 #' The Inequality of a vector to the data
