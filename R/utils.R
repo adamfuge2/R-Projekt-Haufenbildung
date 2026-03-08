@@ -275,17 +275,3 @@ sumOfDistancestTo <- function(data,vector,metric){
     dplyr::summarise(sum = sum(distance)) |>
     base::unlist(use.names = FALSE)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

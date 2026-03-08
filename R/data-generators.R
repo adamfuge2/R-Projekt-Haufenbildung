@@ -101,17 +101,17 @@ generateFullTestData <- function(n=100,min,max){
     values <- c(values,runif(n,min=min[i],max = max[i]))
   }
 
-  tibble::as_tibble(matrix(values,ncol =length(min)))
+  tibble::as_tibble(matrix(values,ncol =length(min)),.name_repair='minimal')
 }
 
 #circle <- function(r) tibble::tibble(X=c(r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0,r/sqrt(2),r),Y=c(0,r/sqrt(2),r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0))
-#
+
 #circles <- list(circle(0.5),circle(1),circle(1),circle(1))
 #connected_circles <- list(circle(0.5),circle(0.5),circle(0.5),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),tibble::tibble(X=c(0,0),Y=c(0.5,1)))
-#
+
 #circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  circles)
 #connected_circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  connected_circles)
-#
+
 #viewData(connected_circles_data)
 #
 #spectralReduction(concentric_circles_data,gamma=1,k=2)
@@ -127,3 +127,5 @@ more_hours_data <- generateFullTestData(n=100,min = c(-180,-90), max = c(180,  9
 oh_no_ive_spilled_my_pacman_dots <- dplyr::mutate(generateClusterTestDataSimple(dim=2,cluster_amount = 5,n=200), X_1=X_1%%1*26, X_2=X_2%%1*30)
 
 more_pacman_dots <- generateFullTestData(n=100,min = c(0,0), max = c(26,30))
+
+#study_courses_data <- tibble::as_tibble(study_courses)

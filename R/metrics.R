@@ -132,9 +132,8 @@ study_courses_data <- structure(tibble::as_tibble(study_courses,.name_repair = '
 #custom_metric <- studies_difference
 #
 #silhouette(data,clustering$clustering_function,o=15,custom_metric)
-#
-#NULL
-#
+
+
 
 
 

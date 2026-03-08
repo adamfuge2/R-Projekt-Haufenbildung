@@ -298,5 +298,3 @@ It can be valued between -1 and 1:
 ```{r mean_silhouette}
 kMeans(data_1,K=4)$mean_silhouette
 ```
-
-

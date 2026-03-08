@@ -55,8 +55,9 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
-  base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
-  base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
+
+  base::stopifnot('K is not a whole number' = is.wholenumber(K))
+  base::stopifnot('K must be between 0 and n+1' = (0 < K && K < n+1))
 
   if(.print_info) print('calculating dissimilarity matrix')
 
@@ -68,6 +69,8 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
 
   ## (BUILD) Define starting medioids
   medioid_indeces <- greedySearchMedioidIndeces(data,K,metric,dissimilarity_matrix=D)
+
+
 
   if(.print_info) print('Done. \n now calculating first costs')
 

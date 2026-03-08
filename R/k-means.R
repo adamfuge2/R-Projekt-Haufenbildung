@@ -72,9 +72,11 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
       dplyr::slice_sample(n=K)
 
 
+    if(.print_info) print(centroids)
 
     ## Main loop: repeat iterating the cluster means, until no more change
     while(!base::identical(centroids, old_centroids)){
+      if(.print_info) print(centroids)
 
       ## calculate all the points distances to the centroids
       distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){metric(x,centroid)})}) |> t()
@@ -315,6 +317,16 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
 #
 #
 #
+### 3rd Example: New Data
+## The resulting function does take inputs not of the original data set
+## note that the amount of unkown data is vastly greater than the training data
+#clusters <- list(tibble::tibble(X=0.05,Y=0.05),
+#                 tibble::tibble(X=0.03,Y=0.02),
+#                 tibble::tibble(X=0.03,Y=0.08),
+#                 tibble::tibble(X=0.07,Y=0.04))
+#training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
+#unknown_data <- generateClusterTestData2DFromPaths(n=1000, clusters)
+#more <- tibble::as_tibble(matrix(runif(20000,min=0,max = 0.1),ncol = 2))
 #
 ### 3rd Example: New Data
 ## The resulting function does take inputs not of the original data set
@@ -335,7 +347,6 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
 #viewClusters(training_data,clustering$clustering_function)
 #viewClusters(unknown_data,clustering$clustering_function)
 #viewClusters(more_data,clustering$clustering_function)
-#
 #
 #
 #
