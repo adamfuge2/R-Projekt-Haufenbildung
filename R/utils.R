@@ -145,6 +145,8 @@ silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
 
   cluster_ids <- unique(clusters[clusters!=0])
 
+  ## We assume o is part of data. We need to remove it
+  clustered_data <- clustered_data[-index_of_o,]
 
   mean_of_distances <- cluster_ids |> sapply(function(k) mean(distances_to_o[clusters == k]))
 
