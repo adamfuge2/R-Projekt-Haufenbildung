@@ -30,7 +30,7 @@ gaussKernel <- function(x,y,gamma){
 }
 
 
-#' Gauss Kernel (Custom Metric)
+#' Kernel Generator (Custom Metric)
 #'
 #' Function operator generating a kernel with a custom metric
 #'
@@ -52,10 +52,10 @@ kernelByCustomMetric <- function(metric,gamma)
 #' points
 #' @param k output dimension
 #' @param mercer_kernel kernel function (see algorithm description)
-#' @param gamma projection faktor for the kernel function
+#' @param gamma projection factor for the kernel function
 #' @param custom_mercer_kernel kernel function (see algorithm description)
 #' @param metric metric used in kernel function
-#' @param p if metric is 'Lp', thi value will be used for p
+#' @param p if metric is 'Lp', this value will be used for p
 #' @param custom_metric a custom metric used in kernel function
 #' @param kernel_epsilon maximal distance at which data points are still considered neighbored.
 #'
@@ -101,15 +101,17 @@ spectralProjection <- function(data,
                !is.null(kernel_epsilon))))
         warning('Custom Kernel provided, other parameters metric, custom_metric or kernel_epsilon discarded')
       W <- dissimilarityMatrix(data,custom_mercer_kernel)
-      K <- custom_mercer_kernel}
-    else{
+      K <- custom_mercer_kernel
+    }else{
       almost_metric <- getDistanceFunction(metric,p,custom_metric)
-      if(kernel_epsilon < Inf) metric <- function(x,y) almost_metric(x,y)* (kernel_epsilon >= almost_metric(x,y))
-      else metric <- almost_metric
+      if(kernel_epsilon < Inf) {
+        metric <- function(x,y) almost_metric(x,y)* (kernel_epsilon >= almost_metric(x,y))
+      }else metric <- almost_metric
 
-      almost_kernel <- gaussKernelByCustomMetric(metric,gamma)
-      if(kernel_epsilon < Inf) K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_metric(x,y))
-      else K <- almost_kernel
+      almost_kernel <- kernelByCustomMetric(metric,gamma)
+      if(kernel_epsilon < Inf) {
+        K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_metric(x,y))
+      }else K <- almost_kernel
 
       W <- dissimilarityMatrix(data,K)
     }
