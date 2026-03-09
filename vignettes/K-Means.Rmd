@@ -17,7 +17,8 @@ knitr::opts_chunk$set(
 )
 knitr::opts_chunk$set(
   fig.align = 'center',
-  fig.width = 7
+  fig.width = 7,
+  dev = 'svg'
 )
 ```
 
@@ -98,7 +99,7 @@ This function comes with a handful of common metrics pre made. Use this paramete
 
 The differences can be visualized using the Voronoi cells:
 ```{r mertric_generate_full_data, echo=FALSE}
-full_data <- clusterfuck:::generateFullTestData(n=1000,min = c(0,0),max= c(1,1))
+full_data <- generateFullTestData(n=2000,lower_bounds = c(0,0),upper_bounds= c(1,1))
 colnames(full_data) <- c('X','Y')
 ```
 
@@ -248,7 +249,7 @@ clusters <- list(tibble::tibble(X=0.05,Y=0.05),
                  tibble::tibble(X=0.07,Y=0.04))
 training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
 unknown_data <- generateClusterTestData2DFromPaths(n=100, clusters)
-more_data <- tibble::as_tibble(matrix(runif(10000,min=0,max = 0.1),ncol = 2), .name_repair = 'unique')
+more_data <- full_data <- generateFullTestData(n=5000,lower_bounds = c(0,0),upper_bounds= c(0.1,0.1))
 
 # derive a clustering using K-Means
 f <- kMeans(training_data,K=4)$clustering_function

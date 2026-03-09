@@ -4,7 +4,12 @@
 \alias{generateFullTestData}
 \title{Generate a full (rectangular) space of test data}
 \usage{
-generateFullTestData(n = 100, min, max, colnames = paste0("X_", 1:length(min)))
+generateFullTestData(
+  n = 100,
+  lower_bounds,
+  upper_bounds,
+  colnames = paste0("X_", 1:length(lower_bounds))
+)
 }
 \description{
 Generate a full (rectangular) space of test data

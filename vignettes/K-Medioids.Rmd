@@ -118,7 +118,7 @@ clustering_3 <- kMedioids(data_1,K=5, metric = 'manhattan')
 
 The differences can be visualized using the Voronoi cells:
 ```{r}
-full_data <- clusterfuck:::generateFullTestData(n=2000,min = c(0,0),max= c(1,1))
+full_data <- generateFullTestData(n=2000,lower_bounds = c(0,0),upper_bounds= c(1,1))
 colnames(full_data) <- c('X','Y')
 viewClusters(full_data,clustering_1$clustering_function)
 viewClusters(full_data,clustering_2$clustering_function)
@@ -139,8 +139,8 @@ clustering_3 <- kMedioids(data_1,K=5, metric = 'Lp', p = 4)
 ```
 
 The differences can be visualized using the Voronoi cells:
-```{r fig.width=7, fig.align='center'}
-full_data <- clusterfuck:::generateFullTestData(n=2000,min = c(0,0),max= c(1,1))
+```{r}
+full_data <- generateFullTestData(n=2000,lower_bounds = c(0,0),upper_bounds= c(1,1))
 colnames(full_data) <- c('X','Y')
 viewClusters(full_data,clustering_1$clustering_function)
 viewClusters(full_data,clustering_2$clustering_function)
@@ -188,7 +188,7 @@ slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,maps::world.citi
 
 clustering <- kMedioids(slice_of_the_world, K=7, custom_metric = distanceByLongitudeAndLatitude)
 clustering
-viewClusters(generateFullTestData(n=4000,min = c(-180,-90), max=c(180,90)),clustering$clustering_function)
+viewClusters(generateFullTestData(n=4000,lower_bounds = c(-180,-90), upper_bounds=c(180,90)),clustering$clustering_function)
 ```
 
 
@@ -225,8 +225,8 @@ clusters <- list(tibble::tibble(X=0.05,Y=0.05),
                  tibble::tibble(X=0.03,Y=0.02),
                  tibble::tibble(X=0.03,Y=0.08),
                  tibble::tibble(X=0.07,Y=0.04))
-training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
-unknown_data <- generateClusterTestData2DFromPaths(n=100, clusters)
+training_data <- generateClusterDataFromPaths(n=50, clusters)
+unknown_data <- generateClusterDataFromPaths(n=100, clusters)
 more_data <- tibble::as_tibble(matrix(runif(10000,min=0,max = 0.1),ncol = 2), .name_repair = 'unique')
 
 # derive a clustering using K-Means
