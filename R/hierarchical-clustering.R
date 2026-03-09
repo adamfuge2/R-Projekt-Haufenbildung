@@ -1,18 +1,38 @@
-## Hierarchical cluster algorithm. Starts by assigning each datapoint a unique cluster
-## ID and merging the two closest clusters to one at each step regarding a certain linkage
-## mode and metric (see above). Merge until n clusters remain.
-##
-## Inputs:
-## data,      a tibble or atomic vector with rows representing datapoints
-## n,         number of clusters in the last iteration
-## mode,      linkage mode (centroid, single, complete, average)
-## metric,    a metric as defined above
-##
-## Returns:
-## res        a tibble of same length as data with an entry 'cluster'
+#' Hierarchical Clustering
+#'
+#' The Hierarchical Clustering algorithm.
+#' Starts by assigning each datapoint a cluster-ID and then combining two clusters
+#' closest to each other given a linkage mode and metric in each iteration. Merge
+#' until n clusters remain.
+#'
+#' @param data a tibble or matrix of arbitrary dimension with each row representing
+#' one datapoint.
+#' @param n guessed number of clusters (at which the iteration stops).
+#' @param mode linkage mode used to determine the distance between two clusters.
+#' Available are \code{'centroid'}, \code{'single'}, \code{'complete'},
+#' \code{'average'}.
+#' @param metric A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}.
+#' @param p A numeric greater than or equal to 1. If \code{metric} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_metric A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
+#'
+#' @returns A list of the class 'clustering'. Contains \itemize{
+#'   \item{\strong{\code{'clustered_data'}}} a tibble of original data with a new column called \code{'cluster'}
+#'   \item{\strong{\code{'clustering_function'}}} a function applicable to known and
+#'   unknown data points. Returns the cluster the data point belongs to.
+#'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
+#'   }
+#' @export
 hierarchical_clustering <- function(data, n, mode = "centroid", metric = "euclidean", p = NULL, custom_metric = NULL){
-  data <- tibble::rowid_to_column(tibble::tibble(data), "cluster")   #assign each datapoint a cluster-ID
-  dim <- base::ncol(data) - 1
+
+  dim <- base::ncol(data)
+  if(n > ncol(data)) stop(paste0("Dataset with ", ncol(data), " datapoints cannot have ", n, " clusters!"))
+
+  #assign each datapoint a cluster-ID
+  data <- tibble::rowid_to_column(tibble::as_tibble(data), "cluster") |>
+    dplyr::relocate(cluster, .after = last_col())
 
   # metric selection
   if(is.null(custom_metric)){
@@ -33,13 +53,13 @@ hierarchical_clustering <- function(data, n, mode = "centroid", metric = "euclid
 
   # mode selection
   if(mode == "centroid")
-    mode <- centroid
+    mode <- linkCentroid
   else if(mode == "single")
-    mode <- single
+    mode <- linkSingle
   else if(mode == "complete")
-    mode <- complete
+    mode <- linkComplete
   else if(mode == "average")
-    mode <- average
+    mode <- linkAverage
   else stop("Unknown linkage mode. Currently implemented selection includes: centroid, single, complete, average")
 
   while(data$cluster |> unique() |> length() > n){
@@ -62,8 +82,6 @@ hierarchical_clustering <- function(data, n, mode = "centroid", metric = "euclid
   data <- dplyr::mutate(data, cluster = dplyr::dense_rank(cluster))
 
 
-  return(data) #### remove
-
   centroids <- data |>
     dplyr::ungroup() |>
     dplyr::group_by(cluster) |>
@@ -76,27 +94,9 @@ hierarchical_clustering <- function(data, n, mode = "centroid", metric = "euclid
       clustering_function = function(x)
         centroids |>
         apply(1,function(centroid) metric(x,centroid)) |>
-        base::which.min(),
-      inner_inequality = ),
+        base::which.min()),
     description = 'Data clustered by hierarchical clustering algorithm',
     class = 'clustering'
-    )
+  )
   )
 }
-
-
-df <- generateClusterTestDataSimple(n = 20, dim = 3)
-data <- hierarchical_clustering(df, 3)
-
-dim <- 3
-centroids <- data |>
-  dplyr::ungroup() |>
-  dplyr::group_by(cluster) |>
-  dplyr::summarise_at(1:dim,mean) |>
-  dplyr::select(-cluster)
-
-metric <- euclidean
-distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){metric(x,centroid)})}) |> t()
-
-distances <- data |> dplyr::mutate(dist = metric())
-distances

@@ -36,7 +36,7 @@ centroid_det <- function(data){   #determine centroid of a tibble (returns a tib
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-centroid <- function(metric, data_1, data_2){
+linkCentroid <- function(metric, data_1, data_2){
   centr_1 <- centroid_det(data_1)
   centr_2 <- centroid_det(data_2)
   return(metric(centr_1, centr_2))
@@ -56,7 +56,7 @@ centroid <- function(metric, data_1, data_2){
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-average <- function(metric, data_1, data_2){   #employ the average distance method
+linkAverage <- function(metric, data_1, data_2){   #employ the average distance method
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
@@ -85,7 +85,7 @@ average <- function(metric, data_1, data_2){   #employ the average distance meth
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-single <- function(metric, data_1, data_2){
+linkSingle <- function(metric, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
@@ -114,7 +114,7 @@ single <- function(metric, data_1, data_2){
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-complete <- function(metric, data_1, data_2){
+linkComplete <- function(metric, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
