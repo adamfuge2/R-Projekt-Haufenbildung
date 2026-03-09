@@ -65,7 +65,7 @@ data_3 <- study_courses_data
 
 The data can even have multiple types
 ```{r}
-data_4 <- tibble::tibble(characters = study_courses, numbers = 1:19)
+data_4 <- tibble::tibble(characters = study_courses_names, numbers = 1:19)
 ```
 
 ```{r, include=FALSE}
@@ -79,7 +79,7 @@ Lets go clustering!
 ```{r}
 kMedioids(data_1,K=3)
 kMedioids(data_2,K=1,.print_info = TRUE)
-kMedioids(data_3,K=3,custom_metric = clusterfuck::studies_difference)$clustered_data
+kMedioids(data_3,K=3,custom_metric = study_courses_distance)$clustered_data
 kMedioids(data_4,K=3,custom_metric = characterAndNumeric_distance)
 ```
 
@@ -184,11 +184,11 @@ distanceByLongitudeAndLatitude <- function(x,y){
 
 # load some data of word cities
 library(maps)
-slice_of_the_world <- tibble::as_tibble(dplyr::slice_sample(n=1000,maps::world.cities[,c('long','lat')]))
+slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,maps::world.cities[,c('long','lat')]))
 
 clustering <- kMedioids(slice_of_the_world, K=7, custom_metric = distanceByLongitudeAndLatitude)
 clustering
-viewClusters(clusterfuck:::generateFullTestData(n=1000,min = c(-180,-90), max=c(180,90)),clustering$clustering_function)
+viewClusters(generateFullTestData(n=4000,min = c(-180,-90), max=c(180,90)),clustering$clustering_function)
 ```
 
 

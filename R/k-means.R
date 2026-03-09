@@ -38,6 +38,7 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
   minimal_cost <- Inf
   old_centroids <- tibble::tibble()
 
+
   if(is.null(custom_metric)){
     if(metric=='euclidean')
       metric <- euclidean
@@ -54,6 +55,28 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
   }
   else metric <- custom_metric
 
+
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    centroid <- data |> dplyr::summarise(across(everything(),mean))
+    distances <- data |> apply(1,function(x) metric(x,centroid))
+    D <- dissimilarityMatrix(data,metric)
+
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data |> dplyr::summarise(across(everything(),mean)),
+        inner_inequality = distances |> sum(),
+        sum_of_squares = distances^2 |> sum(),
+        mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(dplyr::mutate(data, cluster=1),index,D)) |> mean()
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
@@ -163,7 +186,10 @@ findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
   improvement <- list(Inf)
   K <- 1
 
-  while(improvement[[K]]>1 ){
+  inner_inequalities[[1]] <- kMeans(data,1,tries = 10)$inner_inequality
+
+  while(improvement[[K]]>1 || K <= check_min){
+    K <- K+1
 
     if(.print_info)
       print(paste0('checking K = ',K))
@@ -171,17 +197,12 @@ findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
     inner_inequalities[[K]] <- kMeans(data,K,tries = 10)$inner_inequality
 
     if(.print_info)
-      plot(1:K,inner_inequalities,asp=1)
+      plot(1:K,inner_inequalities)
 
-    if(K>1) improvement[[K]] <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
-
-
+    improvement[[K]] <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
 
     if(.print_info)
       print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement[[K]]))
-
-    K <- K+1
-
   }
 
   improvement[improvement<1] <- Inf

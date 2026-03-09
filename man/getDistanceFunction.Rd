@@ -2,10 +2,10 @@
 % Please edit documentation in R/utils.R
 \name{getDistanceFunction}
 \alias{getDistanceFunction}
-\title{Coverts standardized metric inputs to real metric function}
+\title{defer distance function from inputs}
 \usage{
-getDistanceFunction(metric, p, custom_metric)
+getDistanceFunction(metric = "euclidean", p = NULL, custom_metric = NULL)
 }
 \description{
-Coverts standardized metric inputs to real metric function
+defer distance function from inputs
 }
