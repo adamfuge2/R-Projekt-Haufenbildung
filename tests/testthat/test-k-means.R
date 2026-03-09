@@ -44,10 +44,10 @@ test_that("findClusterAmountElbow works", {
 })
 
 
-test_that("findClusterAmountSilhouettePlease works", {
+test_that("findClusterAmountSilhouette works", {
   set.seed(123)
 
   data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
 
-  expect_equal(findClusterAmountSilhouettePlease(data),3)
+  expect_equal(findClusterAmountSilhouette(data),3)
 })
