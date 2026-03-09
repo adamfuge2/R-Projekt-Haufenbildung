@@ -275,3 +275,22 @@ sumOfDistancestTo <- function(data,vector,metric){
     dplyr::summarise(sum = sum(distance)) |>
     base::unlist(use.names = FALSE)
 }
+
+#' defer distance function from inputs
+getDistanceFunction <- function(metric='euclidean',p=NULL,custom_metric=NULL){
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      return(euclidean)
+    else if(metric=='maximum')
+      return(maximumMetric)
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      return(pMetric(p))
+    }
+    else if(metric=='manhattan')
+      return(pMetric(1))
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else return(custom_metric)
+}
