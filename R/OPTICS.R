@@ -1,6 +1,11 @@
   #OPTICS Algorithm
 
   optics <- function(data, epsilon, min_Pts) {
+
+    stopifnot("data must be data.frame or tibble" = is.data.frame(data))
+    stopifnot("data must have at least one row" = nrow(data) >= 1)
+    stopifnot("data must have at least two columns" = ncol(data) >= 2)
+
     x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
     dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data, verbessern wir möglicherweise noch
     data_entries <- nrow(x) # number of points
@@ -113,7 +118,9 @@
         reachdist = reachability,
         coredist = core_distance,
         predecessor = predecessor
+        data = data
       ),
+      description = "OPTICS ordering",
       class = "optics"
     ))
   }

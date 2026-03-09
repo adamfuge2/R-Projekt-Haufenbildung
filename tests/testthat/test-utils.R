@@ -1,7 +1,3 @@
-test_that("multiplication", {
-  expect_equal(2 * 2, 4)
-})
-
 test_that('wholenumber check works',{
   expect_equal(is.wholenumber(1),TRUE)
   expect_equal(is.wholenumber(0.5),FALSE)

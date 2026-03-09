@@ -1,7 +1,3 @@
-library(tibble)
-library(dplyr)
-library(ggplot2)
-
 # DBSCAN Algorithm
 # Was dieser Code am Ende können soll:
 # (gefühlt ist alles was man findet also werden Begriffe sehr inkonsistent deutsch und englisch gemixt bis ich lust habe das zu vereinheitlichen <3)
@@ -15,10 +11,18 @@ library(ggplot2)
 # 3.: Dichte-erreichbare Punkte Clustern zuweisen mit Parametern epsilon und minPts
 
 dbscan <- function(data, epsilon, min_Pts) {
+
+ stopifnot("data must have at least one row" = nrow(data) >= 1)
+ stopifnot("data must have at least two columns" = ncol(data) >= 2)
+ stopifnot("data must contain only numeric values" = #we can discuss if we want that check
+             all(vapply(data, is.numeric, logical(1))))
+ stopifnot("epsilon must be positive and numeric" = is.numeric(epsilon) && epsilon > 0)
+  stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
+ stopifnot("data must be data.frame or tibble" = is.data.frame(data))
+
  x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
  dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data
  data_entries <- nrow(x)
-
  cluster_id = 0L
  visited <- rep(FALSE, data_entries)
  cluster_labels <- rep(0L, data_entries)
@@ -63,7 +67,27 @@ dbscan <- function(data, epsilon, min_Pts) {
     }
   }
 
-   return(list(cluster = cluster_labels))
+ clustered_data <- data
+ clustered_data$cluster <- cluster_labels
+
+ clustering_function <- function(point) {
+   point <- as.numeric(point)
+   d <- sqrt(rowSums((x - matrix(point, nrow(x), ncol(x), byrow = TRUE))^2))
+   neighbors <- which(d <= epsilon)
+   if(length(neighbors) < min_Pts){
+     return(0L)
+   }
+   cluster_labels[neighbors[1]]
+ }
+
+ return(structure(
+   list(
+     clustered_data = clustered_data,
+     clustering_function = clustering_function
+   ),
+   description = 'Data clustered by DBSCAN algorithm',
+   class= 'clustering'
+ ))
 }
 
 
