@@ -76,6 +76,46 @@ generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
 #' @returns a tibble, every row representing a data point.
 #' @export
 generateClusterTestData2DFromPaths <-  function(n=100,list_of_paths){
+  warning('generateClusterTestData2DFromPaths has been depcated. Use generateClusterDataFromPaths')
+
+  stopifnot('list_of_paths must be a list of tibbles' = typeof(list_of_paths) == 'list')
+  stopifnot('list_of_paths must be a list of tibbles' = all(list_of_paths |> sapply(class) > 1))
+  cluster_amount <- length(list_of_paths)
+  stopifnot('list_of_paths must not not be an empty list' = cluster_amount > 0)
+  stopifnot('paths must not be empty' = all(list_of_paths |> sapply(nrow) > 0) )
+  dim <- ncol(list_of_paths[[1]])
+  stopifnot('Paths must be 2D' = dim==2)
+  col_names <- colnames(list_of_paths[[1]])
+  stopifnot('all paths must feature data points of the same dimension' = all(list_of_paths |> sapply(ncol) == dim))
+  stopifnot('all paths must have the same columnnames' = all(list_of_paths |> sapply(function(x) colnames(x)==col_names)))
+
+
+  cluster_amount <- length(list_of_paths)
+  paths <-lapply(list_of_paths,tibbleAsPath)
+  cluster_variances <- stats::runif(cluster_amount, min=0.001, max=0.02)
+
+  points <- base::floor(stats::runif(n,1,cluster_amount+1)) |>
+    sapply(function(which_cluster) unlist(paths[[which_cluster]](stats::runif(1,0,1))+
+                                   tibble::tibble(X=stats::rnorm(1,0,cluster_variances[which_cluster]),
+                                    Y=stats::rnorm(1,0,cluster_variances[which_cluster])))) |>
+    t() |>
+    tibble::as_tibble(.name_repair = 'minimal')
+
+  colnames(points) <- col_names
+
+  return(points)
+}
+
+#' Nonspherical cluster data generator
+#'
+#'
+#' @param n               a positive integer. The number of total data points to be generated.
+#' @param list_of_paths   a list containing tibbles. Each tibble containing points (in rows)
+#'                  to be interpreted as paths along which the data is generated
+#'
+#' @returns a tibble, every row representing a data point.
+#' @export
+generateClusterDataFromPaths <-  function(n=100,list_of_paths){
 
 
   stopifnot('list_of_paths must be a list of tibbles' = typeof(list_of_paths) == 'list')
@@ -95,8 +135,7 @@ generateClusterTestData2DFromPaths <-  function(n=100,list_of_paths){
 
   points <- base::floor(stats::runif(n,1,cluster_amount+1)) |>
     sapply(function(which_cluster) unlist(paths[[which_cluster]](stats::runif(1,0,1))+
-                                   tibble::tibble(X=stats::rnorm(1,0,cluster_variances[which_cluster]),
-                                    Y=stats::rnorm(1,0,cluster_variances[which_cluster])))) |>
+                                          stats::rnorm(dim,0,cluster_variances[which_cluster]))) |>
     t() |>
     tibble::as_tibble(.name_repair = 'minimal')
 
@@ -138,7 +177,4 @@ generateFullTestData <- function(n=100,min,max,colnames=paste0('X_',1:length(min
 #kMeans(spectralReduction(connected_circles_data,gamma=50,k=3)$reduced_data,K=2,tries=5)
 
 ###################### premade data #####################
-
-pacman_full_data <- generateFullTestData(n=100,min = c(0,0), max = c(26,30))
-
 
