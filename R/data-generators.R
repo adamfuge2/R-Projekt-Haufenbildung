@@ -162,19 +162,10 @@ generateFullTestData <- function(n=100,min,max,colnames=paste0('X_',1:length(min
   return(points)
 }
 
-#circle <- function(r) tibble::tibble(X=c(r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0,r/sqrt(2),r),Y=c(0,r/sqrt(2),r,r/sqrt(2),0,-r/sqrt(2),-r,-r/sqrt(2),0))
-
-#circles <- list(circle(0.5),circle(1),circle(1),circle(1))
-#connected_circles <- list(circle(0.5),circle(0.5),circle(0.5),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),circle(1),tibble::tibble(X=c(0,0),Y=c(0.5,1)))
-
-#circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  circles)
-#connected_circles_data <- generateClusterTestData2DFromPaths(n=500,list_of_paths =  connected_circles)
 
 #viewData(connected_circles_data)
 #
 #spectralReduction(concentric_circles_data,gamma=1,k=2)
 #viewData(spectralReduction(connected_circles_data,gamma=60,k=1)$reduced_data)
 #kMeans(spectralReduction(connected_circles_data,gamma=50,k=3)$reduced_data,K=2,tries=5)
-
-###################### premade data #####################
 
