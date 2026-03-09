@@ -148,11 +148,13 @@ generateClusterDataFromPaths <-  function(n=100,list_of_paths){
 #' Generate a full (rectangular) space of test data
 #'
 #' @export
-generateFullTestData <- function(n=100,min,max,colnames=paste0('X_',1:length(min))){
-  dim <- length(min)
+generateFullTestData <- function(n=100,lower_bounds,upper_bound,colnames=paste0('X_',1:length(min))){
+  dim <- length(lower_bounds)
 
-  stopifnot('min and max must have the same length'= length(min) == length(max))
-
+  stopifnot('lower_bounds and upper bounds must not be empty' = length(dim) > 0)
+  stopifnot('lower_bounds and upper_bounds must have the same length'= length(min) == length(max))
+  stopifnot('lower bounds must not be higher than upper bounds' = all(lower_bounds <= upper_bounds))
+  stopifnot('the number of column names must match the dimension of the bounds' = length(colnames) == dim)
 
   points <- 1:dim |> sapply(function(i) runif(n,min=min[[i]],max = max[[i]])) |>
     tibble::as_tibble(.name_repair = 'minimal')
