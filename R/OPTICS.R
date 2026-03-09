@@ -4,17 +4,17 @@
 
     stopifnot("data must be data.frame or tibble" = is.data.frame(data))
     stopifnot("data must have at least one row" = nrow(data) >= 1)
-    stopifnot("data must have at least two columns" = ncol(data) >= 2)
+    stopifnot("data must have at least one columns" = ncol(data) >= 1)
 
     x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
     dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data, verbessern wir möglicherweise noch
-    data_entries <- nrow(x) # number of points
+    n <- nrow(x) # number of points
 
-    processed <- rep(FALSE, data_entries)
-    reachability <- rep(Inf, data_entries)
-    core_distance <- rep(NA, data_entries)
+    processed <- rep(FALSE, n)
+    reachability <- rep(Inf, n)
+    core_distance <- rep(NA, n)
     ordered <- integer(0)
-    predecessor <- rep(NA_integer_, data_entries)
+    predecessor <- rep(NA_integer_, n)
 
     getNeighbors <- function(point) {
       which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
@@ -65,7 +65,7 @@
       )
     }
 
-    for(point in seq_len(data_entries)) {  # for each point in data
+    for(point in seq_len(n)) {  # for each point in data
       # point.reachability-distance = NULL
       # we can save one more for loop? maybe?
       if(processed[point] == FALSE) {   # for each unprocessed point in data
@@ -117,8 +117,9 @@
         order = ordered,
         reachdist = reachability,
         coredist = core_distance,
-        predecessor = predecessor
+        predecessor = predecessor,
         data = data
+        #cluster_amount = ncol(data) anzahl cluster noch ausgeben lassen
       ),
       description = "OPTICS ordering",
       class = "optics"
@@ -167,7 +168,7 @@
     Y = c(0.5,0.28,0.28,0.5)
   )
 
-  ###
+    ###
   sample_points_from_path <- function(path_fun, n, sd = 0.03) {
     pts <- lapply(runif(n), path_fun)
     pts <- dplyr::bind_rows(pts)
@@ -185,10 +186,10 @@
   }
 
   generate_optics_test_data <- function() {
-    p1 <- sample_points_from_path(tibbleAsPath(path1),120,0.035)
-    p2 <- sample_points_from_path(tibbleAsPath(path2),120,0.035)
-    p3 <- sample_points_from_path(tibbleAsPath(path3),120,0.035)
-    noise <- generate_noise(90)
+    p1 <- sample_points_from_path(tibbleAsPath(path1),500,0.035)
+    p2 <- sample_points_from_path(tibbleAsPath(path2),500,0.035)
+    p3 <- sample_points_from_path(tibbleAsPath(path3),500,0.035)
+    noise <- generate_noise(100)
     dplyr::bind_rows(p1,p2,p3,noise)
   }
 

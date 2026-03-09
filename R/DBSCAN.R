@@ -13,19 +13,19 @@
 dbscan <- function(data, epsilon, min_Pts) {
 
  stopifnot("data must have at least one row" = nrow(data) >= 1)
- stopifnot("data must have at least two columns" = ncol(data) >= 2)
+ stopifnot("data must have at least one columns" = ncol(data) >= 1)
  stopifnot("data must contain only numeric values" = #we can discuss if we want that check
-             all(vapply(data, is.numeric, logical(1))))
+             all(tapply(data, is.numeric, logical(1)))) # Sonderfall einbauen; wenn alles numeric machen wir den so, sonst dissimillarity-matrix draufwerfen
  stopifnot("epsilon must be positive and numeric" = is.numeric(epsilon) && epsilon > 0)
-  stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
+ stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
  stopifnot("data must be data.frame or tibble" = is.data.frame(data))
 
  x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
  dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data
- data_entries <- nrow(x)
+ n <- nrow(x) # number of data points
  cluster_id = 0L
- visited <- rep(FALSE, data_entries)
- cluster_labels <- rep(0L, data_entries)
+ visited <- rep(FALSE, n)
+ cluster_labels <- rep(0L, n)
 
  regionQuery <- function(point) {
    which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
@@ -53,8 +53,8 @@ dbscan <- function(data, epsilon, min_Pts) {
  }
 
 
- # for each element in data (point in data_entries)
- for(point in 1:data_entries)
+ # for each element in data (point in n)
+ for(point in 1:n)
   if(visited[point] == FALSE) {
     visited[point] <- TRUE    # mark point as visited
     area <- regionQuery(point) # get neighbors
@@ -92,13 +92,14 @@ dbscan <- function(data, epsilon, min_Pts) {
 
 
 ### let's try it out (to be removed before merging in main)
-data <- generateClusterTestDataSimple2D(n=100)
-result <- dbscan(data, epsilon=0.1, min_Pts=5)
+data <- generateClusterTestDataSimple2D(n=300)
+result <- dbscan(data, epsilon=0.2, min_Pts=3)
+viewClusters(result$clustered_data)
 
 data$cluster <- factor(
-  result$cluster,
-  levels = sort(unique(result$cluster)),
-  labels = paste("Cluster", sort(unique(result$cluster)))
+  result$clustered_data,
+  levels = sort(unique(result$clustered_data)),
+  labels = paste("Cluster", sort(unique(result$clustered_data)))
 )
 ggplot2::ggplot(data, ggplot2::aes(X, Y, color = cluster)) +
   ggplot2::geom_point() +
