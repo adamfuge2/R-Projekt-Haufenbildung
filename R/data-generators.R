@@ -33,6 +33,7 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
   return(test_data)
 }
 
+
 #' spherical test data generator
 #'
 #' @param n           a positive integer. The number of total data points to be generated.
@@ -40,31 +41,107 @@ generateClusterTestDataSimple2D = function(n=100,n_clusters=NULL){
 #'                    If none given, choose a random amount < sqrt(n).
 #' @param dim A positive integer. The dimension of the data points to be generated
 #'
-#' @returns a tibble, every row representing a data point.
+#' @returns a tibble, every row representing a data point. The columns are named X_1 to X_n.
 #' @export
-generateClusterTestDataSimple <- function(n=100,cluster_amount=NULL,dim=2){
+generateClusterTestDataSimple <- function(n=100,
+                                          cluster_amount = NULL,
+                                          dim = 2,
+                                          lower_bounds = c(0,0),
+                                          upper_bounds = c(1,1),
+                                          clusters_mean = NULL,
+                                          clusters_sd = NULL,
+                                          clusters_prob = NULL,
+                                          colnames = NULL,
+                                          include_cluster = FALSE,
+                                          .print_info = FALSE){
+
+  # defer dimensions and bounds from input. DEFAULT case: do nothing
+  if(any(base::missing(dim),
+         base::missing(lower_bounds),
+         base::missing(upper_bounds))){
+    # something got specified. lets check:
+
+    if(base::missing(dim)){
+      # we were not given the parameter dim, but something else
+
+      # defer dim from the actually given parameters
+      if(!base::missing(lower_bounds))
+        dim <- length(lower_bounds)
+      else if(!base::missing(upper_bounds))
+        dim <- length(upper_bounds)
+    }
+    # from here on we are certain we have a value for dim
+
+    # lets defer missing parameters
+    if(base::missing(lower_bounds))
+      lower_bounds <- rep(0,dim)
+    if(base::missing(upper_bounds))
+      upper_bounds <- rep(1,dim)
+  }
+
+  # if no colname got given, give the dimensions their standard names X_1 to X_n
+  if(base::missing(colnames))
+    colnames <- paste0('X_',1:dim)
+
+  # invariants
+  stopifnot('dim must be greater than 0' = dim > 0)
+  stopifnot('lower_bounds and upper bounds must not be empty' = length(lower_bounds) > 0 && length(upper_bounds) > 0)
+  stopifnot('lower_bounds and upper_bounds must have the same length'= length(lower_bounds) == length(upper_bounds))
+  stopifnot('lower bounds must not be higher than upper bounds' = all(lower_bounds <= upper_bounds))
+  stopifnot('the number of column names must match the dimension and length of bounds' = length(colnames) == dim)
+
+  # if no cluster amount specified, determine a random cluster amount
   if(base::missing(cluster_amount)){
-    cluster_amount <- base::floor(stats::runif(1,min = 1, max = 2*base::sqrt(n)))
+    cluster_amount <- base::floor(stats::runif(1,min = 1, max = (2^dim)*base::sqrt(n)))
   }
 
-  cluster_centers <- tibble::tibble(variances=stats::runif(cluster_amount, min=0.001, max=0.1))
+  # if no standard deviations for the clusters specified, randomize them here
+  if(base::missing(clusters_sd))
+    clusters_sd <- stats::runif(cluster_amount, min=0.001, max=0.5)
 
-  for(i in 1:dim){
-    cluster_centers <- cluster_centers |> tibble::add_column(!!paste0('X_',i) := stats::runif(cluster_amount, min=0, max=1))
-  }
 
-  test_data <- tibble::tibble(selected_clusters = base::floor(stats::runif(n,1,cluster_amount+1)), variances = cluster_centers$variances[selected_clusters] ) |> dplyr::rowwise()
+  if(.print_info) print(paste0('clusters_sd: ',paste0(clusters_sd)))
+  stopifnot('length of cluster_sd does not match cluster amount' = length(clusters_sd) == cluster_amount)
 
-  for(i in 1:dim){
-    test_data <- test_data |> dplyr::mutate(!!paste0('X_',i) := stats::rnorm(1,cluster_centers[[selected_clusters,i+1]],variances))
-  }
+  # if no means (centers) for the clusters specified, randomize them here
+  if(base::missing(clusters_mean))
+    clusters_mean <- 1:cluster_amount |>
+                        sapply(function(k) stats::runif(dim,
+                                                       min=lower_bounds,
+                                                       max=upper_bounds)) |>
+                        structure(dim = c(dim,cluster_amount)) |>
+                        t()
 
-  test_data <- test_data |> dplyr::select(c(-1,-2)) |> dplyr::ungroup()
+  stopifnot('amount (rows) of cluster_means does not match cluster amount' = nrow(clusters_mean) == cluster_amount)
 
-  return(test_data)
+  # if no probability weights for the clusters got specified, set them all to 1
+  if(base::missing(clusters_prob))
+    clusters_prob <- rep(1,cluster_amount)
+
+  # for every data point select a cluster according to their probability weights
+  selected_clusters <- base::sample(1:cluster_amount, size = n, replace = TRUE, prob = clusters_prob)
+
+  # using these selected clusters we relate the points with a cluster center
+  points_origin <- clusters_mean[selected_clusters,]
+
+  # using these selected clusters we relate the points with a standard deviation
+  points_sd <-  rep(clusters_sd[selected_clusters],each=dim)
+  # the deviation to add to the cluster centers
+  epsilon <- t(structure(rnorm(n*dim, mean = 0, sd = points_sd),dim=c(dim,n)))
+
+  # the points as matrix
+  points <- points_origin + epsilon
+
+  # format the data to be output as tibble
+  colnames(points) <- colnames
+  data <- tibble::as_tibble(points)
+
+  # for checking purposes we may include the clusters in the data set.
+  # Thus we basically return clustered data
+  if(include_cluster) data <- data |> mutate(cluster = selected_clusters)
+
+  return(data)
 }
-
-
 
 
 #' Nonspherical test data generator
@@ -115,7 +192,12 @@ generateClusterTestData2DFromPaths <-  function(n=100,list_of_paths){
 #'
 #' @returns a tibble, every row representing a data point.
 #' @export
-generateClusterDataFromPaths <-  function(n=100,list_of_paths){
+generateClusterDataFromPaths <-  function(n=100,
+                                          list_of_paths,
+                                          clusters_sd = NULL,
+                                          clusters_prob = rep(1,length(list_of_paths)),
+                                          include_cluster = FALSE,
+                                          .print_info = FALSE){
 
 
   stopifnot('list_of_paths must be a list of tibbles' = typeof(list_of_paths) == 'list')
@@ -127,34 +209,59 @@ generateClusterDataFromPaths <-  function(n=100,list_of_paths){
   col_names <- colnames(list_of_paths[[1]])
   stopifnot('all paths must feature data points of the same dimension' = all(list_of_paths |> sapply(ncol) == dim))
   stopifnot('all paths must have the same columnnames' = all(list_of_paths |> sapply(function(x) colnames(x)==col_names)))
+  stopifnot('there must be as many clusters probability weights as there ar paths' = length(clusters_prob) == cluster_amount)
 
-
-  cluster_amount <- length(list_of_paths)
+  # defer the mathematical paths from the tibbles
   paths <-lapply(list_of_paths,tibbleAsPath)
-  cluster_variances <- stats::runif(cluster_amount, min=0.001, max=0.02)
 
-  points <- base::floor(stats::runif(n,1,cluster_amount+1)) |>
-    sapply(function(which_cluster) unlist(paths[[which_cluster]](stats::runif(1,0,1))+
-                                          stats::rnorm(dim,0,cluster_variances[which_cluster]))) |>
-    t() |>
-    tibble::as_tibble(.name_repair = 'minimal')
 
-  colnames(points) <- col_names
+  # if no standard deviations for the clusters specified, randomize them here
+  if(base::missing(clusters_sd))
+    clusters_sd <- stats::runif(cluster_amount, min=0.001, max=0.01)
 
-  return(points)
+  if(.print_info) print(paste0('clusters_sd: ',paste0(clusters_sd)))
+  stopifnot('length of clusters_sd does not match cluster amount' = length(clusters_sd) == cluster_amount)
+
+
+
+  # for every data point select a cluster according to their probability weights
+  selected_clusters <- base::sample(1:cluster_amount, size = n, replace = TRUE, prob = clusters_prob)
+
+  # using the selected clusters we relate the points with an origin
+  points_origin <- t(sapply(selected_clusters, function(which_cluster) unlist(paths[[which_cluster]](stats::runif(1,0,1)))))
+
+  # using the selected clusters we relate the points with a standard deviation
+  points_sd <-  rep(clusters_sd[selected_clusters],each=dim)
+  # the deviation to add to the cluster centers
+  epsilon <- t(structure(rnorm(n*dim, mean = 0, sd = points_sd),dim=c(dim,n)))
+
+  # the points as matrix
+  points <- points_origin + epsilon
+
+  # for checking purposes we may include the clusters in the data set.
+  # Thus we basically return clustered data
+  if(include_cluster) data <- data |> mutate(cluster = selected_clusters)
+
+  return(data)
 }
 
 
-#' Generate a full (rectangular) space of test data
+
+#' Generate a full (rectangular) space of data
 #'
 #' @export
-generateFullTestData <- function(n=100,min,max,colnames=paste0('X_',1:length(min))){
-  dim <- length(min)
+generateFullTestData <- function(n=100,
+                                 lower_bounds,
+                                 upper_bounds,
+                                 colnames=paste0('X_',1:length(lower_bounds))){
+  dim <- length(lower_bounds)
 
-  stopifnot('min and max must have the same length'= length(min) == length(max))
+  stopifnot('lower_bounds and upper bounds must not be empty' = length(dim) > 0)
+  stopifnot('lower_bounds and upper_bounds must have the same length'= length(min) == length(max))
+  stopifnot('lower bounds must not be higher than upper bounds' = all(lower_bounds <= upper_bounds))
+  stopifnot('the number of column names must match the dimension of the bounds' = length(colnames) == dim)
 
-
-  points <- 1:dim |> sapply(function(i) runif(n,min=min[[i]],max = max[[i]])) |>
+  points <- 1:dim |> sapply(function(i) runif(n,min=lower_bounds[[i]],max = lower_bounds[[i]])) |>
     tibble::as_tibble(.name_repair = 'minimal')
 
   colnames(points) <- colnames
@@ -163,9 +270,16 @@ generateFullTestData <- function(n=100,min,max,colnames=paste0('X_',1:length(min
 }
 
 
+
 #viewData(connected_circles_data)
 #
 #spectralReduction(concentric_circles_data,gamma=1,k=2)
-#viewData(spectralReduction(connected_circles_data,gamma=60,k=1)$reduced_data)
+#viewData(spectralProjection(two_concentric_circles,gamma=60,k=1)$projected_data)
+
+#viewData(spectralProjection(three_concentric_circles,gamma=20,k=3)$projected_data)
 #kMeans(spectralReduction(connected_circles_data,gamma=50,k=3)$reduced_data,K=2,tries=5)
 
+#projected_data <- spectralProjection(three_concentric_circles,gamma=25,k=1)$projected_data
+#kMeans(projected_data,K=3,tries=10)
+
+#spectralClustering(three_connected_concentric_circles,k=1,gamma=50,cluster_algorithm = 'K-Means',K=3,tries=10)
