@@ -72,85 +72,60 @@ spectralProjection <- function(data,
                               custom_metric = NULL,
                               kernel_epsilon = Inf,
                               .print_info = FALSE){
-  # some neccesary stuff
   n <- nrow(data)
 
-  # check which case to process
+  if(.print_info) print(all(c(is.null(custom_mercer_kernel),
+                              is.null(metric),
+                              is.null(custom_metric),
+                              kernel_epsilon==Inf)))
   if(.print_info) print(c(is.null(custom_mercer_kernel),
                               is.null(metric),
                               is.null(custom_metric),
                               kernel_epsilon==Inf))
 
-  # derive the kernel and Weights-matrix from the given inputs
   if(all(c(is.null(custom_mercer_kernel),
            is.null(metric),
            is.null(custom_metric),
            kernel_epsilon==Inf))){
-    # here nothing important got changed. Choose one of the prepared kernels
-
     if(mercer_kernel == 'gauss') {
-      # this is the DEFAULT. the standard gauss kernel
       stopifnot('Please provide a non negative value for gamma'= !is.null(gamma) && gamma >= 0)
       W <- gaussKernelWeights(data,gamma)
       K <- gaussKernel
     }
-
-    # if there WAS a mercer kernel given and it did not match any prepared kernels stop.
     else stop('Unknown mercer kernel and no custom mercer kernel provided')
   }
   else {
-    # something else got input. thus we got to derive which kernel to choose
-
     if(!is.null(custom_mercer_kernel)){
-      # theres been a custom kernel given. this has priority and thus will be chosen first
-
-      # because this is our first check, other checks will NOT be done.
-      # Check if other parameters have been provided
       if(any(c(!is.null(metric),
                !is.null(custom_metric),
                !is.null(kernel_epsilon))))
-        # Warn in case other parameters have been provided
         warning('Custom Kernel provided, other parameters metric, custom_metric or kernel_epsilon discarded')
-
-      # calculate Weights-Matrix
       W <- dissimilarityMatrix(data,custom_mercer_kernel)
-      # calculate the kernel-function
       K <- custom_mercer_kernel
     }else{
-      # there wasnt a custom kernel given. We must derive a kernel usinge the other parameters.
-      # (One of which has to have been given if weve arived here in the decision tree)
-
-      # without considering epsilon, derive the metric
       almost_metric <- getDistanceFunction(metric,p,custom_metric)
-      # integrate the epsilon-cuttoff into the metric
       if(kernel_epsilon < Inf) {
         metric <- function(x,y) almost_metric(x,y)* (kernel_epsilon >= almost_metric(x,y))
       }else metric <- almost_metric
 
-
-      # without considering epsilon, derive the kernel
       almost_kernel <- kernelByCustomMetric(metric,gamma)
-      # integrate the epsilon-cuttoff into the kernel
       if(kernel_epsilon < Inf) {
         K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_metric(x,y))
       }else K <- almost_kernel
 
-
-      # derive the weights-matrix
       W <- dissimilarityMatrix(data,K)
     }
   }
 
-  # We look at the overall distances of the data points
+
   D <- apply(W,1,sum) |> diag()
 
-  # Calculate the matrix laplacian
   L <- D - W
 
-  # Calculate another matrix to be used in further calculations
-  D_sqrt <- diag(diag(D)^(-1/2))
+  D_sqrt <- 1/sqrt(D)    #D^(-1/2)
+  D_sqrt[D_sqrt == Inf] <- 0
 
-  # calculate eigenvectors. from smallest to biggest, thats what the [,n:1] is for
+  # calculate eigenvectors from smallest to biggest
   b <- eigen(D_sqrt %*% L %*% D_sqrt, symmetric=TRUE)$vectors[,n:1]
 
   # transform to be solutions of our optimization problem
@@ -213,6 +188,7 @@ spectralClustering <- function(data,
 
   if(.print_info) print('Now: calculating spectral projection')
 
+  # apply the spectral projection to the data
   spectral_projection <- spectralProjection(data=data,
                                           k=k,
                                           mercer_kernel = mercer_kernel,
@@ -224,51 +200,52 @@ spectralClustering <- function(data,
                                           kernel_epsilon = kernel_epsilon)
 
 
-  if(.print_info) print('Success, now: Clustering of projected data')
+  if(.print_info) print('Success, Now: calculating clustering on projected data')
 
-  # apply the chosen Clustering algorithm and modify the output
+  # Based on the cluster algorithm chosen: Apply it and modify the Output
   if(cluster_algorithm == 'K-Means'){
     # apply kMeans
     clustering <- kMeans(spectral_projection$projected_data, ... )
 
-    # we do want to keep the projected data
+    # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
-    # but were more interested in the clustering of the original data points
+    # but were interested in the clustering of the original data points
     clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   }
   else if(cluster_algorithm == 'K-Medioids'){
-    # apply kMedioids
+    # apply kMeadioids
     clustering <- kMedioids(spectral_projection$projected_data, ...)
 
-    # we do want to keep the projected data
+    # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
-    # but were more interested in the clustering of the original data points
+    # but were interested in the clustering of the original data points
     clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
-  else if(cluster_algorithm == 'hierarchical clustering'){
-    # apply hierarchical Clustering
+  else if(cluster_algorithm == 'hierarchical Clustering'){
+    # apply hierarchical_clustering
     clustering <- hierarchical_clustering(spectral_projection$projected_data, ...)
 
-    # TODO Snep: Modify the output to your liking (See the kMeans case for exam)
-    }
+    # TODO Snep: Modify the output to your liking (see for example kMeans case)
+  }
   else if(cluster_algorithm == 'DBSCAN'){
     # apply DBSCAN
     clustering <- DBSCAN(spectral_projection$projected_data, ...)
 
-    # TODO Snep: Modify the output to your liking (See the kMeans case for example)
+    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)
   }
   else if(cluster_algorithm == 'OPTICS'){
     # apply OPTICS
     clustering <- OPTICS(spectral_projection$projected_data, ...)
 
-    # TODO Snep: Modify the output to your liking (See the kMeans case for example)
+    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)
   }
   else{
-    stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierachical clustering\', \'DBSCAN\' or \'OPTICS\'')
+    stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
   }
 
-  if(.print_info) print('All done!')
+  if(.print_infos) print('Success, All done!')
 
   return(clustering)
 }
@@ -276,8 +253,10 @@ spectralClustering <- function(data,
 #data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)
 #
 #viewClusters(data)
-#viewClusters(spectralProjection(data,k=1,gamma=1)$projected_data)
-#spectralClustering(data,k=1,gamma=1,cluster_algorithm = 'K-Means',K=3,.print_infos=TRUE)
+#viewClusters(spectralprojection(data,k=1,gamma=1)$projected_data)
+#viewClusters(projected_data)
+
+# spectral_clustering <- spectralClustering()
 
 #spectral_projection <- spectralProjection(connected_circles_data,k=1,gamma=10,.print_info = TRUE)
 #spectral_clustering <- spectralClustering(connected_circles_data,k=3,gamma=50,cluster_algorithm = 'K-Means',K=2)

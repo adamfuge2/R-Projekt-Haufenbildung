@@ -4,17 +4,65 @@
 \alias{generateClusterDataFromPaths}
 \title{Nonspherical cluster data generator}
 \usage{
-generateClusterDataFromPaths(n = 100, list_of_paths)
+generateClusterDataFromPaths(
+  n = 100,
+  list_of_paths,
+  clusters_sd = NULL,
+  clusters_prob = rep(1, length(list_of_paths)),
+  include_cluster = FALSE,
+  .print_info = FALSE
+)
 }
 \arguments{
-\item{n}{a positive integer. The number of total data points to be generated.}
+\item{n}{a positive integer. The number of total data points to
+be generated.}
 
-\item{list_of_paths}{a list containing tibbles. Each tibble containing points (in rows)
-to be interpreted as paths along which the data is generated}
+\item{list_of_paths}{a list containing tibbles. Each tibble containing
+points (in rows) to be interpreted as paths along which the data is
+generated}
+
+\item{clusters_sd}{A numeric vector with the same length as \code{list_of_paths}.
+The standard deviations used in the generation of data points around the
+clusters (using a symmetrical normal distribution).}
+
+\item{clusters_prob}{A numeric vector with the same length as \code{list_of_paths}.
+The probability weights used to choose which which cluster a generated data
+point belongs to.}
+
+\item{include_cluster}{A logical of length 1. If \code{TRUE} a column `'cluster'`
+will be included in the generated data which will also be assigned the class `'clustered_data'`.}
+
+\item{.print_info}{A logical of length 1. If \code{TRUE} additional information
+will be displayed during runtime. Used in debugging.}
 }
 \value{
-a tibble, every row representing a data point.
+a tibble, every row representing a data point. The columns are derived from the entries in `'list_of_paths'`
 }
 \description{
 Nonspherical cluster data generator
 }
+\examples{
+generateClusterDataFromPaths(list_of_paths = base::list(tibble::tibble(X = c(0,1,1),
+                                                                       Y = c(0,0,1)),
+                                                        tibble::tibble(X = c(0,0.2),
+                                                                       Y = c(1,0.8))))
+generateClusterDataFromPaths(n = 1000,
+                             list_of_paths = base::list(tibble::tibble(X = c(0,),
+                                                                       Y = c(0)),
+                                                        tibble::tibble(X = c(1),
+                                                                       Y = c(1))),
+                             clusters_sd = c(1,10),
+                             clusters_prob = c(1,100),
+                             include_cluster = TRUE,
+                             .print_info = TRUE)
+
+
+}
+\seealso{
+Other cluster data generator: 
+\code{\link{generateClusterTestData2DFromPaths}()},
+\code{\link{generateClusterTestDataSimple}()},
+\code{\link{generateClusterTestDataSimple2D}()},
+\code{\link{generateFullTestData}()}
+}
+\concept{cluster data generator}

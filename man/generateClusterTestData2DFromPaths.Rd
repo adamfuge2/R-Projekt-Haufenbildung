@@ -16,5 +16,13 @@ to be interpreted as paths along which the data is generated}
 a tibble, every row representing a data point.
 }
 \description{
-Nonspherical test data generator
+DEPRECATED in favor of generateClusterDataFromPaths()
 }
+\seealso{
+Other cluster data generator: 
+\code{\link{generateClusterDataFromPaths}()},
+\code{\link{generateClusterTestDataSimple}()},
+\code{\link{generateClusterTestDataSimple2D}()},
+\code{\link{generateFullTestData}()}
+}
+\concept{cluster data generator}
