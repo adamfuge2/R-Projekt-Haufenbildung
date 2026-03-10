@@ -10,8 +10,11 @@ connected_circles_paths <- list(circle(0.3),
                                 tibble::tibble(X=c(0,0),Y=c(0.3,1)))
 
 # generating the resulting data set
-three_connected_concentric_circles <- generateClusterDataFromPaths(n=1000,list_of_paths =  connected_circles_paths)
+three_connected_concentric_circles <- generateClusterDataFromPaths(n=2000,
+                                                                   list_of_paths = connected_circles_paths,
+                                                                   clusters_prob = c(0.3*2*pi, 0.6*2*pi, 2*pi, 0.7),
+                                                                   clusters_sd = c(0.02,0.02,0.02,0.02))
 
-#viewData(three_connected_concentric_circles)
+viewData(three_connected_concentric_circles)
 
 usethis::use_data(three_connected_concentric_circles, overwrite = TRUE)
