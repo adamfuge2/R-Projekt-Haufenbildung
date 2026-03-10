@@ -129,3 +129,104 @@ linkComplete <- function(metric, data_1, data_2){
     dplyr::summarise(max = max(.data$max_dist)) |>
     dplyr::pull(max)
 }
+
+
+
+
+
+
+
+################ FASTER #################
+
+#
+# linkCentroidFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){
+#   cluster_1_indices <- which(cluster == cluster_id_1)
+#   cluster_2_indices <- which(cluster == cluster_id_2)
+#
+#   centroid_1 <- colMeans(data[cluster_1_indices, ])
+#   centroid_2 <- colMeans(data[cluster_2_indices, ])
+#   return(metric(centroid_1, centroid_2))
+# }
+
+
+generateLinkCentroidFast <- function(data, metric){
+  linkCentroidFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){
+    cluster_1_indices <- which(cluster == cluster_id_1)
+    cluster_2_indices <- which(cluster == cluster_id_2)
+
+    centroid_1 <- colMeans(data[cluster_1_indices, ])
+    centroid_2 <- colMeans(data[cluster_2_indices, ])
+    return(metric(centroid_1, centroid_2))
+  }
+  return(linkCentroidFast)
+}
+
+#' Linkage mode: average (FASTER)
+#'
+#' Mean intercluster dissimilarity. The average of the distances of all
+#' combinations between a point in cluster 1 and a point in cluster 2 given
+#' a metric
+#' @famiy linkages
+#'
+#' @param TODO
+#'
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+linkAverageFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){   #employ the average distance method
+  cluster_1_indices <- which(cluster == cluster_id_1)
+  cluster_2_indices <- which(cluster == cluster_id_2)
+
+  mean(dissimilarity_matrix[cluster_1_indices,cluster_2_indices])
+}
+
+
+
+#' Linkage mode: single (FASTER)
+#'
+#' Minimal intercluster dissimilarity. Determines the smallest distance between
+#' points in cluster and 1 and points in cluster 2 given a metric.
+#'
+#' @famiy linkages
+#'
+#' @param TODO
+#'
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+linkSingleFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){   #employ the average distance method
+  cluster_1_indices <- which(cluster == cluster_id_1)
+  cluster_2_indices <- which(cluster == cluster_id_2)
+
+  min(dissimilarity_matrix[cluster_1_indices,cluster_2_indices])
+}
+
+
+
+#' Linkage mode: complete (FASTER)
+#'
+#' Maximum intercluster dissimilarity. Determines the largest distance
+#' between points in cluster 1 and points in cluster 2 given a metric.
+#'
+#' @famiy linkages
+#'
+#' @param TODO
+#'
+#' @returns a real number (numeric) >= 0
+#' @export
+linkCompleteFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){   #employ the average distance method
+  cluster_1_indices <- which(cluster == cluster_id_1)
+  cluster_2_indices <- which(cluster == cluster_id_2)
+
+  max(dissimilarity_matrix[cluster_1_indices,cluster_2_indices])
+}
+
+
+############ Distance Function #################
+# Helper function to determine distance vector between two clusters (for hierarchical clustering)
+.dist <- function(x, mode, cluster, D_points, neighbors){
+  if(x == neighbors[1])
+    return(Inf)
+  else
+    return(mode(neighbors[1], x, cluster, D_points))
+}
