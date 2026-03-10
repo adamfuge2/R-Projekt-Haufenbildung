@@ -29,13 +29,13 @@ and viewData3D. Currently only works for clusters represented by numbers >=
 }
 \examples{
 # 1D data without clusters
-data_1D <- generateClusterTestDataSimple(dim=1)
+data_1D <- generateClusterData(dim=1)
 viewClusters(data_1D)
 # 2D data without clusters
-data_2D <- generateClusterTestDataSimple(dim=2)
+data_2D <- generateClusterData(dim=2)
 viewClusters(data_2D)
 # 3D data without clusters
-data_3D <- generateClusterTestDataSimple(dim=3)
+data_3D <- generateClusterData(dim=3)
 viewClusters(data_3D)
 # 3D data with a clustering function
 clustered_data <- kMeans(data_3D,K=5)$clustered_data

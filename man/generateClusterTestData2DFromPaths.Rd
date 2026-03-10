@@ -19,10 +19,10 @@ a tibble, every row representing a data point.
 DEPRECATED in favor of generateClusterDataFromPaths()
 }
 \seealso{
-Other cluster data generator: 
+Other cluster data generators: 
+\code{\link{generateClusterData}()},
 \code{\link{generateClusterDataFromPaths}()},
-\code{\link{generateClusterTestDataSimple}()},
 \code{\link{generateClusterTestDataSimple2D}()},
-\code{\link{generateFullTestData}()}
+\code{\link{generateNoiseData}()}
 }
-\concept{cluster data generator}
+\concept{cluster data generators}

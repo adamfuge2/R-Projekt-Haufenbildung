@@ -33,33 +33,32 @@
 #' @returns a tibble, every row representing a data point. The columns are named using the parameter `colnames`.
 #'
 #' @examples
-#' generateClusterTestDataSimple(cluster_amount = 4) |>
-#'   viewData()
-#' generateClusterTestDataSimple(n = 1000,
-#'                               clusters_mean = tibble::tibble(longitude = c(-100,-60,10,20,70,130),
-#'                                                              latitude = c(40,-10,50,20,50,-20)),
-#'                               clusters_sd = c(8,8,3,6,15,5),
-#'                               clusters_prob = c(20,20,10,100,100,10),
-#'                               include_cluster = TRUE) |>
-#'   viewClusters()
-#' generateClusterTestDataSimple(n = 1,
-#'                               lower_bounds = -(20:1),
-#'                               upper_bounds = 1:20,
-#'                               dim = 20,
-#'                               .print_info = TRUE)
+#' generateClusterData(cluster_amount = 4)
+#' generateClusterData(n = 1000,
+#'                     clusters_mean =
+#'                        tibble::tibble(longitude = c(-100,-60,10,20,70,130),
+#'                                       latitude =  c(  40,-10,50,20,50,-20)),
+#'                     clusters_sd = c(8,8,3,6,15,5),
+#'                     clusters_prob = c(20,20,10,100,100,10),
+#'                     include_cluster = TRUE)
+#' generateClusterData(n = 1,
+#'                    lower_bounds = -(20:1),
+#'                    upper_bounds = 1:20,
+#'                    dim = 20,
+#'                    .print_info = TRUE)
 #'
 #' @export
-generateClusterTestDataSimple <- function(n=100,
-                                          cluster_amount = NULL,
-                                          dim = 2,
-                                          lower_bounds = c(0,0),
-                                          upper_bounds = c(1,5),
-                                          clusters_mean = NULL,
-                                          clusters_sd = NULL,
-                                          clusters_prob = NULL,
-                                          colnames = NULL,
-                                          include_cluster = FALSE,
-                                          .print_info = FALSE){
+generateClusterData <- function(n=100,
+                                cluster_amount = NULL,
+                                dim = 2,
+                                lower_bounds = c(0,0),
+                                upper_bounds = c(1,5),
+                                clusters_mean = NULL,
+                                clusters_sd = NULL,
+                                clusters_prob = NULL,
+                                colnames = NULL,
+                                include_cluster = FALSE,
+                                .print_info = FALSE){
   if(.print_info) print('starting generator full of hope')
 
   # defer dimensions and bounds from input. DEFAULT case: do nothing
@@ -121,7 +120,7 @@ generateClusterTestDataSimple <- function(n=100,
       cluster_amount <- base::length(clusters_prob)
     else{
       # if not deferable by other parameters: choose a random amount (dependent on the dimension and number of data points)
-      cluster_amount <- base::floor(stats::runif(1,min = 1, max = min(n/4 , (2^dim))))
+      cluster_amount <- base::floor(stats::runif(1,min = 1, max = min(ceiling(n/4) , (2^dim))))
     }
   }
   # from here on we are certain we have a value for cluster_amount
@@ -131,7 +130,9 @@ generateClusterTestDataSimple <- function(n=100,
   if(base::missing(clusters_sd))
     clusters_sd <- stats::runif(cluster_amount, min=0.001, max=0.5)
 
-  if(.print_info) print(paste0('clusters_sd: ',paste0(clusters_sd)))
+  if(.print_info) {
+    print('clusters_sd: ')
+    print(clusters_sd)}
   stopifnot('length of cluster_sd does not match cluster amount' = length(clusters_sd) == cluster_amount)
 
   # if no means (centers) for the clusters specified, randomize them here
@@ -163,17 +164,20 @@ generateClusterTestDataSimple <- function(n=100,
   epsilon <- t(structure(rnorm(n*dim, mean = 0, sd = points_sd),dim=c(dim,n)))
 
   # the points as matrix
-  points <- points_origin + epsilon
+  data <- points_origin + epsilon
 
   if(.print_info) print('points calculated!')
 
   # format the data to be output as tibble
-  colnames(points) <- colnames
-  data <- tibble::as_tibble(points)
+  colnames(data) <- colnames
+  data <- tibble::as_tibble(data)
 
   # for checking purposes we may include the clusters in the data set.
   # Thus we basically return clustered data
-  if(include_cluster) data <- data |> dplyr::mutate(cluster = selected_clusters)
+  if(include_cluster){
+    data <- data |> dplyr::mutate(cluster = selected_clusters)
+    class(data) <- c('clustered_data',class(data))
+  }
 
   if(.print_info) print('data formated! All Done!')
 
@@ -205,15 +209,17 @@ generateClusterTestDataSimple <- function(n=100,
 #' @returns a tibble, every row representing a data point. The columns are derived from the entries in `'list_of_paths'`
 #'
 #' @examples
-#' generateClusterDataFromPaths(list_of_paths = base::list(tibble::tibble(X = c(0,1,1),
-#'                                                                        Y = c(0,0,1)),
-#'                                                         tibble::tibble(X = c(0,0.2),
-#'                                                                        Y = c(1,0.8))))
+#' generateClusterDataFromPaths(list_of_paths =
+#'                                 list(tibble::tibble(X = c(0,1,1),
+#'                                                     Y = c(0,0,1)),
+#'                                      tibble::tibble(X = c(0,0.2),
+#'                                                     Y = c(1,0.8))))
 #' generateClusterDataFromPaths(n = 1000,
-#'                              list_of_paths = base::list(tibble::tibble(X = c(0,),
-#'                                                                        Y = c(0)),
-#'                                                         tibble::tibble(X = c(1),
-#'                                                                        Y = c(1))),
+#'                              list_of_paths =
+#'                                 list(tibble::tibble(X = c(0),
+#'                                                     Y = c(0)),
+#'                                      tibble::tibble(X = c(1),
+#'                                                     Y = c(1))),
 #'                              clusters_sd = c(1,10),
 #'                              clusters_prob = c(1,100),
 #'                              include_cluster = TRUE,
@@ -232,10 +238,17 @@ generateClusterDataFromPaths <-  function(n=100,
   stopifnot('list_of_paths must be a list of tibbles' = typeof(list_of_paths) == 'list')
   stopifnot('list_of_paths must be a list of tibbles' = all(list_of_paths |> sapply(class) > 1))
   cluster_amount <- length(list_of_paths)
+  # from here on we are certain we have a value for cluster_amount
+  if(.print_info) print(paste0('got value for cluster_amount:', cluster_amount))
+
   stopifnot('list_of_paths must not not be an empty list' = cluster_amount > 0)
   stopifnot('paths must not be empty' = all(list_of_paths |> sapply(nrow) > 0) )
   dim <- ncol(list_of_paths[[1]])
   col_names <- colnames(list_of_paths[[1]])
+  if(.print_info) {
+    print('column names: ')
+    print(col_names)}
+
   stopifnot('all paths must feature data points of the same dimension' = all(list_of_paths |> sapply(ncol) == dim))
   stopifnot('all paths must have the same columnnames' = all(list_of_paths |> sapply(function(x) colnames(x)==col_names)))
   stopifnot('there must be as many clusters probability weights as there ar paths' = length(clusters_prob) == cluster_amount)
@@ -248,7 +261,9 @@ generateClusterDataFromPaths <-  function(n=100,
   if(base::missing(clusters_sd))
     clusters_sd <- stats::runif(cluster_amount, min=0.001, max=0.01)
 
-  if(.print_info) print(paste0('clusters_sd: ',paste0(clusters_sd)))
+  if(.print_info) {
+    print('clusters_sd: ')
+    print(clusters_sd)}
   stopifnot('length of clusters_sd does not match cluster amount' = length(clusters_sd) == cluster_amount)
 
 
@@ -265,12 +280,18 @@ generateClusterDataFromPaths <-  function(n=100,
   epsilon <- t(structure(rnorm(n*dim, mean = 0, sd = points_sd),dim=c(dim,n)))
 
   # the points as matrix
-  points <- points_origin + epsilon
+  data <- points_origin + epsilon
+
+  if(.print_info) print('points calculated!')
+
+  # format the data to be output as tibble
+  colnames(data) <- col_names
+  data <- tibble::as_tibble(data)
 
   # for checking purposes we may include the clusters in the data set.
   # Thus we basically return clustered data
-  if(include_cluster) {data <- data |> mutate(cluster = selected_clusters)
-  class(data) <- c(class(data),'clustered_data')
+  if(include_cluster) {data <- data |> dplyr::mutate(cluster = selected_clusters)
+  class(data) <- c('clustered_data',class(data))
   }
 
   return(data)
@@ -299,23 +320,23 @@ generateClusterDataFromPaths <-  function(n=100,
 #'   using the parameter `colnames`.
 #'
 #' @examples
-#' generateFullTestData(lower_bounds = c(-1,0),
-#'                      upper_bounds = c(1,1))
-#' generateFullTestData(n = 1000,
-#'                      lower_bounds = c(-180,-90),
-#'                      upper_bounds = c(180,90),
-#'                      colnames = c('longitude','latitude'),
-#'                      .print_info = TRUE)
+#' generateNoiseData(lower_bounds = c(-1,0),
+#'                   upper_bounds = c(1,1))
+#' generateNoiseData(n = 1000,
+#'                   lower_bounds = c(-180,-90),
+#'                   upper_bounds = c(180,90),
+#'                   colnames = c('longitude','latitude'),
+#'                   .print_info = TRUE)
 #'
 #'
 #'
 #' @export
-generateFullTestData <- function(n=100,
-                                 lower_bounds,
-                                 upper_bounds,
-                                 colnames = paste0('X_',1:length(lower_bounds)),
-                                 include_cluster = TRUE,
-                                 .print_info = FALSE){
+generateNoiseData <- function(n=100,
+                              lower_bounds,
+                              upper_bounds,
+                              colnames = paste0('X_',1:length(lower_bounds)),
+                              include_cluster = FALSE,
+                              .print_info = FALSE){
 
   dim <- length(lower_bounds)
 
@@ -336,8 +357,8 @@ generateFullTestData <- function(n=100,
 
   colnames(data) <- colnames
 
-  if(include_cluster) {data <- data |> mutate(cluster = 0)
-  class(data) <- c(class(data),'clustered_data')
+  if(include_cluster) {data <- data |> dplyr::mutate(cluster = 0)
+  class(data) <- c('clustered_data',class(data))
   }
 
   return(data)

@@ -5,7 +5,6 @@
 ## for every metric here the following must (approximately) hold:
 ## 1. metric(x,y) = 0  if and only if x = y
 ## 2. metric(x,y) = metric(y,x)
-## 3. metric(x,z) <= metric(x,y) + metric(y,z)
 ##
 ## Inputs:
 ## x,         an atomic vector or tibble row.
@@ -22,6 +21,13 @@
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
+#'
+#' @examples
+#' euclidean(3,5)
+#' euclidean(c(3,0,34),c(-5,30,31))
+#' euclidean(tibble::tibble(X =  3, Y =  0, Z = 34),
+#'           tibble::tibble(X = -5, Y = 30, Z = 31))
+#'
 #' @export
 euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 
@@ -45,6 +51,12 @@ maximumMetric <- function(x,y) base::max(base::abs(x-y))
 #'
 #' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
 #'   numerical output, a real number >= 0.
+#'
+#' @examples
+#' pMetric(1)(3,5)
+#' pMetric(5)(c(3,0,34),c(-5,30,31))
+#' pMetric(1.5)(tibble::tibble(X =  3, Y =  0, Z = 34),
+#'           tibble::tibble(X = -5, Y = 30, Z = 31))
 #' @export
 pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 
@@ -57,6 +69,10 @@ manhattan <- function(x,y) base::sum(base::abs(x-y))
 #' It is purely to serve as an example of an exotic distance function
 #'
 #' @param x,y   a character of length 1. A studies subject. One of TODO
+#'
+#' @examples
+#' study_courses_distance('mathematics','physics')
+#' study_courses_distance('law','geology')
 #'
 #' @export
 study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
@@ -80,16 +96,27 @@ study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unli
 
 
 
-################### Hour metric ##################
+################### pacman distance ##################
 
-#' The difference of hours
+#' Pacman distance function
 #'
-#' Calculates the difference of two times of the day in hours. Be aware, this
-#' means 23.9 and 0.1 are very close.
+#' a function factory for functions on multidimensional toruses. Meaning 'the edges loop'
 #'
-#' @param x,y A numeric between 0 and 24, Hour of a time of day as. Fractional
-#'   hours like 2.5 or 15.9 are allowed.
+#' @param dim_lengths A numeric vector. Describes the widths of the space.
+#' @param base_metric A distance function to be used as the base distance on the looped space.
 #'
+#' @returns A distance function for two data points on a looped multidimensional space
+#'
+#' @examples
+#' pacman_distance(24)(x = 1, y = 23)
+#' pacman_distance(dim_lengths = c(26,30),
+#'                 base_metric = manhattan)(x = c(5,2), y= c(25,23))
+#' @seealso
+#'   [hours_distance()] made by `pacman_distance(25)`,
+#'   [original_pacman_distance()] made by `pacman_distance(dim_lengths = c(26,30),base_metric = manhattan)`,
+#'
+#'
+#' @export
 pacman_distance <- function(dim_lengths,base_metric=euclidean){
 
   dim <- length(dim_lengths)
@@ -102,10 +129,26 @@ pacman_distance <- function(dim_lengths,base_metric=euclidean){
   function(x,y) min(apply(M,c(1),function(plus) base_metric(x,y+plus)))
 }
 
+#' The distance of hours
+#'
+#' Calculates the distance of two times of the day in hours. Be aware, this
+#' means 23.9 and 0.1 are very close.
+#'
+#' @param x,y A numeric between 0 and 24, Hour of a time of day as. Fractional
+#'   hours like 2.5 or 15.9 are allowed.
+#'
+#' @export
 hours_distance <- pacman_distance(dim_lengths=24)
 
-cylinder_distance <- function(radius,height) pacman_distance(dim_lengths = c(radius,height))
 
+#' The distance of on a pacman board
+#'
+#' calculates the distance of two dots on a pacman board (which has dimensions 26*30)
+#'
+#' @param x,y A numeric vector of length 2. Between c(0,0) and c(26,30).
+#'
+#' @returns A non negative numeric of length 1
+#' @export
 original_pacman_distance <- pacman_distance(dim_lengths = c(26,30),base_metric = manhattan)
 
 #clustering <- kMedioids(hours_data,custom_metric = hour_difference,K=3)

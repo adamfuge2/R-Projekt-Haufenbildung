@@ -17,7 +17,8 @@ knitr::opts_chunk$set(
 )
 knitr::opts_chunk$set(
   fig.align = 'center',
-  fig.width = 7
+  fig.width = 7,
+  dev = 'svg'
 )
 ```
 
@@ -34,7 +35,7 @@ This will illustrate the most basic use case for this clustering function:
 
 Lets create some test data
 ```{r general_use_1}
-data <- generateClusterTestDataSimple(n=100, cluster_amount = 4)
+data <- generateClusterData(n=100, cluster_amount = 4)
 ```
 
 This is what it looks like
@@ -59,8 +60,8 @@ This is the main parameter to be provided and the data upon which the clustering
 
 Here some examples: 
 ```{r data_definitions}
-data_1 <- generateClusterTestDataSimple(n = 100, cluster_amount = 7)
-data_2 <- generateClusterTestDataSimple(n = 1)
+data_1 <- generateClusterData(n = 100, cluster_amount = 7)
+data_2 <- generateClusterData(n = 1)
 ```
 
 The data could even have multiple types, although `mean()` has to still make sense on it.
@@ -98,7 +99,7 @@ This function comes with a handful of common metrics pre made. Use this paramete
 
 The differences can be visualized using the Voronoi cells:
 ```{r mertric_generate_full_data, echo=FALSE}
-full_data <- clusterfuck:::generateFullTestData(n=1000,min = c(0,0),max= c(1,1))
+full_data <- generateNoiseData(n=2000,lower_bounds = c(0,0),upper_bounds= c(1,1))
 colnames(full_data) <- c('X','Y')
 ```
 
@@ -207,7 +208,7 @@ K-Means depends heavily on the starting centroids. You can account for bad luck 
 
 Example:
 ```{r tries_example}
-data_5 <- generateClusterTestDataSimple(n=1000, cluster_amount = 7, dim = 3)
+data_5 <- generateClusterData(n=1000, cluster_amount = 7, dim = 3)
 kMeans(data_5,K=7,tries = 1)$inner_inequality
 kMeans(data_5,K=7,tries = 10)$inner_inequality
 ```
@@ -246,9 +247,9 @@ clusters <- list(tibble::tibble(X=0.05,Y=0.05),
                  tibble::tibble(X=0.03,Y=0.02),
                  tibble::tibble(X=0.03,Y=0.08),
                  tibble::tibble(X=0.07,Y=0.04))
-training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
-unknown_data <- generateClusterTestData2DFromPaths(n=100, clusters)
-more_data <- tibble::as_tibble(matrix(runif(10000,min=0,max = 0.1),ncol = 2), .name_repair = 'unique')
+training_data <- generateClusterDataFromPaths(n=50, clusters)
+unknown_data <- generateClusterDataFromPaths(n=100, clusters)
+more_data <- full_data <- generateNoiseData(n=5000,lower_bounds = c(0,0),upper_bounds= c(0.1,0.1))
 
 # derive a clustering using K-Means
 f <- kMeans(training_data,K=4)$clustering_function

@@ -42,15 +42,17 @@ a tibble, every row representing a data point. The columns are derived from the 
 Nonspherical cluster data generator
 }
 \examples{
-generateClusterDataFromPaths(list_of_paths = base::list(tibble::tibble(X = c(0,1,1),
-                                                                       Y = c(0,0,1)),
-                                                        tibble::tibble(X = c(0,0.2),
-                                                                       Y = c(1,0.8))))
+generateClusterDataFromPaths(list_of_paths =
+                                list(tibble::tibble(X = c(0,1,1),
+                                                    Y = c(0,0,1)),
+                                     tibble::tibble(X = c(0,0.2),
+                                                    Y = c(1,0.8))))
 generateClusterDataFromPaths(n = 1000,
-                             list_of_paths = base::list(tibble::tibble(X = c(0,),
-                                                                       Y = c(0)),
-                                                        tibble::tibble(X = c(1),
-                                                                       Y = c(1))),
+                             list_of_paths =
+                                list(tibble::tibble(X = c(0),
+                                                    Y = c(0)),
+                                     tibble::tibble(X = c(1),
+                                                    Y = c(1))),
                              clusters_sd = c(1,10),
                              clusters_prob = c(1,100),
                              include_cluster = TRUE,
@@ -59,10 +61,10 @@ generateClusterDataFromPaths(n = 1000,
 
 }
 \seealso{
-Other cluster data generator: 
+Other cluster data generators: 
+\code{\link{generateClusterData}()},
 \code{\link{generateClusterTestData2DFromPaths}()},
-\code{\link{generateClusterTestDataSimple}()},
 \code{\link{generateClusterTestDataSimple2D}()},
-\code{\link{generateFullTestData}()}
+\code{\link{generateNoiseData}()}
 }
-\concept{cluster data generator}
+\concept{cluster data generators}

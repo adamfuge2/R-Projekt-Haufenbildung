@@ -13,7 +13,7 @@
 #'   the respective data point is stored.
 #'
 #' @examples
-#' data_1D <- generateClusterTestDataSimple(dim=1,cluster_amount=3)
+#' data_1D <- generateClusterData(dim=1,cluster_amount=3)
 #' clustered_data_1D <- kMeans(data_1D,K=3)$clustered_data
 #' clusterfuck:::viewClusters1D(clustered_data_1D)
 #'
@@ -62,7 +62,7 @@ viewClusters1D <-function(clustered_data){
 #'   the respective data point is stored.
 #'
 #' @examples
-#' data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
+#' data_2D <- generateClusterData(dim=2,cluster_amount=5)
 #' clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
 #' clusterfuck:::viewClusters2D(clustered_data_2D)
 #'
@@ -112,7 +112,7 @@ viewClusters2D <-function(clustered_data){
 #'   the respective data point is stored.
 #'
 #' @examples
-#' data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
+#' data_3D <- generateClusterData(dim=3,cluster_amount=5)
 #' clustered_data_3D <- kMeans(data_3D,K=5)$clustered_data
 #' clusterfuck:::viewClusters3D(clustered_data_3D)
 #'
@@ -174,13 +174,13 @@ viewClusters3D <-function(clustered_data){
 #'
 #' @examples
 #' # 1D data without clusters
-#' data_1D <- generateClusterTestDataSimple(dim=1)
+#' data_1D <- generateClusterData(dim=1)
 #' viewClusters(data_1D)
 #' # 2D data without clusters
-#' data_2D <- generateClusterTestDataSimple(dim=2)
+#' data_2D <- generateClusterData(dim=2)
 #' viewClusters(data_2D)
 #' # 3D data without clusters
-#' data_3D <- generateClusterTestDataSimple(dim=3)
+#' data_3D <- generateClusterData(dim=3)
 #' viewClusters(data_3D)
 #' # 3D data with a clustering function
 #' clustered_data <- kMeans(data_3D,K=5)$clustered_data
@@ -226,7 +226,7 @@ viewClusters <- function(data,clustering=NULL){
 #' @param data   A tibble with every row representing a data point.
 #'
 #' @examples
-#' data_3D <- generateClusterTestDataSimple(dim=3,cluster_amount=5)
+#' data_3D <- generateClusterData(dim=3,cluster_amount=5)
 #' clusterfuck:::viewData3D(data_3D)
 #'
 viewData2D <- function(data){
@@ -242,8 +242,8 @@ viewData2D <- function(data){
 #' @param data   A tibble with every row representing a data point.
 #'
 #' @examples
-#' data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
-#' clusterfuck:::viewData2D(data_2D)
+#' data_3D <- generateClusterData(dim=3,cluster_amount=5)
+#' clusterfuck:::viewData3D(data_3D)
 #'
 viewData3D <- function(data){
 
@@ -263,13 +263,13 @@ viewData3D <- function(data){
 #'
 #' @examples
 #' # 1D data without clusters
-#' data_1D <- generateClusterTestDataSimple(dim=1)
+#' data_1D <- generateClusterData(dim=1)
 #' viewData(data_1D)
 #' # 2D data without clusters
-#' data_2D <- generateClusterTestDataSimple(dim=2)
+#' data_2D <- generateClusterData(dim=2)
 #' viewData(data_2D)
 #' # 3D data without clusters
-#' data_3D <- generateClusterTestDataSimple(dim=3)
+#' data_3D <- generateClusterData(dim=3)
 #' viewData(data_3D)
 #'
 #' @export

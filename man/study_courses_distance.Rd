@@ -13,3 +13,8 @@ study_courses_distance(x, y)
 The data for this relies on literally nothing.
 It is purely to serve as an example of an exotic distance function
 }
+\examples{
+study_courses_distance('mathematics','physics')
+study_courses_distance('law','geology')
+
+}
