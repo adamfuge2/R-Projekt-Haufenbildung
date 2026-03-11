@@ -1,10 +1,10 @@
 ############# Linkage Modes ######################
 ##
 ## A linkage mode is a method of calculating the dissimilarity
-## of two clusters (of size >= 1) given a metric to determine a distance
+## of two clusters (of size >= 1) given a distance to determine a distance
 ##
 ## Inputs:
-## metric,    metric as defined above
+## distance,    distance as defined above
 ## data1,     a tibble with n(>=1) rows of dimension d
 ## data2      a tibble with m(>=1) rows of dimension d
 ##
@@ -30,16 +30,16 @@ centroid_det <- function(data){   #determine centroid of a tibble (returns a tib
 #'
 #' The distance between the centroids of two clusters
 #'
-#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param distance  distance function (euclidean, maximumDistance...)
 #' @param data_1   a tibble with n(>=1) rows of dimension d
 #' @param data_2   a tibble with n(>=1) rows of dimension d
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-centroid <- function(metric, data_1, data_2){
+centroid <- function(distance, data_1, data_2){
   centr_1 <- centroid_det(data_1)
   centr_2 <- centroid_det(data_2)
-  return(metric(centr_1, centr_2))
+  return(distance(centr_1, centr_2))
 }
 
 
@@ -48,21 +48,21 @@ centroid <- function(metric, data_1, data_2){
 #'
 #' Mean intercluster dissimilarity. The average of the distances of all
 #' combinations between a point in cluster 1 and a point in cluster 2 given
-#' a metric
+#' a distance function
 #'
-#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param distance  distance function (euclidean, maximumDistance...)
 #' @param data_1   a tibble with n(>=1) rows of dimension d
 #' @param data_2   a tibble with n(>=1) rows of dimension d
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-average <- function(metric, data_1, data_2){   #employ the average distance method
+average <- function(distance, data_1, data_2){   #employ the average distance method
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       mean_dist = mean(
         sapply(1:nrow(data_2), function(j){
-          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
+          distance(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
@@ -77,21 +77,21 @@ average <- function(metric, data_1, data_2){   #employ the average distance meth
 #' Linkage mode: single
 #'
 #' Minimal intercluster dissimilarity. Determines the smallest distance between
-#' points in cluster and 1 and points in cluster 2 given a metric.
+#' points in cluster and 1 and points in cluster 2 given a distance function.
 #'
-#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param distance  distance function (euclidean, maximumDistance...)
 #' @param data_1   a tibble with n(>=1) rows of dimension d
 #' @param data_2   a tibble with n(>=1) rows of dimension d
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-single <- function(metric, data_1, data_2){
+single <- function(distance, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       min_dist = min(
         sapply(1:nrow(data_2), function(j){
-          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
+          distance(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
@@ -108,19 +108,19 @@ single <- function(metric, data_1, data_2){
 #' Maximum intercluster dissimilarity. Determines the largest distance
 #' between points in cluster 1 and points in cluster 2 given a metric.
 #'
-#' @param metric  metric function (euclidean, maximumMetric...)
+#' @param distance  distance function (euclidean, maximumDistance...)
 #' @param data_1   a tibble with n(>=1) rows of dimension d
 #' @param data_2   a tibble with n(>=1) rows of dimension d
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-complete <- function(metric, data_1, data_2){
+complete <- function(distance, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
       max_dist = max(
         sapply(1:nrow(data_2), function(j){
-          metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
+          distance(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>

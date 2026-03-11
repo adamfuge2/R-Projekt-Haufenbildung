@@ -14,17 +14,17 @@ is.wholenumber <- function(x, tol = base::.Machine$double.eps^0.5)  base::abs(x 
 #' Coerces a tibble of cluster centers (centroids) to a clustering function
 #'
 #' @param centroids   a tibble with every row being a centroid
-#' @param metric           a metric whose 2 inputs are of the centroids row type
+#' @param distance           a distance function whose 2 inputs are of the centroids row type
 #'
 #' Returns:
 #' function,    a clustering function relating any data point to their cluster.
 #'              input: rows or atomic vectors Of the data row type
 #'              returns: a whole number > 0, representing the related cluster
 #'
-clusteringFromCentroids<- function(centroids,metric=euclidean){
+clusteringFromCentroids<- function(centroids,distance=euclidean){
   function(x)
     1:base::nrow(centroids) |>
-    sapply(function(k) metric(x,base::unlist(centroids[k,]))) |>
+    sapply(function(k) distance(x,base::unlist(centroids[k,]))) |>
     base::which.min()
 }
 
@@ -36,11 +36,11 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 #'
 #' @param data,        a tibble with with every row representing a data point.
 #' @param clustering,  a clustering function relating any data point to their cluster.
-#' @param metric,      a metric whose 2 inputs are of the data row type.
+#' @param distance,      a distance function whose 2 inputs are of the data row type.
 #'
 #' @returns numeric, a real number > 0.
 #'
-innerInequality <- function(data,clustering_function,metric=euclidean){
+innerInequality <- function(data,clustering_function,distance=euclidean){
 
   clustered_data <- data |>
     dplyr::rowwise() |>
@@ -55,7 +55,7 @@ innerInequality <- function(data,clustering_function,metric=euclidean){
   return(
     clustered_data |>
       dplyr::rowwise() |>
-      dplyr::mutate('distances' = metric(dplyr::c_across(1:base::ncol(data)), centroids[.data$cluster,])) |>
+      dplyr::mutate('distances' = distance(dplyr::c_across(1:base::ncol(data)), centroids[.data$cluster,])) |>
       dplyr::ungroup() |>
       dplyr::summarise(base::sum(.data$distances)) |>
       unlist(use.names=FALSE)
@@ -75,11 +75,11 @@ innerInequality <- function(data,clustering_function,metric=euclidean){
 #' @param clustering  a clustering function relating any data point to their cluster.
 #' @param o           an atomic vector or tibble row.
 #'              This is the data point we calculate the silhouette of
-#' @param metric      a metric whose 2 inputs are of the data row type.
+#' @param distance      a distance function whose 2 inputs are of the data row type.
 #'
 #' @returns numeric, a real number between -1 and 1
 #'
-silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_data=TRUE){
+silhouette <- function(data,clustering_function,o,distance=euclidean,is_part_of_data=TRUE){
   # for more understandable code and inputs we rename this here
   cluster <- clustering_function
 
@@ -88,7 +88,7 @@ silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_da
 
   ## apply the clustering function to the data
   clusters <- apply(data,1,function(data_point) cluster(data_point))
-  distances <- apply(data,1,function(data_point) metric(data_point,o))
+  distances <- apply(data,1,function(data_point) distance(data_point,o))
 
   # do i really have to explain this?
   cluster_of_o <- cluster(o)
@@ -190,34 +190,34 @@ silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
 #'
 #' @param data        a tibble with with every row representing a data point.
 #' @param clustering  a clustering function relating any data point to their cluster.
-#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#' @param distance    A character. One of \code{'euclidean'}, \code{'maximum'},
 #'   \code{'Lp'} or \code{'manhattan'}.
-#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#' @param p         A numeric greater than or equal to 1. If \code{distance} was
 #'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_metric A semi definite and symmetric function whose inputs are
+#' @param custom_distance_function A semi definite and symmetric function whose inputs are
 #'   two of the \code{data} row type.
 #'
 #' @returns a numeric, a real number between -1 and 1
 #'
-meanSilhouette <- function(data,clustering,metric='euclidean',p=NULL,custom_metric=NULL){
+meanSilhouette <- function(data,clustering,distance='euclidean',p=NULL,custom_distance_function=NULL){
 
 
 
-  if(is.null(custom_metric)){
-    if(metric=='euclidean')
-      metric <- euclidean
-    else if(metric=='maximum')
-      metric <- maximumMetric
-    else if(metric=='Lp'){
-      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+  if(is.null(custom_distance_function)){
+    if(distance=='euclidean')
+      distance <- euclidean
+    else if(distance=='maximum')
+      distance <- maximumDistance
+    else if(distance=='Lp'){
+      stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
       stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      metric <- pMetric(p)
+      distance <- pDistance(p)
     }
-    else if(metric=='manhattan')
-      metric <- pMetric(1)
-    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+    else if(distance=='manhattan')
+      distance <- pDistance(1)
+    else stop('Unknown distance function. Look up on the help page which metrics/distance functions are available ore input a custum distance function using the argument custom_distance_function.')
   }
-  else metric <- custom_metric
+  else distance <- custom_distance_function
 
   if( data |>
       apply(1,clustering) |>
@@ -231,7 +231,7 @@ meanSilhouette <- function(data,clustering,metric='euclidean',p=NULL,custom_metr
 
   ## Calculate the silhouette for every point and return their mean
   return( data |>
-            apply(1,function(data_point) silhouette(data,clustering,data_point,metric)) |>
+            apply(1,function(data_point) silhouette(data,clustering,data_point,distance)) |>
             mean()
   )
 }
@@ -263,11 +263,11 @@ tibbleAsPath <- function(data){
 #' Calculates the matrix encoding the differences inbetween all data points
 #'
 #' @param data      a tibble with with every row representing a data point.
-#' @param metric    A metric whose inputs are of the data row type
+#' @param distance    A distance function whose inputs are of the data row type
 #'
 #' @returns a dissimilarity matrix, a row and coloumn for every data point
 #'
-dissimilarityMatrix <-function(data,metric){
+dissimilarityMatrix <-function(data,distance){
   if(length(unique(lapply(data,typeof))) == 1){
     data <- as.matrix(data)}
   basis <- array(base::rep(1:base::nrow(data),base::nrow(data)), dim=c(base::nrow(data),base::nrow(data) ))
@@ -275,7 +275,7 @@ dissimilarityMatrix <-function(data,metric){
   M[,,1] <- basis
   M[,,2] <- t(basis)
 
-  return(apply(M,c(1,2),function(x) metric(data[x[1],],data[x[2],])))
+  return(apply(M,c(1,2),function(x) distance(data[x[1],],data[x[2],])))
 }
 
 
@@ -285,32 +285,32 @@ dissimilarityMatrix <-function(data,metric){
 #'
 #' @param data      a tibble with with every row representing a data point.
 #' @param vector    A vector (i.e. tibble row or atomic vector)
-#' @param metric    A metric whose inputs are of the data row type
+#' @param distance    A distance function whose inputs are of the data row type
 #'
 #' @returns a numeric >= 0
 #'
-sumOfDistancestTo <- function(data,vector,metric){
-  data |> dplyr::rowwise() |> dplyr::mutate('distance' = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
+sumOfDistancestTo <- function(data,vector,distance){
+  data |> dplyr::rowwise() |> dplyr::mutate('distance' = distance(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
     dplyr::ungroup() |>
     dplyr::summarise('sum' = sum(.data$distance)) |>
     base::unlist(use.names = FALSE)
 }
 
 #' defer distance function from inputs
-getDistanceFunction <- function(metric='euclidean',p=NULL,custom_metric=NULL){
-  if(is.null(custom_metric)){
-    if(metric=='euclidean')
+getDistanceFunction <- function(distance='euclidean',p=NULL,custom_distance_function=NULL){
+  if(is.null(custom_distance_function)){
+    if(distance=='euclidean')
       return(euclidean)
-    else if(metric=='maximum')
-      return(maximumMetric)
-    else if(metric=='Lp'){
-      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+    else if(distance=='maximum')
+      return(maximumDistance)
+    else if(distance=='Lp'){
+      stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
       stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      return(pMetric(p))
+      return(pDistance(p))
     }
-    else if(metric=='manhattan')
-      return(pMetric(1))
-    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+    else if(distance=='manhattan')
+      return(pDistance(1))
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_distance_function.')
   }
-  else return(custom_metric)
+  else return(custom_distance_function)
 }

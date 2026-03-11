@@ -108,12 +108,12 @@ test_that('metrics',{
   data_atomic_2 <- c(-3, 8, 0)
 
   testthat::expect_no_error(euclidean(data[1, ], data[2, ]))
-  testthat::expect_no_error(maximumMetric(data[1, ], data[2, ]))
-  testthat::expect_no_error(pMetric(6)(data[1, ], data[2, ]))
+  testthat::expect_no_error(maximumDistance(data[1, ], data[2, ]))
+  testthat::expect_no_error(pDistance(6)(data[1, ], data[2, ]))
 
   testthat::expect_no_error(euclidean(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(maximumMetric(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(pMetric(6)(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(maximumDistance(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(pDistance(6)(data_atomic_1, data_atomic_2))
 })
 
 
