@@ -89,7 +89,7 @@ kMeans(data_2,K=1)
 # kMeans(data_1,K=5) throws error
 ```
 
-### 2.3 metric
+### 2.3 metric (distance)
 This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
 
 - `'euclidean'` (default)
@@ -109,73 +109,73 @@ colnames(full_data) <- c('X','Y')
 ##### euclidean
 ```{r mertric_examples_euclidean}
 set.seed(123)
-euclidean_clustering <- kMeans(data_1,K=4, metric = 'euclidean', tries=10)
+euclidean_clustering <- kMeans(data_1,K=4, distance = 'euclidean', tries=10)
 viewClusters(full_data,euclidean_clustering$clustering_function)
 ```
 
 ##### maximum
 ```{r mertric_examples_maximum}
 set.seed(123)
-maximum_clustering <- kMeans(data_1,K=4, metric = 'maximum', tries=10)
+maximum_clustering <- kMeans(data_1,K=4, distance = 'maximum', tries=10)
 viewClusters(full_data,maximum_clustering$clustering_function)
 ```
 
 ##### manhattan
 ```{r mertric_examples_manhattan}
 set.seed(123)
-manhattan_clustering <- kMeans(data_1,K=4, metric = 'manhattan', tries=10)
+manhattan_clustering <- kMeans(data_1,K=4, distance = 'manhattan', tries=10)
 viewClusters(full_data,manhattan_clustering$clustering_function)
 ```
 
 
 ### 2.4 p
-If you chose `'Lp'` for the parameter `metric` (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
+If you chose `'Lp'` for the parameter `distance` (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
 
 #### Examples {.tabset}
 
 ##### p = 1 (manhattan)
 ```{r p_examples_1}
 set.seed(123)
-p_clustering_1 <- kMeans(data_1,K=4, metric = 'Lp', p=1 , tries=10)
+p_clustering_1 <- kMeans(data_1,K=4, distance = 'Lp', p=1 , tries=10)
 viewClusters(full_data,p_clustering_1$clustering_function)
 ```
 
 ##### p = 1.5 
 ```{r p_examples_1_5}
 set.seed(123)
-p_clustering_1_5 <- kMeans(data_1,K=4, metric = 'Lp', p=1.5 , tries=10)
+p_clustering_1_5 <- kMeans(data_1,K=4, distance = 'Lp', p=1.5 , tries=10)
 viewClusters(full_data,p_clustering_1_5$clustering_function)
 ```
 
 ##### p = 2 (euclidean)
 ```{r p_examples_2}
 set.seed(123)
-p_clustering_2 <- kMeans(data_1,K=4, metric = 'Lp', p=2 , tries=10)
+p_clustering_2 <- kMeans(data_1,K=4, distance = 'Lp', p=2 , tries=10)
 viewClusters(full_data,p_clustering_2$clustering_function)
 ```
 
 ##### p = 4 
 ```{r p_examples_4}
 set.seed(123)
-p_clustering_4 <- kMeans(data_1,K=4, metric = 'Lp', p=4 , tries=10)
+p_clustering_4 <- kMeans(data_1,K=4, distance = 'Lp', p=4 , tries=10)
 viewClusters(full_data,p_clustering_4$clustering_function)
 ```
 
 ##### p = 8 
 ```{r p_examples_8}
 set.seed(123)
-p_clustering_8 <- kMeans(data_1,K=4, metric = 'Lp', p=8 , tries=10)
+p_clustering_8 <- kMeans(data_1,K=4, distance = 'Lp', p=8 , tries=10)
 viewClusters(full_data,p_clustering_8$clustering_function)
 ```
 
-### 2.5 custom_metric
-You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters `metric` (2.3) and `p` (2.4) are ignored. 
+### 2.5 custom_distance_function
+You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance is provided, the parameters `distance` (2.3) and `p` (2.4) are ignored. 
 
 But please consider:
 - Your custom metric must applicable on the data (on which `mean()` must be applicable)
 - Non continous custom metrics can cause loops
 - **Using an unoptimized custom metric can slow** the calculation of kMeans down significantly! 
-- (For unusual custom metrics comsider using [kMedioids](K-Medioid.Rmd) instead)
+- (For unusual custom metrics consider using [kMedioids](K-Medioid.Rmd) instead)
 
 
 Inputs:   
@@ -188,19 +188,19 @@ Output:
 
 
 Example:
-```{r custom_metric_example_1}
+```{r custom_distance_function_example_1}
 discrete_distance <- function(x,y) !identical(x,y) |> as.numeric()
-kMeans(data_1, K=4, custom_metric = discrete_distance)
+kMeans(data_1, K=4, custom_distance_function = discrete_distance)
 ```
 
 Because this is a main feature of the package, here is another example:
-```{r custom_metric_example_2}
+```{r custom_distance_function_example_2}
 WIDE_euclidean <- function(x,y) {
   x[[1]] <- 0.1*x[[1]]
   y[[1]] <- 0.1*y[[1]]
   euclidean(x,y)
   }
-kMeans(data_1, K=4, custom_metric = WIDE_euclidean)
+kMeans(data_1, K=4, custom_distance_function = WIDE_euclidean)
 ```
 
 ### 2.6 tries

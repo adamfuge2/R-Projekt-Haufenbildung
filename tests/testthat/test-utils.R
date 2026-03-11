@@ -108,12 +108,12 @@ test_that('metrics',{
   data_atomic_2 <- c(-3, 8, 0)
 
   testthat::expect_no_error(euclidean(data[1, ], data[2, ]))
-  testthat::expect_no_error(maximumMetric(data[1, ], data[2, ]))
-  testthat::expect_no_error(pMetric(6)(data[1, ], data[2, ]))
+  testthat::expect_no_error(maximumDistance(data[1, ], data[2, ]))
+  testthat::expect_no_error(pDistance(6)(data[1, ], data[2, ]))
 
   testthat::expect_no_error(euclidean(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(maximumMetric(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(pMetric(6)(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(maximumDistance(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(pDistance(6)(data_atomic_1, data_atomic_2))
 })
 
 
@@ -128,7 +128,7 @@ test_that('Linkage mode: centroid', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(centroid(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkCentroid(euclidean, data_1, data_2))
 })
 
 
@@ -136,7 +136,7 @@ test_that('Linkage mode: average', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(average(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkAverage(euclidean, data_1, data_2))
 })
 
 
@@ -144,7 +144,7 @@ test_that('Linkage mode: single', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(single(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkSingle(euclidean, data_1, data_2))
 })
 
 
@@ -152,5 +152,5 @@ test_that('Linkage mode: complete', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(complete(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkComplete(euclidean, data_1, data_2))
 })

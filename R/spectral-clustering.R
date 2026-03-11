@@ -2,7 +2,7 @@
 
 #' Gauss Kernel Weights
 #'
-#' Function to determine the weights using euclidean metric. (shortcut)
+#' Function to determine the weights using euclidean distance. (shortcut)
 #'
 #' @param data a tibble or atomic vector with n rows representing d-dimensional
 #' points
@@ -31,18 +31,18 @@ gaussKernel <- function(x,y,gamma){
 }
 
 
-#' Kernel Generator (Custom Metric)
+#' Kernel Generator (Custom distance function)
 #'
-#' Function operator generating a kernel with a custom metric
+#' Function operator generating a kernel with a custom distance function
 #'
-#' @param metric a metric function taking two arguments
+#' @param distance a distance function taking two arguments
 #' @param gamma reduction factor for Kernel (large value means large reduction of
 #' far distances)
 #'
-#' @returns kernel function with this custom metric
+#' @returns kernel function with this custom distance
 #' @export
-kernelByCustomMetric <- function(metric,gamma)
-  function(x,y) base::exp(- gamma * metric(x,y))
+kernelByCustomDistance <- function(distance,gamma)
+  function(x,y) base::exp(- gamma * distance(x,y))
 
 
 #' Spectral projection
@@ -55,9 +55,9 @@ kernelByCustomMetric <- function(metric,gamma)
 #' @param mercer_kernel kernel function (see algorithm description)
 #' @param gamma projection factor for the kernel function
 #' @param custom_mercer_kernel kernel function (see algorithm description)
-#' @param metric metric used in kernel function
-#' @param p if metric is 'Lp', this value will be used for p
-#' @param custom_metric a custom metric used in kernel function
+#' @param distance distance used in kernel function
+#' @param p if distance function is 'Lp', this value will be used for p
+#' @param custom_distance_function a custom distance function used in kernel function
 #' @param kernel_epsilon maximal distance at which data points are still considered neighbored.
 #' @param .print_info A logical of length 1. If \code{TRUE} additional
 #'   information will be displayed during runtime. Used in debugging.
@@ -70,25 +70,25 @@ spectralProjection <- function(data,
                               mercer_kernel = 'gauss',
                               gamma = NULL,
                               custom_mercer_kernel = NULL,
-                              metric = NULL,
+                              distance = NULL,
                               p = NULL,
-                              custom_metric = NULL,
+                              custom_distance_function = NULL,
                               kernel_epsilon = Inf,
                               .print_info = FALSE){
   n <- nrow(data)
 
   if(.print_info) print(all(c(is.null(custom_mercer_kernel),
-                              is.null(metric),
-                              is.null(custom_metric),
+                              is.null(distance),
+                              is.null(custom_distance_function),
                               kernel_epsilon==Inf)))
   if(.print_info) print(c(is.null(custom_mercer_kernel),
-                              is.null(metric),
-                              is.null(custom_metric),
+                              is.null(distance),
+                              is.null(custom_distance_function),
                               kernel_epsilon==Inf))
 
   if(all(c(is.null(custom_mercer_kernel),
-           is.null(metric),
-           is.null(custom_metric),
+           is.null(distance),
+           is.null(custom_distance_function),
            kernel_epsilon==Inf))){
     if(mercer_kernel == 'gauss') {
       stopifnot('Please provide a non negative value for gamma'= !is.null(gamma) && gamma >= 0)
@@ -99,21 +99,21 @@ spectralProjection <- function(data,
   }
   else {
     if(!is.null(custom_mercer_kernel)){
-      if(any(c(!is.null(metric),
-               !is.null(custom_metric),
+      if(any(c(!is.null(distance),
+               !is.null(custom_distance_function),
                !is.null(kernel_epsilon))))
-        warning('Custom Kernel provided, other parameters metric, custom_metric or kernel_epsilon discarded')
+        warning('Custom Kernel provided, other parameters distance, custom_distance_function or kernel_epsilon discarded')
       W <- dissimilarityMatrix(data,custom_mercer_kernel)
       K <- custom_mercer_kernel
     }else{
-      almost_metric <- getDistanceFunction(metric,p,custom_metric)
+      almost_distance <- getDistanceFunction(distance,p,custom_distance_function)
       if(kernel_epsilon < Inf) {
-        metric <- function(x,y) almost_metric(x,y)* (kernel_epsilon >= almost_metric(x,y))
-      }else metric <- almost_metric
+        distance <- function(x,y) almost_distance(x,y)* (kernel_epsilon >= almost_distance(x,y))
+      }else distance <- almost_distance
 
-      almost_kernel <- kernelByCustomMetric(metric,gamma)
+      almost_kernel <- kernelByCustomdistance(distance,gamma)
       if(kernel_epsilon < Inf) {
-        K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_metric(x,y))
+        K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_distance(x,y))
       }else K <- almost_kernel
 
       W <- dissimilarityMatrix(data,K)
@@ -182,9 +182,9 @@ spectralClustering <- function(data,
                                mercer_kernel = 'gauss',
                                gamma = NULL,
                                custom_mercer_kernel = NULL,
-                               metric = NULL,
+                               distance = NULL,
                                p = NULL,
-                               custom_metric = NULL,
+                               custom_distance_function = NULL,
                                kernel_epsilon = Inf,
                                cluster_algorithm = 'K-Means',
                                ...,
@@ -198,9 +198,9 @@ spectralClustering <- function(data,
                                           mercer_kernel = mercer_kernel,
                                           gamma=gamma,
                                           custom_mercer_kernel = custom_mercer_kernel,
-                                          metric = metric,
+                                          distance = distance,
                                           p = p,
-                                          custom_metric = custom_metric,
+                                          custom_distance_function = custom_distance_function,
                                           kernel_epsilon = kernel_epsilon)
 
 
@@ -266,6 +266,6 @@ spectralClustering <- function(data,
 #spectral_clustering <- spectralClustering(connected_circles_data,k=3,gamma=50,cluster_algorithm = 'K-Means',K=2)
 #spectral_clustering
 
-#clustering <- spectralClustering(study_courses_data,k=2,gamma=1,custom_metric=studies_difference,K=6)
+#clustering <- spectralClustering(study_courses_data,k=2,gamma=1,custom_distance_function=studies_difference,K=6)
 
 

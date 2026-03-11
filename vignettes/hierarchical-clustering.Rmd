@@ -1,0 +1,248 @@
+---
+title: "The Hierarchical Clustering Algorithm"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    tabset: true
+vignette: >
+  %\VignetteIndexEntry{The Hierarchical Clustering Algorithm}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(
+  fig.align = 'center',
+  fig.width = 7,
+  dev = 'svg'
+)
+```
+
+```{r setup, message = FALSE, warning = FALSE}
+library(clusterfuck)
+```
+
+This is an overview about the Hierarchical Clustering algorithm of the clusterfuck package.
+
+## General Use
+In the most simple case, we have a 2-dimensional dataset containing, for example, 4 clusters:
+
+```{r general_use_1, echo = 2}
+set.seed(129)
+data <- generateClusterTestDataSimple(n = 100, cluster_amount = 4, dim = 2)
+```
+
+This dataset can be illustrated by using the \code{viewData} function:
+
+```{r general_use_2}
+viewData(data)
+```
+
+**Apply Hierarchical Clustering with 4 Clusters:**
+
+```{r general_use_3}
+hierarchicalClustering(data, 4)
+```
+This returns a \code{clustering} object.
+
+
+## Parameters
+
+### 2.1 data (necessary)
+This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point or alternatively a matrix. 
+
+Some examples:
+```{r data_definitions, echo = c(2,3)}
+set.seed(121)
+data_1 <- generateClusterTestDataSimple(n = 100, cluster_amount = 7)
+data_2 <- generateClusterTestDataSimple(n = 1)
+```
+
+These can be clustered by the standard usage of Hierarchical Clustering:
+
+```{r standard_usage}
+hierarchicalClustering(data_1, 3)
+hierarchicalClustering(data_2, 1)
+```
+
+
+
+### 2.2 K
+The number of clusters the algorithm tries to fit the data in.
+This number must be
+- a positive integer 
+- larger than 0
+- at maximum equal to the amount of unique data points in `data`
+
+Some examples
+```{r K_examples}
+hierarchicalClustering(data_1, 3)
+hierarchicalClustering(data_1, 5)
+hierarchicalClustering(data_1, 10)
+hierarchicalClustering(data_2, 1)
+# hierarchicalClustering(data_2, 5) throws error
+```
+
+
+## 2.3 mode
+The linkage mode used to calculate the distance between two clusters. Since, in 
+general, a cluster consists of multiple datapoints, the definition of a distance
+between two clusters cannot be deduced by the distance function ('metric').
+
+To tackle this problem we can introduce methods for employing distance functions
+defining a distance between clusters. 
+
+These modes can be transferred as an optional argument in the form of a string.
+In the following, the usage of these modes is demonstrated.
+
+### 2.3.1 Centroid
+One rather heuristic method to define intercluster distance is to determine the 
+centroids of both clusters (this process is independet of any distance function
+as it makes use of the arithmetic mean) and then calculating the distance between
+the two centroids with the distance function.
+
+```{r mode-options-centroid, eval = FALSE}
+hierarchicalClustering(data, 4, mode = "centroid")
+```
+
+### 2.3.2 Single
+Interprets the smallest distance of the pair \code{p_1, p_2} with \code{p_1} belonging
+to cluster 1 and \code{p_2} to cluster 2 as the distance beween the two clusters.
+
+```{r mode-options-single, eval = FALSE}
+hierarchicalClustering(data, 4, mode = "single")
+```
+
+### 2.3.3 Complete
+Interprets the largest distance of the pair \code{p_1, p_2} with \code{p_1} belonging
+to cluster 1 and \code{p_2} to cluster 2 as the distance between the two clusters.
+
+```{r mode-options-complete, eval = FALSE}
+hierarchicalClustering(data, 4, mode = "complete")
+```
+
+
+### 2.3.4 Average
+Calculates the distance between every pair \code{p_1, p_2} with \code{p_1} belonging
+to cluster 1 and \code{p_2} to cluster 2 and then returning the mean of these values.
+
+```{r mode-options-average, eval = FALSE}
+hierarchicalClustering(data, 4, mode = "average")
+```
+
+
+
+
+### 2.4 distance_method
+This function comes with a handful of common distance function ('metric') pre made. 
+Use this parameter to choose one of the following:
+
+- `'euclidean'` (default)
+- `'maximum'`
+- `'manhattan'`
+- `'Lp'`
+
+
+#### Examples {.tabset}
+
+##### euclidean
+```{r metric_examples_euclidean}
+hierarchicalClustering(euclidean_cluster_data, K=2, distance_method = 'euclidean')
+```
+
+##### maximum
+```{r metric_examples_maximum}
+hierarchicalClustering(maximum_cluster_data, K=2, distance_method = 'maximum')
+```
+
+##### manhattan
+```{r metric_examples_manhattan}
+hierarchicalClustering(manhattan_cluster_data, K=2, distance_method = 'manhattan')
+```
+
+
+### 2.5 p
+If you chose `'Lp'` for the parameter `distance_method` then this is where you can input the value for the p-metric. Will be ignored, if other distance functions are chosen.
+
+
+
+### 2.6 custom_metric
+You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters `metric` and `p` are ignored. 
+
+But please consider:
+- Your custom metric must applicable on the data (on which `mean()` must be applicable)
+- Non continuous custom metrics can cause loops
+- **Using an unoptimized custom metric can slow** the calculation of clustering algorithms down significantly! 
+
+Inputs:   
+- `x` and `y` : Two of the data row type. (The internally chosen names do not matter)
+
+Output: 
+- Must be greater or equal to 0 (semi-definite)
+- Must be zero, if `x` and `y` are identical
+- Must have the same output, when the values of `x` and `y` are switched. (symmetry)
+
+
+Examples:
+
+```{r globe_example_distance}
+# the custom function for distance on a globe
+distanceByLongitudeAndLatitude <- function(x,y){
+  x <- unlist(x,use.names = FALSE)[2:1] * 2*pi/360
+  y <- unlist(y,use.names = FALSE)[2:1] * 2*pi/360
+  round(2*6371000 * asin(sqrt(sin((y[1]-x[1])/2)^2 +
+                       cos(x[1]) * cos(y[1]) *
+                     sin((y[2]-x[2])/2)^2)),2)
+}
+```
+
+```{r globe_example_1, echo = -3}
+if(require('maps')){
+# load some data of word cities
+set.seed(124)
+slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=200, maps::world.cities[ ,c('long','lat')]))
+
+clustering <- hierarchicalClustering(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
+clustering
+} 
+```
+
+Because this is a main feature of the package, here is another example:
+
+
+```{r custom_distance_function_example_2}
+WIDE_euclidean <- function(x,y) {
+  x[[1]] <- 0.1*x[[1]]
+  y[[1]] <- 0.1*y[[1]]
+  euclidean(x,y)
+  }
+hierarchicalClustering(data_1, K=4, custom_distance_function = WIDE_euclidean)
+```
+
+
+### 2.7 .print_info
+A logical of length 1.
+This is useful for debugging or finding loops caused by custom metrics. If `TRUE` some extra info will be displayed in the console.
+
+Example: 
+```{r .print_info_example}
+hierarchicalClustering(data_1, K=7, .print_info = TRUE)
+```
+
+
+
+
+## 3 Output
+The output is a clustering object:
+A list of the class clustering with at least an element called `'clustered_data'`.
+
+### 3.1. clustered_data
+The original data with a column called `'cluster'` added.
+
+```{r clustered_data}
+hierarchicalClustering(data_1, K=4)$clustered_data
+```
