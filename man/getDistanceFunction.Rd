@@ -4,7 +4,11 @@
 \alias{getDistanceFunction}
 \title{defer distance function from inputs}
 \usage{
-getDistanceFunction(metric = "euclidean", p = NULL, custom_metric = NULL)
+getDistanceFunction(
+  distance = "euclidean",
+  p = NULL,
+  custom_distance_function = NULL
+)
 }
 \description{
 defer distance function from inputs

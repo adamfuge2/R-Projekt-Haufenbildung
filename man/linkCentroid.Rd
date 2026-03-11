@@ -7,11 +7,11 @@
 linkCentroid(metric, data_1, data_2)
 }
 \arguments{
-\item{metric}{metric function (euclidean, maximumMetric...)}
-
 \item{data_1}{a tibble with n(>=1) rows of dimension d}
 
 \item{data_2}{a tibble with n(>=1) rows of dimension d}
+
+\item{distance}{distance function (euclidean, maximumDistance...)}
 }
 \value{
 a real number (numeric) >= 0

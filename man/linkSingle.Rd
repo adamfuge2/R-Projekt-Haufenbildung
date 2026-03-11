@@ -7,16 +7,16 @@
 linkSingle(metric, data_1, data_2)
 }
 \arguments{
-\item{metric}{metric function (euclidean, maximumMetric...)}
-
 \item{data_1}{a tibble with n(>=1) rows of dimension d}
 
 \item{data_2}{a tibble with n(>=1) rows of dimension d}
+
+\item{distance}{distance function (euclidean, maximumDistance...)}
 }
 \value{
 a real number (numeric) >= 0
 }
 \description{
 Minimal intercluster dissimilarity. Determines the smallest distance between
-points in cluster and 1 and points in cluster 2 given a metric.
+points in cluster and 1 and points in cluster 2 given a distance function.
 }

@@ -7,9 +7,9 @@
 kMedioids(
   data,
   K,
-  metric = "euclidean",
+  distance = "euclidean",
   p = NULL,
-  custom_metric = NULL,
+  custom_distance_function = NULL,
   .print_info = FALSE
 )
 }
@@ -21,13 +21,13 @@ sample size and called n.}
 \item{K}{A whole number between 0 and n+1. The amount of Clusters the
 algorithm tries to find in the data}
 
-\item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}}
 
-\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+\item{p}{A numeric greater than or equal to 1. If \code{distance} was
 chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
-\item{custom_metric}{A semi definite and symmetric function whose inputs are
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}

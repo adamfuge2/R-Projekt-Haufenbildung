@@ -17,5 +17,5 @@ far distances)}
 n x n matrix with values between 0 and 1
 }
 \description{
-Function to determine the weights using euclidean metric. (shortcut)
+Function to determine the weights using euclidean distance. (shortcut)
 }
