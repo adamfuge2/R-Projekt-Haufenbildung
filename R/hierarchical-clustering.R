@@ -26,7 +26,10 @@
 #'   }
 #' @export
 hierarchicalClustering <- function(data, K, mode = "centroid", distance_method = "euclidean", p = NULL, custom_distance_function = NULL, .print_info = FALSE){
-  data <- tibble::as_tibble(data)
+
+  # reformat the input and remove NAs
+  data <- reformatDataInput(data)
+
   n <- base::nrow(data)
 
   if(K > n) stop(paste0("Dataset with ", n, " datapoints cannot have ", K, " clusters!"))
@@ -89,7 +92,7 @@ hierarchicalClustering <- function(data, K, mode = "centroid", distance_method =
   }
   if(.print_info) print("Done, formatting result")
 
-  data <- dplyr::mutate(tibble::as.tibble(data), cluster = dplyr::dense_rank(cluster))
+  data <- dplyr::mutate(tibble::as_tibble(data), cluster = dplyr::dense_rank(cluster))
 
   return(structure(
     list(

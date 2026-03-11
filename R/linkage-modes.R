@@ -60,16 +60,16 @@ linkAverage <- function(metric, data_1, data_2){   #employ the average distance 
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      mean_dist = mean(
+      'mean_dist' = mean(
         sapply(1:nrow(data_2), function(j){
           metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
-    dplyr::select(mean_dist) |>
+    dplyr::select('mean_dist') |>
     dplyr::ungroup() |>
-    dplyr::summarise(mean = mean(.data$mean_dist)) |>
-    dplyr::pull(mean)
+    dplyr::summarise('mean' = mean(.data$mean_dist)) |>
+    dplyr::pull(.data$mean)
 }
 
 
@@ -89,16 +89,16 @@ linkSingle <- function(metric, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      min_dist = min(
+      'min_dist' = min(
         sapply(1:nrow(data_2), function(j){
           metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
-    dplyr::select(min_dist) |>
+    dplyr::select('min_dist') |>
     dplyr::ungroup() |>
-    dplyr::summarise(min = min(.data$min_dist)) |>
-    dplyr::pull(min)
+    dplyr::summarise('min' = min(.data$min_dist)) |>
+    dplyr::pull(.data$min)
 }
 
 
@@ -118,16 +118,16 @@ linkComplete <- function(metric, data_1, data_2){
   data_1 |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      max_dist = max(
+      'max_dist' = max(
         sapply(1:nrow(data_2), function(j){
           metric(data_1[dplyr::cur_group_rows(), ], data_2[j, ])
         })
       )
     ) |>
-    dplyr::select(max_dist) |>
+    dplyr::select('max_dist') |>
     dplyr::ungroup() |>
-    dplyr::summarise(max = max(.data$max_dist)) |>
-    dplyr::pull(max)
+    dplyr::summarise('max' = max(.data$max_dist)) |>
+    dplyr::pull(.data$max)
 }
 
 
