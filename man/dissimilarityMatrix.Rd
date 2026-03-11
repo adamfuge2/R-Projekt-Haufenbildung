@@ -4,12 +4,12 @@
 \alias{dissimilarityMatrix}
 \title{Dissimilarity matrix}
 \usage{
-dissimilarityMatrix(data, metric)
+dissimilarityMatrix(data, distance)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
-\item{metric}{A metric whose inputs are of the data row type}
+\item{distance}{A distance function whose inputs are of the data row type}
 }
 \value{
 a dissimilarity matrix, a row and coloumn for every data point

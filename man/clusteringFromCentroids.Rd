@@ -4,12 +4,12 @@
 \alias{clusteringFromCentroids}
 \title{Coerce a data frame to clustering}
 \usage{
-clusteringFromCentroids(centroids, metric = euclidean)
+clusteringFromCentroids(centroids, distance = euclidean)
 }
 \arguments{
 \item{centroids}{a tibble with every row being a centroid}
 
-\item{metric}{a metric whose 2 inputs are of the centroids row type
+\item{distance}{a distance function whose 2 inputs are of the centroids row type
 
 Returns:
 function,    a clustering function relating any data point to their cluster.

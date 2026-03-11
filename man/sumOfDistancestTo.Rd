@@ -4,14 +4,14 @@
 \alias{sumOfDistancestTo}
 \title{The Inequality of a vector to the data}
 \usage{
-sumOfDistancestTo(data, vector, metric)
+sumOfDistancestTo(data, vector, distance)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
 \item{vector}{A vector (i.e. tibble row or atomic vector)}
 
-\item{metric}{A metric whose inputs are of the data row type}
+\item{distance}{A distance function whose inputs are of the data row type}
 }
 \value{
 a numeric >= 0

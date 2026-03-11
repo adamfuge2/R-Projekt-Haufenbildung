@@ -18,7 +18,7 @@ test_that("Gauss Kernel", {
 test_that("Kernel by Custom distance function", {
   x <- c(2, 4, -8)
   y <- c(2.4, 5, 9.1)
-  testthat::expect_no_error(kernelByCustomMetric(euclidean, 2)(x, y))
+  testthat::expect_no_error(kernelByCustomDistanceFunction(euclidean, 2)(x, y))
 })
 
 
@@ -31,7 +31,7 @@ test_that("Spectral Projection", {
   testthat::expect_no_error(spectralProjection(data, k, gamma = gamma))
 
   #for special cases
-  custum_kernel <- kernelByCustomMetric(maximumDistance, 1.4)
+  custum_kernel <- kernelByCustomDistanceFunction(maximumDistance, 1.4)
   testthat::expect_warning(spectralProjection(data, k, gamma = gamma, custom_mercer_kernel = custum_kernel))
   testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4))
   testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4)$projected_data), k)
@@ -46,7 +46,7 @@ test_that("Spectral Clustering", {
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, K = 4))
 
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "K-Medioids", K = 4))
-  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "hierarchical Clustering", n = 2))
+  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "hierarchical clustering", K = 2))
 
   #fill with additional arguments if fully implemented
   #testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "DBSCAN"))

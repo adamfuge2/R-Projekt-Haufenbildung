@@ -8,7 +8,7 @@ silhouette(
   data,
   clustering_function,
   o,
-  metric = euclidean,
+  distance = euclidean,
   is_part_of_data = TRUE
 )
 }
@@ -20,7 +20,7 @@ silhouette(
 \item{o}{an atomic vector or tibble row.
 This is the data point we calculate the silhouette of}
 
-\item{metric}{A metric whose 2 inputs are of the data row type.}
+\item{distance}{a distance function whose 2 inputs are of the data row type.}
 
 \item{is_part_of_data}{A logical of length 1. If \code{TRUE} we assume that the data point is already part of the `data`.}
 }

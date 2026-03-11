@@ -1,6 +1,6 @@
 # Hierarchical Clustering
 set.seed(13456)
-data <- generateClusterTestDataSimple(n=16, cluster_amount = 3, dim = 3)
+data <- generateClusterData(n=16, cluster_amount = 3, dim = 3)
 data_matrix <- as.matrix(data)
 
 

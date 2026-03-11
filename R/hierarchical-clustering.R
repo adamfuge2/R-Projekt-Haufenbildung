@@ -42,14 +42,14 @@ hierarchicalClustering <- function(data, K, mode = "centroid", distance_method =
     if(distance_method == 'euclidean')
       distance <- euclidean
     else if(distance_method =='maximum')
-      distance <- maximumMetric
+      distance <- maximumDistance
     else if(distance_method == 'Lp'){
       stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
       stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      distance <- pMetric(p)
+      distance <- pDistance(p)
     }
     else if(distance_method == 'manhattan')
-      distance <- pMetric(1)
+      distance <- pDistance(1)
     else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
   }
   else distance <- custom_distance_function

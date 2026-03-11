@@ -41,7 +41,7 @@ gaussKernel <- function(x,y,gamma){
 #'
 #' @returns kernel function with this custom distance
 #' @export
-kernelByCustomDistance <- function(distance,gamma)
+kernelByCustomDistanceFunction <- function(distance,gamma)
   function(x,y) base::exp(- gamma * distance(x,y))
 
 
@@ -111,7 +111,7 @@ spectralProjection <- function(data,
         distance <- function(x,y) almost_distance(x,y)* (kernel_epsilon >= almost_distance(x,y))
       }else distance <- almost_distance
 
-      almost_kernel <- kernelByCustomdistance(distance,gamma)
+      almost_kernel <- kernelByCustomDistanceFunction(distance,gamma)
       if(kernel_epsilon < Inf) {
         K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_distance(x,y))
       }else K <- almost_kernel
@@ -210,28 +210,14 @@ spectralClustering <- function(data,
   if(cluster_algorithm == 'K-Means'){
     # apply kMeans
     clustering <- kMeans(spectral_projection$projected_data, ... )
-
-    # we would like to be able to access the projected data
-    clustering$projected_clustered_data <- clustering$clustered_data
-    # but were interested in the clustering of the original data points
-    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
-
   }
   else if(cluster_algorithm == 'K-Medioids'){
     # apply kMeadioids
     clustering <- kMedioids(spectral_projection$projected_data, ...)
-
-    # we would like to be able to access the projected data
-    clustering$projected_clustered_data <- clustering$clustered_data
-    # but were interested in the clustering of the original data points
-    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
-
   }
-  else if(cluster_algorithm == 'hierarchical Clustering'){
+  else if(cluster_algorithm == 'hierarchical clustering'){
     # apply hierarchical_clustering
-    clustering <- hierarchical_clustering(spectral_projection$projected_data, ...)
-
-    # TODO Snep: Modify the output to your liking (see for example kMeans case)
+    clustering <- hierarchicalClustering(spectral_projection$projected_data, ...)
   }
   else if(cluster_algorithm == 'DBSCAN'){
     # apply DBSCAN
@@ -248,6 +234,11 @@ spectralClustering <- function(data,
   else{
     stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
   }
+
+  # we would like to be able to access the projected data
+  clustering$projected_clustered_data <- clustering$clustered_data
+  # but were interested in the clustering of the original data points
+  clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   if(.print_info) print('Success, All done!')
 

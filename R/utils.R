@@ -293,6 +293,22 @@ dissimilarityMatrix <-function(data,distance){
 }
 
 
+#' Reformat Data Input
+#'
+#' Removes NA and inserts column names if none are given
+#'
+#' @param data a tibble or matrix of arbitrary dimension with each row representing
+#' one datapoint.
+#'
+#' @returns tibble of same type as input
+#' @export
+reformatDataInput <- function(data){
+  if(base::length(base::colnames(data)) == 0)
+    base::colnames(data) <- paste0('X_', 1:ncol(data))
+  return(stats::na.omit(tibble::as_tibble(data)))
+}
+
+
 #' The Inequality of a vector to the data
 #'
 #' Sums the distances of a vector to all pints in the data set.

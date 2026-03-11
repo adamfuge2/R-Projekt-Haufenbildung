@@ -10,9 +10,9 @@ spectralClustering(
   mercer_kernel = "gauss",
   gamma = NULL,
   custom_mercer_kernel = NULL,
-  metric = NULL,
+  distance = NULL,
   p = NULL,
-  custom_metric = NULL,
+  custom_distance_function = NULL,
   kernel_epsilon = Inf,
   cluster_algorithm = "K-Means",
   ...,
@@ -31,11 +31,11 @@ points}
 
 \item{custom_mercer_kernel}{kernel function (see algorithm description)}
 
-\item{metric}{metric used in kernel function}
+\item{distance}{distance used in kernel function}
 
-\item{p}{if metric is 'Lp', this value will be used for p}
+\item{p}{if distance function is 'Lp', this value will be used for p}
 
-\item{custom_metric}{a custom metric used in kernel function}
+\item{custom_distance_function}{a custom distance function used in kernel function}
 
 \item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
 
