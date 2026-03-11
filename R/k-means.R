@@ -56,6 +56,27 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
   else metric <- custom_metric
 
 
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    centroid <- data |> dplyr::summarise(across(everything(),mean))
+    distances <- data |> apply(1,function(x) metric(x,centroid))
+    D <- dissimilarityMatrix(data,metric)
+
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data |> dplyr::summarise(across(everything(),mean)),
+        inner_inequality = distances |> sum(),
+        sum_of_squares = distances^2 |> sum(),
+        mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(dplyr::mutate(data, cluster=1),index,D)) |> mean()
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)

@@ -19,7 +19,7 @@ Displays 2D data points color coded by their cluster. Can be used for:
 0. Every data point in 'cluster' will be labeled as an 'Outlier'.
 }
 \examples{
-data_2D <- generateClusterTestDataSimple(dim=2,cluster_amount=5)
+data_2D <- generateClusterData(dim=2,cluster_amount=5)
 clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
 clusterfuck:::viewClusters2D(clustered_data_2D)
 

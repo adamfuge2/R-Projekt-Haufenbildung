@@ -23,7 +23,7 @@ test_that('InnerInequality',{
 
   set.seed(13456)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   clustering <- kMeans(data,K=3,tries = 10)
 
@@ -70,12 +70,12 @@ test_that('tibbleAsPath',{
 })
 
 test_that('dissimilarityMatrix',{
-  data <- generateClusterTestDataSimple(n=10)
+  data <- generateClusterData(n=10)
   testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,euclidean), as.matrix(stats::dist(data)))
 })
 
 test_that('sumOfDistancestTo',{
-  data <- generateClusterTestDataSimple(n=10)
+  data <- generateClusterData(n=10)
   expect_equal(sumOfDistancestTo(data,data[1,],euclidean), sum(as.matrix(stats::dist(data))[1,]))
 })
 
