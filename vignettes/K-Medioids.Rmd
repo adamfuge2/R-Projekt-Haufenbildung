@@ -98,8 +98,8 @@ kMedioids(data_1,K=10)
 kMedioids(data_2,K=1)
 ```
 
-### 2.3 metric / distance
-This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
+### 2.3 distance
+This function comes with a handful of common distance functions pre made. Use this parameter to choose one of the following:
 
 - 'euclidean' (default)
 - 'maximum' 
@@ -126,16 +126,16 @@ viewClusters(full_data,clustering_3$clustering_function)
 ```
 
 ### 2.4 p
-If you chose 'Lp' for the parameter distance (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
+If you chose 'Lp' for the parameter distance (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other distances are chosen.
 
 Examples:
 ```{r}
 set.seed(123)
-clustering_1 <- kMedioids(data_1,K=5, metric = 'Lp', p = 1)
+clustering_1 <- kMedioids(data_1,K=5, distance = 'Lp', p = 1)
 set.seed(123)
-clustering_2 <- kMedioids(data_1,K=5, metric = 'Lp', p = 2)
+clustering_2 <- kMedioids(data_1,K=5, distance = 'Lp', p = 2)
 set.seed(123)
-clustering_3 <- kMedioids(data_1,K=5, metric = 'Lp', p = 4)
+clustering_3 <- kMedioids(data_1,K=5, distance = 'Lp', p = 4)
 ```
 
 The differences can be visualized using the Voronoi cells:
@@ -149,11 +149,11 @@ viewClusters(full_data,clustering_3$clustering_function)
 
 
 ### 2.5 custom_distance_function
-You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters metric (2.3) and p (2.4) are ignored. 
+You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance function is provided, the parameters distance (2.3) and p (2.4) are ignored. 
 
 But please consider:
-- Your custom metric must applicable on the data
-- **Using an unoptimized custom metric can slow** the calculation of kMedioids down significantly!
+- Your custom distance function must applicable on the data
+- **Using an unoptimized custom distance function can slow** the calculation of kMedioids down significantly!
 
 
 Inputs:   
@@ -202,7 +202,7 @@ viewClusters(generateNoiseData(n=4000,lower_bounds = c(-180,-90), upper_bounds=c
 ```
 ### 2.6 .print_info
 A logical of length 1
-This is useful for debugging or finding loops caused by custom metrics (2.5). If TRUE some extra info will be displayed in the console
+This is useful for debugging or finding loops caused by custom distance functions (2.5). If TRUE some extra info will be displayed in the console
 
 Example: 
 ```{r}
