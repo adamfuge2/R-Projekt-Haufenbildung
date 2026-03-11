@@ -4,14 +4,14 @@
 \alias{linkComplete}
 \title{Linkage mode: complete}
 \usage{
-linkComplete(metric, data_1, data_2)
+linkComplete(distance, data_1, data_2)
 }
 \arguments{
+\item{distance}{distance function (euclidean, maximumDistance...)}
+
 \item{data_1}{a tibble with n(>=1) rows of dimension d}
 
 \item{data_2}{a tibble with n(>=1) rows of dimension d}
-
-\item{distance}{distance function (euclidean, maximumDistance...)}
 }
 \value{
 a real number (numeric) >= 0

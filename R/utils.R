@@ -326,7 +326,17 @@ sumOfDistancestTo <- function(data,vector,distance){
     base::unlist(use.names = FALSE)
 }
 
-#' defer distance function from inputs
+#' Defer distance function from inputs
+#'
+#' @param distance A character. One of \code{'euclidean'}, \code{'maximum'},
+#'   \code{'Lp'} or \code{'manhattan'}.
+#' @param p A numeric greater than or equal to 1. If \code{distance_method} was
+#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
+#' @param custom_distance_function A semi definite and symmetric function whose inputs are
+#'   two of the \code{data} row type.
+#'
+#' @returns a distance function
+#' @export
 getDistanceFunction <- function(distance='euclidean',p=NULL,custom_distance_function=NULL){
   if(is.null(custom_distance_function)){
     if(distance=='euclidean')

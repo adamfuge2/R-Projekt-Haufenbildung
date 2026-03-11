@@ -207,9 +207,9 @@ greedySearchMedioidIndeces <- function(data,K,distance=euclidean,dissimilarity_m
   base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
 
   if(K == nrow(unique(data))) return(data |>
-                                       dplyr::mutate(index = row(data[1])) |>
-                                       dplyr::summarise(index=dplyr::first(index)     , .by = all_of(1:ncol(data))) |>
-                                       dplyr::select(index) |>
+                                       dplyr::mutate('index' = row(data[1])) |>
+                                       dplyr::summarise('index' = dplyr::first(.data$index)     , .by = all_of(1:ncol(data))) |>
+                                       dplyr::select('index') |>
                                        unlist(use.names = FALSE))
 
   # if not already given, calculate dissimilarity matrix

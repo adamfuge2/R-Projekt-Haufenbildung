@@ -141,7 +141,7 @@ viewClusters3D <-function(clustered_data){
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
-  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[cluster_label])
+  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[.data$cluster_label])
 
   x<- clustered_data$X
   y<- clustered_data$Y

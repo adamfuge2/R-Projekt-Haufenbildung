@@ -11,16 +11,16 @@ Authors@R: c(
     person(
       "Adam", "Fuge",
       email = "adam.fuge@stud.uni-heidelberg.de",
-      role = "aut"
+      role = c("aut", "cre")
     ),
     person(
-      "Roman", "Hektor",
-      email = "roman.hektor@stud.uni-heidelberg.de",
-      role = c("aut",'cre')
+      "Roman", "Hector",
+      email = "roman.hector@stud.uni-heidelberg.de",
+      role = "aut"
     )
   )
 Description: This package includes the algoriithms K-Means, K-Medioids, 
-    hierarchical clustering, DBSCAN and OPTICS. 
+    spectral clustering, hierarchical clustering, DBSCAN and OPTICS. 
     Also included are easy to use functions to 
     - score the clusterings,
     - plot the clusterings, 
@@ -32,7 +32,8 @@ RoxygenNote: 7.3.3
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    maps
 Config/testthat/edition: 3
 Imports: 
     dplyr (>= 1.2.0),

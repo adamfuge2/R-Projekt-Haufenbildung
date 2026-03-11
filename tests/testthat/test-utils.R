@@ -38,7 +38,6 @@ test_that('silhouette',{
 
   testthat::expect_equal(silhouette(data,clustering,c(0.1,0.46)),0)
 
-  print(silhouette(data,clustering,c(0.15,0.46)))
 
   testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46),is_part_of_data = FALSE), silhouette(data,clustering,c(0.4,0.46),is_part_of_data = FALSE))
 })
