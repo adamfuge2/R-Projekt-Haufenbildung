@@ -34,13 +34,13 @@ viewClusters1D <-function(clustered_data){
 
 
   ## label the clusters
-  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate(cluster_label = clusterLabeling(cluster))
+  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
   ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
+  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.dist$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  print(ggplot2::ggplot(clustered_data,ggplot2::aes(y=Y, x=row(clustered_data)[,1] ,colour = cluster_label)) +
+  print(ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
           ggplot2::geom_point() +
           ggplot2::scale_color_manual(values = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
           ggplot2::labs(x='Data Points',x='Value')
@@ -83,13 +83,13 @@ viewClusters2D <-function(clustered_data){
 
 
   ## label the clusters
-  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate(cluster_label = clusterLabeling(cluster))
+  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
   ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
+  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  print(ggplot2::ggplot(clustered_data,ggplot2::aes(x=X,y=Y,colour = cluster_label)) +
+  print(ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
           ggplot2::geom_point() +
           ggplot2::scale_color_manual(values = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
           ggplot2::coord_fixed()
@@ -135,17 +135,17 @@ viewClusters3D <-function(clustered_data){
 
 
   ## label the clusters
-  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate(cluster_label = clusterLabeling(cluster))
+  clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
 
   ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(cluster!=0) |> dplyr::distinct(cluster) |> base::nrow()
+  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
-  clustered_data <- clustered_data |> dplyr::mutate(color = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[cluster_label])
+  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[cluster_label])
 
   x<- clustered_data$X
-  y<- clustered_data $Y
-  z<- clustered_data $Z
+  y<- clustered_data$Y
+  z<- clustered_data$Z
   color <- clustered_data$color
 
   ## Display data as 2D scatter plot
@@ -232,7 +232,7 @@ viewClusters <- function(data,clustering=NULL){
 viewData2D <- function(data){
   colnames(data) <- c('X','Y')
 
-  ggplot2::ggplot(data,ggplot2::aes(x=X,y=Y)) +
+  ggplot2::ggplot(data,ggplot2::aes(x=.data$X,y=.data$Y)) +
     ggplot2::geom_point()
 }
 

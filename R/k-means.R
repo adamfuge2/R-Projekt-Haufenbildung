@@ -36,7 +36,10 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
   n <- base::nrow(data)
   dim <- base::ncol(data)
   minimal_cost <- Inf
-  old_centroids <- tibble::tibble()
+  old_centroids <- tibble::tibble
+
+  # Invariant, check parameter tries
+  base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
 
 
   if(is.null(custom_metric)){
@@ -80,7 +83,6 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
-  base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
   base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
   base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
   if(.print_info) print(Sys.time() - start)
@@ -199,12 +201,13 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
 #' reduction bound can be chosen arbitrarily.
 #'
 #' @param data        a tibble with with every row representing a data point.
+#' @param check_min   A positive Integer.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
+findClusterAmountElbow <- function(data, check_min = 1, .print_info = FALSE){
   inner_inequalities <- numeric()
   improvement <- list(Inf)
   K <- 1

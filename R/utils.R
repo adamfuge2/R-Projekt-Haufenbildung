@@ -40,24 +40,24 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 #'
 #' @returns numeric, a real number > 0.
 #'
-innerInequality <- function(data,clustering,metric=euclidean){
+innerInequality <- function(data,clustering_function,metric=euclidean){
 
   clustered_data <- data |>
     dplyr::rowwise() |>
-    dplyr::mutate(cluster=clustering(dplyr::c_across(dplyr::everything())))
+    dplyr::mutate('cluster'=clustering_function(dplyr::c_across(dplyr::everything())))
 
   centroids <- clustered_data |>
     dplyr::ungroup() |>
-    dplyr::group_by(cluster) |>
+    dplyr::group_by('cluster') |>
     dplyr::summarise_at(1:base::ncol(data),base::mean) |>
-    dplyr::select(-cluster)
+    dplyr::select(dplyr::all_of(1:(ncol(data)-1)))
 
   return(
     clustered_data |>
       dplyr::rowwise() |>
-      dplyr::mutate(distances = metric(dplyr::c_across(1:base::ncol(data)), centroids[cluster,])) |>
+      dplyr::mutate('distances' = metric(dplyr::c_across(1:base::ncol(data)), centroids[.data$cluster,])) |>
       dplyr::ungroup() |>
-      dplyr::summarise(base::sum(distances)) |>
+      dplyr::summarise(base::sum(.data$distances)) |>
       unlist(use.names=FALSE)
   )
 }
@@ -89,7 +89,6 @@ silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_da
   ## apply the clustering function to the data
   clusters <- apply(data,1,function(data_point) cluster(data_point))
   distances <- apply(data,1,function(data_point) metric(data_point,o))
-  clustered_data <- dplyr::mutate(data,cluster = clusters, distance = distances)
 
   # do i really have to explain this?
   cluster_of_o <- cluster(o)
@@ -291,9 +290,9 @@ dissimilarityMatrix <-function(data,metric){
 #' @returns a numeric >= 0
 #'
 sumOfDistancestTo <- function(data,vector,metric){
-  data |> dplyr::rowwise() |> dplyr::mutate(distance = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
+  data |> dplyr::rowwise() |> dplyr::mutate('distance' = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
     dplyr::ungroup() |>
-    dplyr::summarise(sum = sum(distance)) |>
+    dplyr::summarise('sum' = sum(.data$distance)) |>
     base::unlist(use.names = FALSE)
 }
 

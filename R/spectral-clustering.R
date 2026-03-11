@@ -141,7 +141,7 @@ spectralProjection <- function(data,
   dim(a) <- c(k,n)
 
   # save the data points in tibble as usual
-  projected_data <- tibble::as_tibble(t(a),.name_repair = 'unique')
+  projected_data <- tibble::as_tibble(t(a),.name_repair = 'minimal')
 
   # useful names
   colnames(projected_data) <- paste0('X_',1:k)
@@ -245,7 +245,7 @@ spectralClustering <- function(data,
     stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
   }
 
-  if(.print_infos) print('Success, All done!')
+  if(.print_info) print('Success, All done!')
 
   return(clustering)
 }

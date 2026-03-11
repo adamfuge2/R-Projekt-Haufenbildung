@@ -172,7 +172,7 @@ kMedioids(data_1, K=4, custom_metric = discrete_distance)
 ```
 
 Because this is a main feature of the package, here is another example:
-```{r}
+```{r globe_example_distance}
 # the custom function for distance on a globe
 distanceByLongitudeAndLatitude <- function(x,y){
   x <- unlist(x,use.names = FALSE)[2:1] * 2*pi/360
@@ -181,17 +181,25 @@ distanceByLongitudeAndLatitude <- function(x,y){
                        cos(x[1]) * cos(y[1]) *
                      sin((y[2]-x[2])/2)^2)),2)
 }
+```
 
+
+```{r globe_example_1}
+if(require('maps')){
 # load some data of word cities
 library(maps)
 slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,maps::world.cities[,c('long','lat')]))
 
 clustering <- kMedioids(slice_of_the_world, K=7, custom_metric = distanceByLongitudeAndLatitude)
 clustering
-viewClusters(generateNoiseData(n=4000,lower_bounds = c(-180,-90), upper_bounds=c(180,90)),clustering$clustering_function)
+} 
 ```
 
-
+```{r globe_example_2}
+if(require('maps')){
+viewClusters(generateNoiseData(n=4000,lower_bounds = c(-180,-90), upper_bounds=c(180,90)),clustering$clustering_function)
+} 
+```
 ### 2.6 .print_info
 A logical of length 1
 This is useful for debugging or finding loops caused by custom metrics (2.5). If TRUE some extra info will be displayed in the console

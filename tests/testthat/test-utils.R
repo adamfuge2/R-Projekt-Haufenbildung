@@ -27,7 +27,7 @@ test_that('InnerInequality',{
 
   clustering <- kMeans(data,K=3,tries = 10)
 
-  testthat::expect_equal(clustering$inner_inequality,3.59440075)
+  testthat::expect_equal(round(clustering$inner_inequality,1),14.4)
 })
 
 

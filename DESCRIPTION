@@ -39,6 +39,7 @@ Imports:
     ggplot2 (>= 4.0.2),
     rlang,
     scatterplot3d,
+    stats,
     tibble (>= 3.3.1),
     tidyselect (>= 1.2.1)
 Depends:
