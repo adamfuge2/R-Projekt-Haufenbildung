@@ -79,8 +79,8 @@ Lets go clustering!
 ```{r}
 kMedioids(data_1,K=3)
 kMedioids(data_2,K=1,.print_info = TRUE)
-kMedioids(data_3,K=3,custom_metric = study_courses_distance)$clustered_data
-kMedioids(data_4,K=3,custom_metric = characterAndNumeric_distance)
+kMedioids(data_3,K=3,custom_distance_function = study_courses_distance)$clustered_data
+kMedioids(data_4,K=3,custom_distance_function = characterAndNumeric_distance)
 ```
 
 ### 2.2 K
@@ -98,7 +98,7 @@ kMedioids(data_1,K=10)
 kMedioids(data_2,K=1)
 ```
 
-### 2.3 metric
+### 2.3 metric / distance
 This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
 
 - 'euclidean' (default)
@@ -109,11 +109,11 @@ This function comes with a handful of common metrics pre made. Use this paramete
 Examples
 ```{r}
 set.seed(123)
-clustering_1 <- kMedioids(data_1,K=5, metric = 'euclidean')
+clustering_1 <- kMedioids(data_1,K=5, distance = 'euclidean')
 set.seed(123)
-clustering_2 <- kMedioids(data_1,K=5, metric = 'maximum')
+clustering_2 <- kMedioids(data_1,K=5, distance = 'maximum')
 set.seed(123)
-clustering_3 <- kMedioids(data_1,K=5, metric = 'manhattan')
+clustering_3 <- kMedioids(data_1,K=5, distance = 'manhattan')
 ```
 
 The differences can be visualized using the Voronoi cells:
@@ -126,7 +126,7 @@ viewClusters(full_data,clustering_3$clustering_function)
 ```
 
 ### 2.4 p
-If you chose 'Lp' for the parameter metric (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
+If you chose 'Lp' for the parameter distance (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
 
 Examples:
 ```{r}
@@ -148,7 +148,7 @@ viewClusters(full_data,clustering_3$clustering_function)
 ```
 
 
-### 2.5 custom_metric
+### 2.5 custom_distance_function
 You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters metric (2.3) and p (2.4) are ignored. 
 
 But please consider:
@@ -168,7 +168,7 @@ Output:
 Example:
 ```{r}
 discrete_distance <- function(x,y) !identical(x,y) |> as.numeric()
-kMedioids(data_1, K=4, custom_metric = discrete_distance)
+kMedioids(data_1, K=4, custom_distance_function = discrete_distance)
 ```
 
 Because this is a main feature of the package, here is another example:
@@ -190,7 +190,7 @@ if(require('maps')){
 library(maps)
 slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,maps::world.cities[,c('long','lat')]))
 
-clustering <- kMedioids(slice_of_the_world, K=7, custom_metric = distanceByLongitudeAndLatitude)
+clustering <- kMedioids(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
 clustering
 } 
 ```

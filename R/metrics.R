@@ -1,10 +1,10 @@
 ######################### metrics #################################
 ##
-## A metric is a function measuring the
+## A distance is a function measuring the
 ## distance/closeness/inequality/relatedness/etc...
-## for every metric here the following must (approximately) hold:
-## 1. metric(x,y) = 0  if and only if x = y
-## 2. metric(x,y) = metric(y,x)
+## for every distance here the following must (approximately) hold:
+## 1. distance(x,y) = 0  if and only if x = y
+## 2. distance(x,y) = distance(y,x)
 ##
 ## Inputs:
 ## x,         an atomic vector or tibble row.
@@ -32,40 +32,40 @@
 euclidean <- function(x,y) sqrt(base::sum((x-y)^2))
 
 
-#' The standard Manhattan, taxi or maximum metric
+#' The standard Manhattan, taxi or maximum distance
 #'
 #' @param x         an atomic vector or tibble row with only real numbers
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @returns numeric,   a real number >= 0.
 #' @export
-maximumMetric <- function(x,y) base::max(base::abs(x-y))
+maximumDistance <- function(x,y) base::max(base::abs(x-y))
 
 
 
-#' The standard Lp metric
+#' The standard Lp distance
 #'
 #'
 #' @param p         a real numeric with 1 <= p < Inf
 #'
 #'
-#' @returns a metric (function) with inputs \code{x,y} numerical vectors and a
+#' @returns a distance (function) with inputs \code{x,y} numerical vectors and a
 #'   numerical output, a real number >= 0.
 #'
 #' @examples
-#' pMetric(1)(3,5)
-#' pMetric(5)(c(3,0,34),c(-5,30,31))
-#' pMetric(1.5)(tibble::tibble(X =  3, Y =  0, Z = 34),
+#' pDistance(1)(3,5)
+#' pDistance(5)(c(3,0,34),c(-5,30,31))
+#' pDistance(1.5)(tibble::tibble(X =  3, Y =  0, Z = 34),
 #'           tibble::tibble(X = -5, Y = 30, Z = 31))
 #' @export
-pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
+pDistance <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 
 #' Manhattan/Taxi distance
 #'
 #' @export
 manhattan <- function(x,y) base::sum(base::abs(x-y))
 
-##################### Study courses metric ####################
+##################### Study courses distance ####################
 #' A distance function on study courses
 #'
 #' The data for this relies on literally nothing.
@@ -83,14 +83,14 @@ study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unli
 #viewData(students_data)
 #
 #
-#clustering <- kMedioids(students_data,K=4,custom_metric=studies_difference,.print_info = TRUE)
+#clustering <- kMedioids(students_data,K=4,custom_distance_function=studies_difference,.print_info = TRUE)
 #
 #clustering$clustered_data
 #
 #data <- students_data
-#custom_metric <- studies_difference
+#custom_distance_function <- studies_difference
 #
-#silhouette(data,clustering$clustering_function,o=15,custom_metric)
+#silhouette(data,clustering$clustering_function,o=15,custom_distance_function)
 
 
 
@@ -106,21 +106,21 @@ study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unli
 #' a function factory for functions on multidimensional toruses. Meaning 'the edges loop'
 #'
 #' @param dim_lengths A numeric vector. Describes the widths of the space.
-#' @param base_metric A distance function to be used as the base distance on the looped space.
+#' @param base_distance A distance function to be used as the base distance on the looped space.
 #'
 #' @returns A distance function for two data points on a looped multidimensional space
 #'
 #' @examples
 #' pacman_distance(24)(x = 1, y = 23)
 #' pacman_distance(dim_lengths = c(26,30),
-#'                 base_metric = manhattan)(x = c(5,2), y= c(25,23))
+#'                 base_distance = manhattan)(x = c(5,2), y= c(25,23))
 #' @seealso
 #'   [hours_distance()] made by `pacman_distance(25)`,
-#'   [original_pacman_distance()] made by `pacman_distance(dim_lengths = c(26,30),base_metric = manhattan)`,
+#'   [original_pacman_distance()] made by `pacman_distance(dim_lengths = c(26,30),base_distance = manhattan)`,
 #'
 #'
 #' @export
-pacman_distance <- function(dim_lengths,base_metric=euclidean){
+pacman_distance <- function(dim_lengths,base_distance=euclidean){
 
   dim <- length(dim_lengths)
 
@@ -129,7 +129,7 @@ pacman_distance <- function(dim_lengths,base_metric=euclidean){
   M[row(M)%%(3^col(M)) > 3^(col(M)-1)-1 & row(M)%%(3^col(M)) < 2*3^(col(M)-1)] <- 0
   M[row(M)%%(3^col(M)) >= 2*3^(col(M)-1)] <- M[row(M)%%(3^col(M)) >= 2*3^(col(M)-1)]*-1
 
-  function(x,y) min(apply(M,c(1),function(plus) base_metric(x,y+plus)))
+  function(x,y) min(apply(M,c(1),function(plus) base_distance(x,y+plus)))
 }
 
 #' The distance of hours
@@ -152,18 +152,18 @@ hours_distance <- pacman_distance(dim_lengths=24)
 #'
 #' @returns A non negative numeric of length 1
 #' @export
-original_pacman_distance <- pacman_distance(dim_lengths = c(26,30),base_metric = manhattan)
+original_pacman_distance <- pacman_distance(dim_lengths = c(26,30),base_distance = manhattan)
 
-#clustering <- kMedioids(hours_data,custom_metric = hour_difference,K=3)
+#clustering <- kMedioids(hours_data,custom_distance_function = hour_difference,K=3)
 #viewClusters(more_hours_data,clustering$clustering_function)
 #clustering
 #
-#clustering <- kMedioids(oh_no_ive_spilled_my_pacman_dots,custom_metric = original_pacman_distance,K=4)
+#clustering <- kMedioids(oh_no_ive_spilled_my_pacman_dots,custom_distance_function = original_pacman_distance,K=4)
 #viewClusters(more_pacman_dots,clustering$clustering_function)
 #clustering
 
-#viewData(spectralReduction(oh_no_ive_spilled_my_pacman_dots,1,custom_mercian_kernel = gaussKernelByCustomMetric(original_pacman_distance,gamma = 1),k=3)$reduced_data)
-#viewData(spectralReduction(hours_data,gamma=1,k=2,custom_mercian_kernel = gaussKernelByCustomMetric(hours_distance,gamma = 50))$reduced_data)
+#viewData(spectralReduction(oh_no_ive_spilled_my_pacman_dots,1,custom_mercian_kernel = gaussKernelByCustomDistance(original_pacman_distance,gamma = 1),k=3)$reduced_data)
+#viewData(spectralReduction(hours_data,gamma=1,k=2,custom_mercian_kernel = gaussKernelByCustomDistance(hours_distance,gamma = 50))$reduced_data)
 
 
 ################## distance on the globe #################
@@ -184,11 +184,11 @@ distanceByLongitudeAndLatitude <- function(x,y){
 #distanceByLongitudeAndLatitude(x,y)
 #
 #viewData(dplyr::slice_sample(world.cities[,c('long','lat')],n=100))
-#kMedioids(dplyr::slice_sample(world.cities[,c('long','lat')],n=1000),custom_metric = distanceByLongitudeAndLatitude,K=2,.print_info=TRUE)
+#kMedioids(dplyr::slice_sample(world.cities[,c('long','lat')],n=1000),custom_distance_function = distanceByLongitudeAndLatitude,K=2,.print_info=TRUE)
 #slice_of_the_world <- dplyr::slice_sample(world.cities[,c('long','lat')],n=1000)
 #the_world <- tibble::as_tibble(matrix(c(runif(1000,min=-180,max = 180),runif(1000,min=-90,max = 90)),ncol = 2))
 
 
-#clustering <- kMedioids(slice_of_the_world,custom_metric = distanceByLongitudeAndLatitude,K=6,.print_info=TRUE)
+#clustering <- kMedioids(slice_of_the_world,custom_distance_function = distanceByLongitudeAndLatitude,K=6,.print_info=TRUE)
 #viewClusters(world.cities[,c('long','lat')],clustering$clustering_function)
 
