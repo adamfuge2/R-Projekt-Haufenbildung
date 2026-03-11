@@ -1,7 +1,7 @@
 #test for spectral clustering
 
 test_that("Gauss Kernel Weights", {
-  data <- generateClusterTestDataSimple(n = 10)
+  data <- generateClusterData(n = 10)
   testthat::expect_no_error(gaussKernelWeights(data, 5))
 })
 
@@ -23,7 +23,7 @@ test_that("Kernel by Custom Metric", {
 
 
 test_that("Spectral Projection", {
-  data <- generateClusterTestDataSimple(n = 20, dim = 5)
+  data <- generateClusterData(n = 20, dim = 5)
   k <- 3
   gamma <- 1.1
 
@@ -39,7 +39,7 @@ test_that("Spectral Projection", {
 
 
 test_that("Spectral Clustering", {
-  data <- generateClusterTestDataSimple(n = 20, dim = 3)
+  data <- generateClusterData(n = 20, dim = 3)
   k <- 2
   gamma <- 1.4
 

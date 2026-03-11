@@ -8,17 +8,6 @@ test_that('wholenumber check works',{
   expect_error(is.wholenumber('char'))
 })
 
-test_that('generators output right dimension',{
-  expect_equal(ncol(generateClusterTestDataSimple2D(10)),2)
-  expect_equal(ncol(generateClusterTestDataSimple(10,dim=3)),3)
-  expect_equal(ncol(generateClusterTestData2DFromPaths(10,list(tibble::tibble(X=0.5,Y=0.5)))),2)
-})
-
-test_that('generators outputs right sample size',{
-  expect_equal(nrow(generateClusterTestDataSimple2D(10)),10)
-  expect_equal(nrow(generateClusterTestData2DFromPaths(10,list(tibble::tibble(X=0.5,Y=0.5)))),10)
-})
-
 test_that('clusteringFromCentroids',{
   data <- tibble::tibble(X=c(0.1,0.1,0.8),Y=c(0.46,0.8,0.4))
 
@@ -34,7 +23,7 @@ test_that('InnerInequality',{
 
   set.seed(13456)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   clustering <- kMeans(data,K=3,tries = 10)
 
@@ -80,12 +69,12 @@ test_that('tibbleAsPath',{
 })
 
 test_that('dissimilarityMatrix',{
-  data <- generateClusterTestDataSimple2D(n=10)
+  data <- generateClusterData(n=10)
   testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,euclidean), as.matrix(stats::dist(data)))
 })
 
 test_that('sumOfDistancestTo',{
-  data <- generateClusterTestDataSimple2D(n=10)
+  data <- generateClusterData(n=10)
   expect_equal(sumOfDistancestTo(data,data[1,],euclidean), sum(as.matrix(stats::dist(data))[1,]))
 })
 

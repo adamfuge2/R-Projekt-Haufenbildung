@@ -1,7 +1,7 @@
 test_that("K-Means works", {
   set.seed(13456)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   clustering <- kMeans(data,K=3,tries = 5)
 
@@ -38,7 +38,7 @@ test_that("K-Means works", {
 test_that("findClusterAmountElbow works", {
   set.seed(123)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   expect_equal(findClusterAmountElbow(data),3)
 })
@@ -47,7 +47,7 @@ test_that("findClusterAmountElbow works", {
 test_that("findClusterAmountSilhouette works", {
   set.seed(123)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   expect_equal(findClusterAmountSilhouette(data),3)
 })

@@ -60,6 +60,9 @@ maximumMetric <- function(x,y) base::max(base::abs(x-y))
 #' @export
 pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 
+#' Manhattan/Taxi distance
+#'
+#' @export
 manhattan <- function(x,y) base::sum(base::abs(x-y))
 
 ##################### Study courses metric ####################
