@@ -201,7 +201,7 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
 #' reduction bound can be chosen arbitrarily.
 #'
 #' @param data        a tibble with with every row representing a data point.
-#' @param check_min   A positive Integer.
+#' @param check_min   A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
@@ -252,11 +252,12 @@ findClusterAmountElbow <- function(data, check_min = 1, .print_info = FALSE){
 #'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
 #' @param custom_metric A semi definite and symmetric function whose inputs are
 #'   two of the \code{data} row type.
+#' @param check_min   A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #' @export
-findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE ,check_min = 1){
+findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL,check_min = 1, .print_info = FALSE ){
   clusterings <- list()
   fit <- list()
   improvement <- Inf

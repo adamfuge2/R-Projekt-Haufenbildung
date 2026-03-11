@@ -15,12 +15,14 @@ silhouette(
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
+\item{clustering_function}{a clustering function relating any data point to their cluster.}
+
 \item{o}{an atomic vector or tibble row.
 This is the data point we calculate the silhouette of}
 
-\item{metric}{a metric whose 2 inputs are of the data row type.}
+\item{metric}{A metric whose 2 inputs are of the data row type.}
 
-\item{clustering}{a clustering function relating any data point to their cluster.}
+\item{is_part_of_data}{A logical of length 1. If \code{TRUE} we assume that the data point is already part of the `data`.}
 }
 \value{
 numeric, a real number between -1 and 1

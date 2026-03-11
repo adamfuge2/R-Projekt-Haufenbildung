@@ -37,7 +37,7 @@ viewClusters1D <-function(clustered_data){
   clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
   ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.dist$cluster) |> base::nrow()
+  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
   print(ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +

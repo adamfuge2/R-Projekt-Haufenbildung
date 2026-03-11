@@ -62,6 +62,9 @@ pMetric <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 
 #' Manhattan/Taxi distance
 #'
+#' @param x         an atomic vector or tibble row with only real numbers
+#' @param y         an atomic vector or tibble row with only real numbers
+#'
 #' @export
 manhattan <- function(x,y) base::sum(base::abs(x-y))
 

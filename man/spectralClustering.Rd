@@ -44,6 +44,9 @@ projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},
 \code{'hierarchical Clustering'}, \code{'DBSCAN'}, \code{'OPTICS'}}
 
 \item{...}{Further parameters to pass on to the clustering algorithm.}
+
+\item{.print_info}{A logical of length 1. If \code{TRUE} additional
+information will be displayed during runtime. Used in debugging.}
 }
 \value{
 a clustering object

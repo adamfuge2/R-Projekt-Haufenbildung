@@ -22,8 +22,9 @@ gaussKernelWeights <- function(data,gamma){
 #'
 #' @param x tibble with one row or atomic vector
 #' @param y tibble with one row or atomic vector
+#' @param gamma a numeric \eqn{\ge} 0
 #'
-#' @returns numeric bewteen 0 and 1
+#' @returns numeric between 0 and 1
 #' @export
 gaussKernel <- function(x,y,gamma){
   base::exp(- gamma * sqrt(sum((x-y)^2)))
@@ -58,6 +59,8 @@ kernelByCustomMetric <- function(metric,gamma)
 #' @param p if metric is 'Lp', this value will be used for p
 #' @param custom_metric a custom metric used in kernel function
 #' @param kernel_epsilon maximal distance at which data points are still considered neighbored.
+#' @param .print_info A logical of length 1. If \code{TRUE} additional
+#'   information will be displayed during runtime. Used in debugging.
 #'
 #' @returns tibble with eigenvectors of projected dimension k
 #'
@@ -169,7 +172,8 @@ spectralProjection <- function(data,
 #'   projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},
 #'   \code{'hierarchical Clustering'}, \code{'DBSCAN'}, \code{'OPTICS'}
 #' @param ... Further parameters to pass on to the clustering algorithm.
-#'
+#' @param .print_info A logical of length 1. If \code{TRUE} additional
+#'   information will be displayed during runtime. Used in debugging.
 #' @returns a clustering object
 #'
 #' @export

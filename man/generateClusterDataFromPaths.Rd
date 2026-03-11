@@ -63,8 +63,6 @@ generateClusterDataFromPaths(n = 1000,
 \seealso{
 Other cluster data generators: 
 \code{\link{generateClusterData}()},
-\code{\link{generateClusterTestData2DFromPaths}()},
-\code{\link{generateClusterTestDataSimple2D}()},
 \code{\link{generateNoiseData}()}
 }
 \concept{cluster data generators}

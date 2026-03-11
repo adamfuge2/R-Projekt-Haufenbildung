@@ -4,12 +4,12 @@
 \alias{innerInequality}
 \title{Calculate the inner inequality of the clusters, also called cost}
 \usage{
-innerInequality(data, clustering, metric = euclidean)
+innerInequality(data, clustering_function, metric = euclidean)
 }
 \arguments{
 \item{data, }{a tibble with with every row representing a data point.}
 
-\item{clustering, }{a clustering function relating any data point to their cluster.}
+\item{clustering_function, }{a clustering function relating any data point to their cluster.}
 
 \item{metric, }{a metric whose 2 inputs are of the data row type.}
 }

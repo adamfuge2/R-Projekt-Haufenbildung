@@ -9,8 +9,8 @@ findClusterAmountSilhouette(
   metric = "euclidean",
   p = NULL,
   custom_metric = NULL,
-  .print_info = FALSE,
-  check_min = 1
+  check_min = 1,
+  .print_info = FALSE
 )
 }
 \arguments{
@@ -24,6 +24,8 @@ chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
 \item{custom_metric}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
+
+\item{check_min}{A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
 }

@@ -6,6 +6,11 @@
 \usage{
 manhattan(x, y)
 }
+\arguments{
+\item{x}{an atomic vector or tibble row with only real numbers}
+
+\item{y}{an atomic vector or tibble row with only real numbers}
+}
 \description{
 Manhattan/Taxi distance
 }

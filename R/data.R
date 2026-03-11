@@ -63,3 +63,65 @@
 #' }
 'oh_no_ive_spilled_my_pacman_dots'
 
+
+############## concentric circles #################
+
+#' Two concentric Circles
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+#'
+'two_concentric_circles'
+
+#' Two connected concentric circles
+#'
+#' Two concentric circles like [two_concentric_circles] but connected by a vertical line.
+#' This example data set makes [optics()] and [dbscan()] \strong{fail},
+#' where as they would succeed in clustering the [two_concentric_circles] data set.
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+#'
+'two_connected_concentric_circles'
+
+#' Three concentric Circles
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+#'
+'three_concentric_circles'
+
+
+#' Three connected concentric circles
+#'
+#' Three concentric circles like [three_concentric_circles] but connected by a vertical line.
+#' This example data set makes [optics()] and [dbscan()] \strong{fail},
+#' where as they would succeed in clustering the [three_concentric_circles] data set.
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+#'
+'three_connected_concentric_circles'
+
+
+

@@ -35,7 +35,7 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 #'
 #'
 #' @param data,        a tibble with with every row representing a data point.
-#' @param clustering,  a clustering function relating any data point to their cluster.
+#' @param clustering_function,  a clustering function relating any data point to their cluster.
 #' @param metric,      a metric whose 2 inputs are of the data row type.
 #'
 #' @returns numeric, a real number > 0.
@@ -72,10 +72,11 @@ innerInequality <- function(data,clustering_function,metric=euclidean){
 #'
 #'
 #' @param data        a tibble with with every row representing a data point.
-#' @param clustering  a clustering function relating any data point to their cluster.
+#' @param clustering_function  a clustering function relating any data point to their cluster.
 #' @param o           an atomic vector or tibble row.
 #'              This is the data point we calculate the silhouette of
-#' @param metric      a metric whose 2 inputs are of the data row type.
+#' @param metric      A metric whose 2 inputs are of the data row type.
+#' @param is_part_of_data A logical of length 1. If \code{TRUE} we assume that the data point is already part of the `data`.
 #'
 #' @returns numeric, a real number between -1 and 1
 #'
@@ -124,6 +125,19 @@ silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_da
 }
 
 #' A faster silhouette calculator
+#'
+#' Calculates the Silhouette of a point like [silhouette()], but in order to
+#' fasten up the calculations \strong{does not really} check its inputs. It also assumes
+#' that the data point in question is part of the data and that the
+#' clustered_data has a column called `'cluster'`.
+#'
+#' @param clustered_data A clustered_data object, or at least a tibble with a column called `'cluster'`
+#' @param index_of_o An integer between 1 and `nrow(clustered_data)`
+#' @param dissimilarity_matrix A matrix representing the distances of the data points
+#'
+#' @returns numeric, a real number between -1 and 1.
+#'    The larger, the better the data point fits into its own cluster compared
+#'    to the next nearest cluster.
 silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
 
   o <- clustered_data[index_of_o,-ncol(clustered_data)]

@@ -80,8 +80,6 @@ generateClusterData(n = 1,
 \seealso{
 Other cluster data generators: 
 \code{\link{generateClusterDataFromPaths}()},
-\code{\link{generateClusterTestData2DFromPaths}()},
-\code{\link{generateClusterTestDataSimple2D}()},
 \code{\link{generateNoiseData}()}
 }
 \concept{cluster data generators}

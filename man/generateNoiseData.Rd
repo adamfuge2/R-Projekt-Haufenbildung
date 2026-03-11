@@ -55,8 +55,6 @@ generateNoiseData(n = 1000,
 \seealso{
 Other cluster data generators: 
 \code{\link{generateClusterData}()},
-\code{\link{generateClusterDataFromPaths}()},
-\code{\link{generateClusterTestData2DFromPaths}()},
-\code{\link{generateClusterTestDataSimple2D}()}
+\code{\link{generateClusterDataFromPaths}()}
 }
 \concept{cluster data generators}

@@ -6,6 +6,21 @@
 \usage{
 silhouette_faster(clustered_data, index_of_o, dissimilarity_matrix)
 }
+\arguments{
+\item{clustered_data}{A clustered_data object, or at least a tibble with a column called `'cluster'`}
+
+\item{index_of_o}{An integer between 1 and `nrow(clustered_data)`}
+
+\item{dissimilarity_matrix}{A matrix representing the distances of the data points}
+}
+\value{
+numeric, a real number between -1 and 1.
+   The larger, the better the data point fits into its own cluster compared
+   to the next nearest cluster.
+}
 \description{
-A faster silhouette calculator
+Calculates the Silhouette of a point like [silhouette()], but in order to
+fasten up the calculations \strong{does not really} check its inputs. It also assumes
+that the data point in question is part of the data and that the
+clustered_data has a column called `'cluster'`.
 }

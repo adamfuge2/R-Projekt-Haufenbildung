@@ -10,9 +10,11 @@ gaussKernel(x, y, gamma)
 \item{x}{tibble with one row or atomic vector}
 
 \item{y}{tibble with one row or atomic vector}
+
+\item{gamma}{a numeric \eqn{\ge} 0}
 }
 \value{
-numeric bewteen 0 and 1
+numeric between 0 and 1
 }
 \description{
 Kernel function using the euclidean norm

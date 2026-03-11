@@ -36,6 +36,9 @@ points}
 \item{custom_metric}{a custom metric used in kernel function}
 
 \item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
+
+\item{.print_info}{A logical of length 1. If \code{TRUE} additional
+information will be displayed during runtime. Used in debugging.}
 }
 \value{
 tibble with eigenvectors of projected dimension k
