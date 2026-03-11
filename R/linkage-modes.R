@@ -138,25 +138,25 @@ linkComplete <- function(metric, data_1, data_2){
 
 ################ FASTER #################
 
-#
-# linkCentroidFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){
-#   cluster_1_indices <- which(cluster == cluster_id_1)
-#   cluster_2_indices <- which(cluster == cluster_id_2)
-#
-#   centroid_1 <- colMeans(data[cluster_1_indices, ])
-#   centroid_2 <- colMeans(data[cluster_2_indices, ])
-#   return(metric(centroid_1, centroid_2))
-# }
-
-
-generateLinkCentroidFast <- function(data, metric){
+#' Centroid Fast Function Generator
+#'
+#' Takes a dataset and a distance function (metric) to generate a centroid-linkage mode
+#' compatible in signature with the other linkage modes.
+#'
+#' @family Linkage Modes
+#' @param data a tibble with n(>=1) rows of dimension d
+#' @param distance_function a distance function (euclidean, maximum,...)
+#'
+#' @returns linkage mode centroid
+#' @export
+generateLinkCentroidFast <- function(data, distance_function){
   linkCentroidFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){
     cluster_1_indices <- which(cluster == cluster_id_1)
     cluster_2_indices <- which(cluster == cluster_id_2)
 
     centroid_1 <- colMeans(data[cluster_1_indices, ])
     centroid_2 <- colMeans(data[cluster_2_indices, ])
-    return(metric(centroid_1, centroid_2))
+    return(distance_function(centroid_1, centroid_2))
   }
   return(linkCentroidFast)
 }
@@ -166,14 +166,17 @@ generateLinkCentroidFast <- function(data, metric){
 #' Mean intercluster dissimilarity. The average of the distances of all
 #' combinations between a point in cluster 1 and a point in cluster 2 given
 #' a metric
-#' @famiy linkages
+#' @family Linkage Modes
 #'
-#' @param TODO
-#'
+#' @param cluster_id_1 number denoting the first cluster ID
+#' @param cluster_id_2 number denoting the second cluster ID
+#' @param cluster atomic vector assigning a cluster to each data point
+#' @param dissimilarity_matrix a matrix containing all distances between points
+#' within the dataset
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
-linkAverageFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){   #employ the average distance method
+linkAverageFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_matrix){
   cluster_1_indices <- which(cluster == cluster_id_1)
   cluster_2_indices <- which(cluster == cluster_id_2)
 
@@ -187,10 +190,9 @@ linkAverageFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_m
 #' Minimal intercluster dissimilarity. Determines the smallest distance between
 #' points in cluster and 1 and points in cluster 2 given a metric.
 #'
-#' @famiy linkages
+#' @family Linkage Modes
 #'
-#' @param TODO
-#'
+#' @inheritParams linkAverageFast
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
@@ -208,9 +210,9 @@ linkSingleFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_ma
 #' Maximum intercluster dissimilarity. Determines the largest distance
 #' between points in cluster 1 and points in cluster 2 given a metric.
 #'
-#' @famiy linkages
+#' @family Linkage Modes
 #'
-#' @param TODO
+#' @inheritParams linkAverageFast
 #'
 #' @returns a real number (numeric) >= 0
 #' @export
@@ -223,10 +225,24 @@ linkCompleteFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_
 
 
 ############ Distance Function #################
-# Helper function to determine distance vector between two clusters (for hierarchical clustering)
+#' Internal distance function
+#'
+#' Helper function to determine distance vector between two clusters (for hierarchical clustering)
+#'
+#' @param x number denoting the cluster whose distance should be determined
+#' @param mode linkage mode (function)
+#' @param cluster atomic vector assigning a cluster to each data point
+#' @param D_points dissimilarity matrix for individual points
+#' @param neighbors atomic vector of length 2 denoting the two cluster IDs of
+#' minimal distance
+#'
+#' @return a real number (numeric) >= 0
+#' @export
 .dist <- function(x, mode, cluster, D_points, neighbors){
   if(x == neighbors[1])
     return(Inf)
   else
     return(mode(neighbors[1], x, cluster, D_points))
 }
+
+

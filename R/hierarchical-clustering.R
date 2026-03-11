@@ -26,7 +26,7 @@
 #'   }
 #' @export
 hierarchicalClustering <- function(data, K, mode = "centroid", distance_method = "euclidean", p = NULL, custom_distance_function = NULL, .print_info = FALSE){
-  data <- tibble::as.tibble(data)
+  data <- tibble::as_tibble(data)
   n <- base::nrow(data)
 
   if(K > n) stop(paste0("Dataset with ", n, " datapoints cannot have ", K, " clusters!"))

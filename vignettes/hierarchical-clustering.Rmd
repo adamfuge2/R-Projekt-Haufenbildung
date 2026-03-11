@@ -1,0 +1,30 @@
+---
+title: "The Hierarchical Clustering Algorithm"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    tabset: true
+vignette: >
+  %\VignetteIndexEntry{hierarchical-clustering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(
+  fig.align = 'center',
+  fig.width = 7,
+  dev = 'svg'
+)
+```
+
+```{r setup, message = FALSE, warning = FALSE}
+library(clusterfuck)
+```
+
+This is an overview about the Hierarchical Clustering algorithm of the clusterfuck package.
+

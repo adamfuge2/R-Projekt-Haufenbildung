@@ -8,9 +8,10 @@ hierarchicalClustering(
   data,
   K,
   mode = "centroid",
-  metric = "euclidean",
+  distance_method = "euclidean",
   p = NULL,
-  custom_metric = NULL
+  custom_distance_function = NULL,
+  .print_info = FALSE
 )
 }
 \arguments{
@@ -23,13 +24,13 @@ one datapoint.}
 Available are \code{'centroid'}, \code{'single'}, \code{'complete'},
 \code{'average'}.}
 
-\item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
-\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
 chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
-\item{custom_metric}{A semi definite and symmetric function whose inputs are
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
 }
 \value{
