@@ -33,10 +33,10 @@ In the most simple case, we have a 2-dimensional dataset containing, for example
 
 ```{r general_use_1, echo = 2}
 set.seed(129)
-data <- generateClusterTestDataSimple(n = 100, cluster_amount = 4, dim = 2)
+data <- generateClusterData(n = 100, cluster_amount = 4, dim = 2)
 ```
 
-This dataset can be illustrated by using the \code{viewData} function:
+This data set can be illustrated by using the \code{viewData} function:
 
 ```{r general_use_2}
 viewData(data)
@@ -58,8 +58,8 @@ This is the main parameter to be provided and the data upon which the clustering
 Some examples:
 ```{r data_definitions, echo = c(2,3)}
 set.seed(121)
-data_1 <- generateClusterTestDataSimple(n = 100, cluster_amount = 7)
-data_2 <- generateClusterTestDataSimple(n = 1)
+data_1 <- generateClusterData(n = 100, cluster_amount = 7)
+data_2 <- generateClusterData(n = 1)
 ```
 
 These can be clustered by the standard usage of Hierarchical Clustering:
@@ -206,8 +206,7 @@ if(require('maps')){
 set.seed(124)
 slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=200, maps::world.cities[ ,c('long','lat')]))
 
-clustering <- hierarchicalClustering(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
-clustering
+hierarchicalClustering(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
 } 
 ```
 
