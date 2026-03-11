@@ -65,6 +65,8 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
   ## between the data points now.
   D <- dissimilarityMatrix(data,metric = metric)
 
+
+
   if(.print_info) print('Done. \n now find starting medioids')
 
   ## (BUILD) Define starting medioids
@@ -75,6 +77,25 @@ kMedioids <- function(data,K,metric = 'euclidean',p=NULL,custom_metric=NULL,.pri
   if(.print_info) print('Done. \n now calculating first costs')
 
   new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
+
+
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data[medioid_indeces,],
+        inner_inequality = new_min_cost,
+        sum_of_squares = structure(D[medioid_indeces,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
+        mean_silhouette = 0
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
 
   while(new_min_cost < old_min_cost){
     ## We've found a new, better medioids configuration!

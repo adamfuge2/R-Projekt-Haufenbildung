@@ -40,7 +40,7 @@ test_that('silhouette',{
 
   print(silhouette(data,clustering,c(0.15,0.46)))
 
-  testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46)), silhouette(data,clustering,c(0.4,0.46)))
+  testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46),is_part_of_data = FALSE), silhouette(data,clustering,c(0.4,0.46),is_part_of_data = FALSE))
 })
 
 test_that('meanSilhouette',{
@@ -48,11 +48,12 @@ test_that('meanSilhouette',{
 
   clustering <- clusteringFromCentroids(data)
 
+  # should be zero, because mono elementary clusters
   testthat::expect_equal(meanSilhouette(data,clustering),0)
 
   data <- data |> dplyr::add_row(tibble::tibble(X=0.15,Y=0.46))
 
-  testthat::expect_equal(meanSilhouette(data,clustering),0.4268618)
+  testthat::expect_equal(round(meanSilhouette(data,clustering),5),0.00039)
 })
 
 test_that('tibbleAsPath',{

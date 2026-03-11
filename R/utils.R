@@ -79,17 +79,20 @@ innerInequality <- function(data,clustering,metric=euclidean){
 #'
 #' @returns numeric, a real number between -1 and 1
 #'
-silhouette <- function(data,clustering,o,metric=euclidean,is_part_of_data=TRUE){
+silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_data=TRUE){
+  # for more understandable code and inputs we rename this here
+  cluster <- clustering_function
+
   ## if o is part of data, remove it
   if(is_part_of_data) data <- data |> dplyr::filter(duplicated(data) | !apply(data,1,function(row) all(row==o)) )
 
   ## apply the clustering function to the data
-  clusters <- apply(data,1,function(data_point) clustering(data_point))
+  clusters <- apply(data,1,function(data_point) cluster(data_point))
   distances <- apply(data,1,function(data_point) metric(data_point,o))
   clustered_data <- dplyr::mutate(data,cluster = clusters, distance = distances)
 
-  #
-  cluster_of_o <- f(o)
+  # do i really have to explain this?
+  cluster_of_o <- cluster(o)
 
   ## Return zero, if o is the only data point in its cluster,
   ## else we would have a devide by zero error later.
@@ -97,7 +100,16 @@ silhouette <- function(data,clustering,o,metric=euclidean,is_part_of_data=TRUE){
   ## choice means monoelemental clusterings are
   ## more encouraged than wrong clusterings (which have a negative silhouettecoefficient)
   ## and less encouraged than good natural clusterings (which have a slihouettecoefficient close to 1)
-  if( is_part_of_data && length(clusters[clusters==cluster_of_o]) == 1 ){
+  if( length(clusters[clusters==cluster_of_o]) == 0 ){
+    return(0)
+  }
+
+  ## Return zero, if theres only 1 cluster,
+  ## else we would have a devide by zero error later.
+  ## The choice 0 is ARBITRARY, but as the silhouette is bounded by -1 and 1 this
+  ## choice means trivial clusterings are always less encouraged than good natural
+  ## clusterings (which have a slihouettecoefficient close to 1)
+  if( length(unique(clusters)) == 1 && clusters[[1]] == cluster(o) ){
     return(0)
   }
 
@@ -112,19 +124,28 @@ silhouette <- function(data,clustering,o,metric=euclidean,is_part_of_data=TRUE){
   return( (b_of_o - a_of_o)/max(b_of_o, a_of_o) )
 }
 
+#' A faster silhouette calculator
 silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
 
   o <- clustered_data[index_of_o,-ncol(clustered_data)]
   cluster_of_o <- clustered_data[index_of_o,ncol(clustered_data)] |> unlist(use.names = FALSE)
 
 
+  ## Return zero, if theres only 1 cluster,
+  ## else we would have a devide by zero error later.
+  ## The choice 0 is ARBITRARY, but as the silhouette is bounded by -1 and 1 this
+  ## choice means trivial clusterings are always less encouraged than good natural
+  ## clusterings (which have a slihouettecoefficient close to 1)
+  if( length(unique(clustered_data$cluster)) == 1 ){
+    return(0)
+  }
 
   ## We assume o is part of data. We need to remove it
   clustered_data <- clustered_data[-index_of_o,]
 
 
 
-  ## apply the clustering function to the data
+  ## store the clusters seperately
   clusters <- clustered_data$cluster
 
 

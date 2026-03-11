@@ -452,10 +452,3 @@ generateClusterTestData2DFromPaths <-  function(n=100,list_of_paths){
 #spectralReduction(concentric_circles_data,gamma=1,k=2)
 #viewData(spectralProjection(two_concentric_circles,gamma=60,k=1)$projected_data)
 
-#viewData(spectralProjection(three_concentric_circles,gamma=20,k=3)$projected_data)
-#kMeans(spectralReduction(connected_circles_data,gamma=50,k=3)$reduced_data,K=2,tries=5)
-
-#projected_data <- spectralProjection(three_concentric_circles,gamma=25,k=1)$projected_data
-#kMeans(projected_data,K=3,tries=10)
-
-#spectralClustering(three_connected_concentric_circles,k=1,gamma=50,cluster_algorithm = 'K-Means',K=3,tries=10)

@@ -30,7 +30,6 @@ test_that("K-Means works", {
   testthat::expect_error(kMeans(tibble::tibble(),K=3,tries=2))
   testthat::expect_error(kMeans(tibble::tibble(X=0),K=3,tries=2))
   testthat::expect_error(kMeans(tibble::tibble(X=c(0,0,0)),K=2))
-  testthat::expect_error(kMeans(data[101,],K=1,tries=2))
   testthat::expect_error(kMeans(data,K=3,metric='42'))
   print('kMeans has been tested')
 })

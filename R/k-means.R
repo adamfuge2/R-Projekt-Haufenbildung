@@ -85,6 +85,29 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
   base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
   if(.print_info) print(Sys.time() - start)
 
+
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    centroid <- data |> dplyr::summarise(across(everything(),mean))
+    distances <- data |> apply(1,function(x) metric(x,centroid))
+    D <- dissimilarityMatrix(data,metric)
+
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data |> dplyr::summarise(across(everything(),mean)),
+        inner_inequality = distances |> sum(),
+        sum_of_squares = distances^2 |> sum(),
+        mean_silhouette = 0
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
+
   ## Start of actual algorithm
   ## Try multiple times, to minimize the dependency on random chance
   for(repeats in 1:tries){
@@ -241,10 +264,7 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
     if(.print_info)
       print(paste0('checking K = ',K))
 
-    clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric,p=p,custom_metric=custom_metric, .print_info = .print_info)
-
-    fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric=metric,p=p,custom_metric=custom_metric)
-
+    fit[[K]] <- kMedioids(data = data,K = K,metric = metric,p=p,custom_metric=custom_metric, .print_info = .print_info)$mean_silhouette
 
     plot(1:K,fit)
 
