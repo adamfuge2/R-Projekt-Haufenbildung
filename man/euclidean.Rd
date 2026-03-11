@@ -17,3 +17,10 @@ numeric,   a real number >= 0.
 \description{
 The standard euclidean distance
 }
+\examples{
+euclidean(3,5)
+euclidean(c(3,0,34),c(-5,30,31))
+euclidean(tibble::tibble(X =  3, Y =  0, Z = 34),
+          tibble::tibble(X = -5, Y = 30, Z = 31))
+
+}

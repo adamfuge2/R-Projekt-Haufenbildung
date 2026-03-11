@@ -16,5 +16,13 @@ If none given, choose a random amount < sqrt(n).}
 a tibble, every row representing a data point.
 }
 \description{
-spherical test data generator
+DEPRECATED in favor of generateClusterTestDataSimple()
 }
+\seealso{
+Other cluster data generators: 
+\code{\link{generateClusterData}()},
+\code{\link{generateClusterDataFromPaths}()},
+\code{\link{generateClusterTestData2DFromPaths}()},
+\code{\link{generateNoiseData}()}
+}
+\concept{cluster data generators}

@@ -11,6 +11,8 @@
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
 #' @importFrom rlang .data
+#' @importFrom stats rnorm
+#' @importFrom stats runif
 ## usethis namespace: end
 #' @import rlang
 #' @import dplyr

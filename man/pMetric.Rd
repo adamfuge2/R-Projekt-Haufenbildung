@@ -16,3 +16,9 @@ a metric (function) with inputs \code{x,y} numerical vectors and a
 \description{
 The standard Lp metric
 }
+\examples{
+pMetric(1)(3,5)
+pMetric(5)(c(3,0,34),c(-5,30,31))
+pMetric(1.5)(tibble::tibble(X =  3, Y =  0, Z = 34),
+          tibble::tibble(X = -5, Y = 30, Z = 31))
+}

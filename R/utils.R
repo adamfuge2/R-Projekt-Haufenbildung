@@ -40,24 +40,24 @@ clusteringFromCentroids<- function(centroids,metric=euclidean){
 #'
 #' @returns numeric, a real number > 0.
 #'
-innerInequality <- function(data,clustering,metric=euclidean){
+innerInequality <- function(data,clustering_function,metric=euclidean){
 
   clustered_data <- data |>
     dplyr::rowwise() |>
-    dplyr::mutate(cluster=clustering(dplyr::c_across(dplyr::everything())))
+    dplyr::mutate('cluster'=clustering_function(dplyr::c_across(dplyr::everything())))
 
   centroids <- clustered_data |>
     dplyr::ungroup() |>
-    dplyr::group_by(cluster) |>
+    dplyr::group_by('cluster') |>
     dplyr::summarise_at(1:base::ncol(data),base::mean) |>
-    dplyr::select(-cluster)
+    dplyr::select(dplyr::all_of(1:(ncol(data)-1)))
 
   return(
     clustered_data |>
       dplyr::rowwise() |>
-      dplyr::mutate(distances = metric(dplyr::c_across(1:base::ncol(data)), centroids[cluster,])) |>
+      dplyr::mutate('distances' = metric(dplyr::c_across(1:base::ncol(data)), centroids[.data$cluster,])) |>
       dplyr::ungroup() |>
-      dplyr::summarise(base::sum(distances)) |>
+      dplyr::summarise(base::sum(.data$distances)) |>
       unlist(use.names=FALSE)
   )
 }
@@ -79,27 +79,19 @@ innerInequality <- function(data,clustering,metric=euclidean){
 #'
 #' @returns numeric, a real number between -1 and 1
 #'
-silhouette <- function(data,clustering,o,metric=euclidean){
-  ## if o is not part of data, append it. This is a surprise tool that might help us later
-  data[base::nrow(data)+1,] <- o |>
-    matrix(nrow=1) |>
-    tibble::as_tibble(.name_repair = make.names)
-  data <- dplyr::distinct(data)
+silhouette <- function(data,clustering_function,o,metric=euclidean,is_part_of_data=TRUE){
+  # for more understandable code and inputs we rename this here
+  cluster <- clustering_function
+
+  ## if o is part of data, remove it
+  if(is_part_of_data) data <- data |> dplyr::filter(duplicated(data) | !apply(data,1,function(row) all(row==o)) )
 
   ## apply the clustering function to the data
-  clustered_data <- data |>
-    dplyr::rowwise() |>
-    dplyr::mutate(cluster = clustering(dplyr::c_across(dplyr::everything()))) |>
-    dplyr::mutate(distance = metric(dplyr::c_across(1:base::ncol(data)), o))
+  clusters <- apply(data,1,function(data_point) cluster(data_point))
+  distances <- apply(data,1,function(data_point) metric(data_point,o))
 
-  ## as set up above, o is now part of the data set with minimal distance to itself.
-  ## We can thus derive the cluster of o by looking for the cluster of the data
-  ## point with the least distance to o
-  cluster_of_o <- clustered_data |>
-    dplyr::arrange(distance) |>
-    utils::head(1) |>
-    dplyr::select(cluster) |>
-    base::unlist(use.names=FALSE)
+  # do i really have to explain this?
+  cluster_of_o <- cluster(o)
 
   ## Return zero, if o is the only data point in its cluster,
   ## else we would have a devide by zero error later.
@@ -107,39 +99,81 @@ silhouette <- function(data,clustering,o,metric=euclidean){
   ## choice means monoelemental clusterings are
   ## more encouraged than wrong clusterings (which have a negative silhouettecoefficient)
   ## and less encouraged than good natural clusterings (which have a slihouettecoefficient close to 1)
-  if( clustered_data |>
-      dplyr::filter(cluster == cluster_of_o) |>
-      base::nrow() == 1){
+  if( length(clusters[clusters==cluster_of_o]) == 0 ){
     return(0)
   }
 
-  ## remove o from the data set
-  clustered_data <- clustered_data |>
-    dplyr::ungroup()|>
-    dplyr::arrange(distance) |>
-    dplyr::slice(-1)
+  ## Return zero, if theres only 1 cluster,
+  ## else we would have a devide by zero error later.
+  ## The choice 0 is ARBITRARY, but as the silhouette is bounded by -1 and 1 this
+  ## choice means trivial clusterings are always less encouraged than good natural
+  ## clusterings (which have a slihouettecoefficient close to 1)
+  if( length(unique(clusters)) == 1 && clusters[[1]] == cluster(o) ){
+    return(0)
+  }
+
+  cluster_ids <- unique(clusters[clusters!=0])
+
+  mean_of_distances <- cluster_ids |> sapply(function(k) mean(distances[clusters == k]))
+
+  a_of_o <- mean_of_distances[cluster_of_o]
+  b_of_o <- mean_of_distances[-cluster_of_o] |> min()
+
+  ## return the so called silhouette
+  return( (b_of_o - a_of_o)/max(b_of_o, a_of_o) )
+}
+
+#' A faster silhouette calculator
+silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
+
+  o <- clustered_data[index_of_o,-ncol(clustered_data)]
+  cluster_of_o <- clustered_data[index_of_o,ncol(clustered_data)] |> unlist(use.names = FALSE)
+
+
+  ## Return zero, if theres only 1 cluster,
+  ## else we would have a devide by zero error later.
+  ## The choice 0 is ARBITRARY, but as the silhouette is bounded by -1 and 1 this
+  ## choice means trivial clusterings are always less encouraged than good natural
+  ## clusterings (which have a slihouettecoefficient close to 1)
+  if( length(unique(clustered_data$cluster)) == 1 ){
+    return(0)
+  }
+
+  ## We assume o is part of data. We need to remove it
+  clustered_data <- clustered_data[-index_of_o,]
 
 
 
-  ## calculate the distance of o to the clusters
-  ## (meaning the mean distance of o to the points belonging to the clusters)
-  clustered_data <- clustered_data |>
-    dplyr::summarise(mean_distance = base::mean(distance), .by = cluster) |>
-    dplyr::arrange(mean_distance)
+  ## store the clusters seperately
+  clusters <- clustered_data$cluster
 
-  ## The overlap of o with its respective cluster
-  ## note that this would be undefined if the cluster was now empty
-  a_of_o <- clustered_data |>
-    dplyr::filter(cluster == cluster_of_o) |>
-    dplyr::select(mean_distance) |>
-    base::unlist(use.names=FALSE)
 
-  ## The best overlap of o with a cluster thats not the one of o
-  b_of_o <- clustered_data |>
-    dplyr::filter(cluster != cluster_of_o) |>
-    dplyr::select(mean_distance) |>
-    utils::head(1) |>
-    base::unlist(use.names=FALSE)
+  distances_to_o <- dissimilarity_matrix[index_of_o,-index_of_o]
+
+
+
+  ## Return zero, if o is the only data point in its cluster,
+  ## else we would have a devide by zero error later.
+  ## The choice 0 is ARBITRARY, but as the silhouette is bounded by -1 and 1 this
+  ## choice means monoelemental clusterings are
+  ## more encouraged than wrong clusterings (which have a negative silhouettecoefficient)
+  ## and less encouraged than good natural clusterings (which have a slihouettecoefficient close to 1)
+  if( !(cluster_of_o %in% clusters) ){
+    return(0)
+  }
+
+
+  cluster_ids <- unique(clusters[clusters!=0])
+
+  ## We assume o is part of data. We need to remove it
+  clustered_data <- clustered_data[-index_of_o,]
+
+  mean_of_distances <- cluster_ids |> sapply(function(k) mean(distances_to_o[clusters == k]))
+
+
+  a_of_o <- mean_of_distances[cluster_ids == cluster_of_o]
+  b_of_o <- mean_of_distances[cluster_ids != cluster_of_o] |> min()
+
 
   ## return the so called silhouette
   return( (b_of_o - a_of_o)/max(b_of_o, a_of_o) )
@@ -186,11 +220,9 @@ meanSilhouette <- function(data,clustering,metric='euclidean',p=NULL,custom_metr
   else metric <- custom_metric
 
   if( data |>
-      dplyr::rowwise() |>
-      dplyr::mutate(cluster = clustering(dplyr::c_across(dplyr::everything()))) |>
-      dplyr::ungroup() |>
-      dplyr::summarize(.by = cluster) |>
-      base::nrow() == 1){
+      apply(1,clustering) |>
+      unique() |>
+      length() == 1){
     ## If there's only one cluster, we cut the calculation short and return 0.
     ## Note that this is an ARBITRARY choice, but seems reasonable as it gives no info
     ## about whether the clustering with 1 cluster is good ore bad
@@ -199,11 +231,8 @@ meanSilhouette <- function(data,clustering,metric='euclidean',p=NULL,custom_metr
 
   ## Calculate the silhouette for every point and return their mean
   return( data |>
-            dplyr::rowwise() |>
-            dplyr::mutate(silhouette = silhouette(data,clustering,dplyr::c_across(all_of(1:base::ncol(data))),metric))|>
-            dplyr::ungroup() |>
-            dplyr::summarize(mean(silhouette)) |>
-            base::unlist(use.names=FALSE)
+            apply(1,function(data_point) silhouette(data,clustering,data_point,metric)) |>
+            mean()
   )
 }
 
@@ -250,7 +279,6 @@ dissimilarityMatrix <-function(data,metric){
 }
 
 
-
 #' The Inequality of a vector to the data
 #'
 #' Sums the distances of a vector to all pints in the data set.
@@ -262,23 +290,27 @@ dissimilarityMatrix <-function(data,metric){
 #' @returns a numeric >= 0
 #'
 sumOfDistancestTo <- function(data,vector,metric){
-  data |> dplyr::rowwise() |> dplyr::mutate(distance = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
+  data |> dplyr::rowwise() |> dplyr::mutate('distance' = metric(dplyr::c_across(all_of(1:ncol(data))) , vector)) |>
     dplyr::ungroup() |>
-    dplyr::summarise(sum = sum(distance)) |>
+    dplyr::summarise('sum' = sum(.data$distance)) |>
     base::unlist(use.names = FALSE)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-NULL
+#' defer distance function from inputs
+getDistanceFunction <- function(metric='euclidean',p=NULL,custom_metric=NULL){
+  if(is.null(custom_metric)){
+    if(metric=='euclidean')
+      return(euclidean)
+    else if(metric=='maximum')
+      return(maximumMetric)
+    else if(metric=='Lp'){
+      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
+      return(pMetric(p))
+    }
+    else if(metric=='manhattan')
+      return(pMetric(1))
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+  }
+  else return(custom_metric)
+}

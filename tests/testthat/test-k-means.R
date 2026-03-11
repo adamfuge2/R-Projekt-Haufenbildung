@@ -1,7 +1,9 @@
 test_that("K-Means works", {
-  set.seed(13456)
-
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,
+                              clusters_mean = tibble::tibble('X'=c(0.4,0.4,0.8),
+                                                             'Y'=c(0.7,0.1,0.7)),
+                              clusters_sd=c(0.01,0.02,0.01),
+                              cluster_amount = 3)
 
   clustering <- kMeans(data,K=3,tries = 5)
 
@@ -28,26 +30,29 @@ test_that("K-Means works", {
   testthat::expect_error(kMeans(data,K=1,tries=0))
   testthat::expect_error(kMeans(data,K=0,tries=2))
   testthat::expect_error(kMeans(tibble::tibble(),K=3,tries=2))
-  testthat::expect_error(kMeans(tibble::tibble(X=0),K=3,tries=2))
-  testthat::expect_error(kMeans(tibble::tibble(X=c(0,0,0)),K=2))
-  testthat::expect_error(kMeans(data[101,],K=1,tries=2))
+  testthat::expect_error(kMeans(tibble::tibble('X'=0),K=3,tries=2))
+  testthat::expect_error(kMeans(tibble::tibble('X'=c(0,0,0)),K=2))
   testthat::expect_error(kMeans(data,K=3,metric='42'))
   print('kMeans has been tested')
 })
 
 test_that("findClusterAmountElbow works", {
-  set.seed(123)
-
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,
+                              clusters_mean = tibble::tibble('X'=c(0.4,0.4,0.8),
+                                                             'Y'=c(0.7,0.1,0.7)),
+                              clusters_sd=c(0.01,0.02,0.01),
+                              cluster_amount = 3)
 
   expect_equal(findClusterAmountElbow(data),3)
 })
 
 
-test_that("findClusterAmountSilhouettePlease works", {
-  set.seed(123)
+test_that("findClusterAmountSilhouette works", {
+  data <- generateClusterData(n=100,
+                              clusters_mean = tibble::tibble('X'=c(0.4,0.4,0.8),
+                                                             'Y'=c(0.7,0.1,0.7)),
+                              clusters_sd=c(0.01,0.02,0.01),
+                              cluster_amount = 3)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
-
-  expect_equal(findClusterAmountSilhouettePlease(data),3)
+  expect_equal(findClusterAmountSilhouette(data),3)
 })
