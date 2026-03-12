@@ -4,10 +4,12 @@
 \alias{findClusterAmountElbow}
 \title{Fining a best cluster amount using the 'Elbow-method'}
 \usage{
-findClusterAmountElbow(data, .print_info = FALSE, check_min = 1)
+findClusterAmountElbow(data, check_min = 1, .print_info = FALSE)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
+
+\item{check_min}{A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
 }

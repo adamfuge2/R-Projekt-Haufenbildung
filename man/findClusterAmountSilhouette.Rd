@@ -6,24 +6,26 @@
 \usage{
 findClusterAmountSilhouette(
   data,
-  metric = "euclidean",
+  distance = "euclidean",
   p = NULL,
-  custom_metric = NULL,
-  .print_info = FALSE,
-  check_min = 1
+  custom_distance_function = NULL,
+  check_min = 1,
+  .print_info = FALSE
 )
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
-\item{metric}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
-\item{p}{A numeric greater than or equal to 1. If \code{metric} was
+\item{p}{A numeric greater than or equal to 1. If \code{distance} was
 chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
-\item{custom_metric}{A semi definite and symmetric function whose inputs are
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
+
+\item{check_min}{A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.}
 
 \item{.print_info}{A logical. Prints some useful information for debugging.}
 }

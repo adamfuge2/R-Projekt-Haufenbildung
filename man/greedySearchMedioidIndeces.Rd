@@ -7,7 +7,7 @@
 greedySearchMedioidIndeces(
   data,
   K,
-  metric = euclidean,
+  distance = euclidean,
   dissimilarity_matrix = NULL
 )
 }
@@ -19,7 +19,7 @@ sample size and called n.}
 \item{K}{A whole number between 0 and n+1. The amount of Clusters the
 algorithm tries to find in the data}
 
-\item{metric}{A metric whose inputs are the rows of data.}
+\item{distance}{A distance function whose inputs are the rows of data.}
 
 \item{dissimilarity_matrix}{A matrix having encoded all distances between data points}
 }

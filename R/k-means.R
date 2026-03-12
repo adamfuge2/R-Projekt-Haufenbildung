@@ -14,11 +14,11 @@
 #'            The number of rows is the sample size and called n.
 #' @param K          A whole number between 0 and n+1.
 #'            The amount of Clusters the algorithm tries to find in the data
-#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#' @param distance    A character. One of \code{'euclidean'}, \code{'maximum'},
 #'   \code{'Lp'} or \code{'manhattan'}.
-#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#' @param p         A numeric greater than or equal to 1. If \code{distance} was
 #'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_metric A semi definite and symmetric function whose inputs are
+#' @param custom_distance_function A semi definite and symmetric function whose inputs are
 #'   two of the \code{data} row type.
 #' @param tries A positive integer. The amount of times the algorithm should retry with new starting centroids
 #' @param .print_info A logical. Prints some useful information for debugging.
@@ -30,35 +30,85 @@
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
 #'   }
 #' @export
-kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, .print_info = FALSE){
+kMeans <- function(data,K,distance='euclidean',p=NULL,custom_distance_function=NULL,tries=K, .print_info = FALSE){
+  start <- Sys.time()
   ## some necessary variables
   n <- base::nrow(data)
   dim <- base::ncol(data)
   minimal_cost <- Inf
-  old_centroids <- tibble::tibble()
+  old_centroids <- tibble::tibble
 
-  if(is.null(custom_metric)){
-    if(metric=='euclidean')
-      metric <- euclidean
-    else if(metric=='maximum')
-      metric <- maximumMetric
-    else if(metric=='Lp'){
-      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
+  # Invariant, check parameter tries
+  base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
+
+
+  if(is.null(custom_distance_function)){
+    if(distance=='euclidean')
+      distance <- euclidean
+    else if(distance=='maximum')
+      distance <- maximumDistance
+    else if(distance=='Lp'){
+      stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
       stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      metric <- pMetric(p)
+      distance <- pDistance(p)
     }
-    else if(metric=='manhattan')
-      metric <- pMetric(1)
-    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
+    else if(distance=='manhattan')
+      distance <- pDistance(1)
+    else stop('Unknown distance function. Look up on the help page which distance functions are available ore input a custum distance function using the argument custom_distance_function.')
   }
-  else metric <- custom_metric
+  else distance <- custom_distance_function
 
+
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    centroid <- data |> dplyr::summarise(across(everything(),mean))
+    distances <- data |> apply(1,function(x) distance(x,centroid))
+    D <- dissimilarityMatrix(data,distance)
+
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data |> dplyr::summarise(across(everything(),mean)),
+        inner_inequality = distances |> sum(),
+        sum_of_squares = distances^2 |> sum(),
+        mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(dplyr::mutate(data, cluster=1),index,D)) |> mean()
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
-  base::stopifnot('tries must be an integer greater than 0' = is.wholenumber(tries) && 0 < tries )
   base::stopifnot('K must be an integer between 0 and n+1' = is.wholenumber(K) && (0 < K && K < n+1))
   base::stopifnot('data must have at least K unique data points' = K <= nrow(unique(data)))
+  if(.print_info) print(Sys.time() - start)
+
+
+  # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
+  if(K==1){
+    centroid <- data |> dplyr::summarise(across(everything(),mean))
+    distances <- data |> apply(1,function(x) distance(x,centroid))
+    D <- dissimilarityMatrix(data,distance)
+
+    return(structure(
+      list(
+        clustered_data = dplyr::mutate(data, cluster=1),
+        clustering_function = function(x) 1,
+        centroids = data |> dplyr::summarise(across(everything(),mean)),
+        inner_inequality = distances |> sum(),
+        sum_of_squares = distances^2 |> sum(),
+        mean_silhouette = 0
+      ),
+      description = 'Data clustered by K-Means algorithm',
+      class= c('K-Means-clustering',  'clustering')
+    )
+    )
+
+  }
 
   ## Start of actual algorithm
   ## Try multiple times, to minimize the dependency on random chance
@@ -77,7 +127,7 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
       if(.print_info) print(centroids)
 
       ## calculate all the points distances to the centroids
-      distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){metric(x,centroid)})}) |> t()
+      distances <- centroids |> apply(1,function(centroid){data[,1:dim] |> apply(1,function(x){distance(x,centroid)})}) |> t()
 
       ## Defer the clusters, every point to their nearest centroid
       cluster <- apply(distances,2,which.min)
@@ -103,6 +153,7 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
     ## update the currently best clustering guess
     if(cost < minimal_cost){
       minimal_cost <- cost
+      best_distances <- distances |> apply(2,min)
       best_centroids <- centroids
       best_clustered_data <- data
 
@@ -110,20 +161,31 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
         base::print(base::paste0('Found a new best clustering with cost ',cost))
     }
   }
+  if(.print_info) print(Sys.time() - start)
 
 
+  f <- function(x)
+    best_centroids |>
+    apply(1,function(centroid) distance(x,centroid)) |>
+    base::which.min()
+  if(.print_info) print(Sys.time() - start)
+
+  D <- dissimilarityMatrix(data[,1:dim],distance)
+
+  if(.print_info) print(Sys.time() - start)
 
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
   return(structure(
               list(
                 clustered_data = best_clustered_data,
-                clustering_function = function(x)
-                  best_centroids |>
-                  apply(1,function(centroid) metric(x,centroid)) |>
-                  base::which.min(),
-                inner_inequality = minimal_cost),
+                clustering_function = f,
+                centroids = best_centroids,
+                inner_inequality = minimal_cost,
+                sum_of_squares = best_distances^2 |> sum(),
+                mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(best_clustered_data,index,D)) |> mean()
+                ),
               description = 'Data clustered by K-Means algorithm',
-              class= 'clustering'
+              class= c('K-Means-clustering',  'clustering')
              )
         )
 }
@@ -139,17 +201,21 @@ kMeans <- function(data,K,metric='euclidean',p=NULL,custom_metric=NULL,tries=K, 
 #' reduction bound can be chosen arbitrarily.
 #'
 #' @param data        a tibble with with every row representing a data point.
+#' @param check_min   A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #'
 #' @export
-findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
+findClusterAmountElbow <- function(data, check_min = 1, .print_info = FALSE){
   inner_inequalities <- numeric()
   improvement <- list(Inf)
   K <- 1
 
-  while(improvement[[K]]>1 ){
+  inner_inequalities[[1]] <- kMeans(data,1,tries = 10)$inner_inequality
+
+  while(improvement[[K]]>1 || K <= check_min){
+    K <- K+1
 
     if(.print_info)
       print(paste0('checking K = ',K))
@@ -157,17 +223,12 @@ findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
     inner_inequalities[[K]] <- kMeans(data,K,tries = 10)$inner_inequality
 
     if(.print_info)
-      plot(1:K,inner_inequalities,asp=1)
+      plot(1:K,inner_inequalities)
 
-    if(K>1) improvement[[K]] <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
-
-
+    improvement[[K]] <- inner_inequalities[[K-1]] - inner_inequalities[[K]]
 
     if(.print_info)
       print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement[[K]]))
-
-    K <- K+1
-
   }
 
   improvement[improvement<1] <- Inf
@@ -185,29 +246,29 @@ findClusterAmountElbow <- function(data, .print_info = FALSE, check_min = 1){
 #' Be careful with its result, it is only heuristically optimal.
 #'
 #' @param data      a tibble with with every row representing a data point.
-#' @param metric    A character. One of \code{'euclidean'}, \code{'maximum'},
+#' @param distance    A character. One of \code{'euclidean'}, \code{'maximum'},
 #'   \code{'Lp'} or \code{'manhattan'}.
-#' @param p         A numeric greater than or equal to 1. If \code{metric} was
+#' @param p         A numeric greater than or equal to 1. If \code{distance} was
 #'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_metric A semi definite and symmetric function whose inputs are
+#' @param custom_distance_function A semi definite and symmetric function whose inputs are
 #'   two of the \code{data} row type.
+#' @param check_min   A positive Integer. The minimum amount of clusters to be checked for their inner Inequality.
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns a positive integer, the 'optimal' amount of clusters
 #' @export
-findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_metric=NULL, .print_info = FALSE ,check_min = 1){
+findClusterAmountSilhouette <- function(data,distance='euclidean',p=NULL,custom_distance_function=NULL ,check_min = 1, .print_info = FALSE){
   clusterings <- list()
   fit <- list()
   improvement <- Inf
   K <- 1
 
+
   while(improvement>0 || K <= check_min){
     if(.print_info)
       print(paste0('checking K = ',K))
 
-    clusterings[[K]] <- kMedioids(data = data,K = K,metric = metric,p=p,custom_metric=custom_metric, .print_info = .print_info)
-
-    fit[[K]] <- meanSilhouette(data,clusterings[[K]]$clustering_function,metric=metric,p=p,custom_metric=custom_metric)
+    fit[[K]] <- kMedioids(data = data,K = K,distance = distance,p=p,custom_distance_function=custom_distance_function, .print_info = .print_info)$mean_silhouette
 
     plot(1:K,fit)
 
@@ -301,6 +362,16 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
 #
 #
 #
+### 3rd Example: New Data
+## The resulting function does take inputs not of the original data set
+## note that the amount of unkown data is vastly greater than the training data
+#clusters <- list(tibble::tibble(X=0.05,Y=0.05),
+#                 tibble::tibble(X=0.03,Y=0.02),
+#                 tibble::tibble(X=0.03,Y=0.08),
+#                 tibble::tibble(X=0.07,Y=0.04))
+#training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
+#unknown_data <- generateClusterTestData2DFromPaths(n=1000, clusters)
+#more <- tibble::as_tibble(matrix(runif(20000,min=0,max = 0.1),ncol = 2))
 #
 ### 3rd Example: New Data
 ## The resulting function does take inputs not of the original data set
@@ -314,14 +385,13 @@ findClusterAmountSilhouette <- function(data,metric='euclidean',p=NULL,custom_me
 #more <- tibble::as_tibble(matrix(runif(20000,min=0,max = 0.1),ncol = 2))
 #
 ## derive a clustering using K-Means
-#clustering <- kMeans(training_data,metric='maximum',4)
+#clustering <- kMeans(training_data,distance='maximum',4)
 ## this would take ages for 1000 data points
 #
 ## lets take a look
 #viewClusters(training_data,clustering$clustering_function)
 #viewClusters(unknown_data,clustering$clustering_function)
 #viewClusters(more_data,clustering$clustering_function)
-#
 #
 #
 #

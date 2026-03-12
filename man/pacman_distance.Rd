@@ -2,15 +2,27 @@
 % Please edit documentation in R/metrics.R
 \name{pacman_distance}
 \alias{pacman_distance}
-\title{The difference of hours}
+\title{Pacman distance function}
 \usage{
-pacman_distance(dim_lengths, base_metric = euclidean)
+pacman_distance(dim_lengths, base_distance = euclidean)
 }
 \arguments{
-\item{x, y}{A numeric between 0 and 24, Hour of a time of day as. Fractional
-hours like 2.5 or 15.9 are allowed.}
+\item{dim_lengths}{A numeric vector. Describes the widths of the space.}
+
+\item{base_distance}{A distance function to be used as the base distance on the looped space.}
+}
+\value{
+A distance function for two data points on a looped multidimensional space
 }
 \description{
-Calculates the difference of two times of the day in hours. Be aware, this
-means 23.9 and 0.1 are very close.
+a function factory for functions on multidimensional toruses. Meaning 'the edges loop'
+}
+\examples{
+pacman_distance(24)(x = 1, y = 23)
+pacman_distance(dim_lengths = c(26,30),
+                base_distance = manhattan)(x = c(5,2), y= c(25,23))
+}
+\seealso{
+[hours_distance()] made by `pacman_distance(25)`,
+  [original_pacman_distance()] made by `pacman_distance(dim_lengths = c(26,30),base_distance = manhattan)`,
 }

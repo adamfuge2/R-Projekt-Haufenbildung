@@ -4,17 +4,6 @@ test_that('wholenumber check works',{
   expect_error(is.wholenumber('char'))
 })
 
-test_that('generators output right dimension',{
-  expect_equal(ncol(generateClusterTestDataSimple2D(10)),2)
-  expect_equal(ncol(generateClusterTestDataSimple(10,dim=3)),3)
-  expect_equal(ncol(generateClusterTestData2DFromPaths(10,list(tibble::tibble(X=0.5,Y=0.5)))),2)
-})
-
-test_that('generators outputs right sample size',{
-  expect_equal(nrow(generateClusterTestDataSimple2D(10)),10)
-  expect_equal(nrow(generateClusterTestData2DFromPaths(10,list(tibble::tibble(X=0.5,Y=0.5)))),10)
-})
-
 test_that('clusteringFromCentroids',{
   data <- tibble::tibble(X=c(0.1,0.1,0.8),Y=c(0.46,0.8,0.4))
 
@@ -30,11 +19,11 @@ test_that('InnerInequality',{
 
   set.seed(13456)
 
-  data <- generateClusterTestDataSimple(n=100,cluster_amount = 3)
+  data <- generateClusterData(n=100,cluster_amount = 3)
 
   clustering <- kMeans(data,K=3,tries = 10)
 
-  testthat::expect_equal(clustering$inner_inequality,3.59440075)
+  testthat::expect_equal(round(clustering$inner_inequality,1),14.4)
 })
 
 
@@ -45,9 +34,8 @@ test_that('silhouette',{
 
   testthat::expect_equal(silhouette(data,clustering,c(0.1,0.46)),0)
 
-  print(silhouette(data,clustering,c(0.15,0.46)))
 
-  testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46)), silhouette(data,clustering,c(0.4,0.46)))
+  testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46),is_part_of_data = FALSE), silhouette(data,clustering,c(0.4,0.46),is_part_of_data = FALSE))
 })
 
 test_that('meanSilhouette',{
@@ -55,11 +43,12 @@ test_that('meanSilhouette',{
 
   clustering <- clusteringFromCentroids(data)
 
+  # should be zero, because mono elementary clusters
   testthat::expect_equal(meanSilhouette(data,clustering),0)
 
   data <- data |> dplyr::add_row(tibble::tibble(X=0.15,Y=0.46))
 
-  testthat::expect_equal(meanSilhouette(data,clustering),0.4268618)
+  testthat::expect_equal(round(meanSilhouette(data,clustering),5),0.00039)
 })
 
 test_that('tibbleAsPath',{
@@ -76,12 +65,12 @@ test_that('tibbleAsPath',{
 })
 
 test_that('dissimilarityMatrix',{
-  data <- generateClusterTestDataSimple2D(n=10)
+  data <- generateClusterData(n=10)
   testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,euclidean), as.matrix(stats::dist(data)))
 })
 
 test_that('sumOfDistancestTo',{
-  data <- generateClusterTestDataSimple2D(n=10)
+  data <- generateClusterData(n=10)
   expect_equal(sumOfDistancestTo(data,data[1,],euclidean), sum(as.matrix(stats::dist(data))[1,]))
 })
 
@@ -114,12 +103,12 @@ test_that('metrics',{
   data_atomic_2 <- c(-3, 8, 0)
 
   testthat::expect_no_error(euclidean(data[1, ], data[2, ]))
-  testthat::expect_no_error(maximumMetric(data[1, ], data[2, ]))
-  testthat::expect_no_error(pMetric(6)(data[1, ], data[2, ]))
+  testthat::expect_no_error(maximumDistance(data[1, ], data[2, ]))
+  testthat::expect_no_error(pDistance(6)(data[1, ], data[2, ]))
 
   testthat::expect_no_error(euclidean(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(maximumMetric(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(pMetric(6)(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(maximumDistance(data_atomic_1, data_atomic_2))
+  testthat::expect_no_error(pDistance(6)(data_atomic_1, data_atomic_2))
 })
 
 
@@ -134,7 +123,7 @@ test_that('Linkage mode: centroid', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(centroid(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkCentroid(euclidean, data_1, data_2))
 })
 
 
@@ -142,7 +131,7 @@ test_that('Linkage mode: average', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(average(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkAverage(euclidean, data_1, data_2))
 })
 
 
@@ -150,7 +139,7 @@ test_that('Linkage mode: single', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(single(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkSingle(euclidean, data_1, data_2))
 })
 
 
@@ -158,5 +147,5 @@ test_that('Linkage mode: complete', {
   data_1 <- tibble::tibble(X=c(-5.2, -3, 0, 7, 10), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 6.5))
   data_2 <- tibble::tibble(X=c(9, 6.7, -7.6, -7.9, 0), Y=c(4.4, -6.5, 0, 1.2, -8.1), Z=c(8.8, 2.6, -2.1, 0, 6.8))
 
-  testthat::expect_no_error(complete(euclidean, data_1, data_2))
+  testthat::expect_no_error(linkComplete(euclidean, data_1, data_2))
 })

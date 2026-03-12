@@ -4,17 +4,25 @@
 \alias{silhouette}
 \title{Silhouette of a clustering on ONE SPECIFIC data point.}
 \usage{
-silhouette(data, clustering, o, metric = euclidean)
+silhouette(
+  data,
+  clustering_function,
+  o,
+  distance = euclidean,
+  is_part_of_data = TRUE
+)
 }
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
-\item{clustering}{a clustering function relating any data point to their cluster.}
+\item{clustering_function}{a clustering function relating any data point to their cluster.}
 
 \item{o}{an atomic vector or tibble row.
 This is the data point we calculate the silhouette of}
 
-\item{metric}{a metric whose 2 inputs are of the data row type.}
+\item{distance}{a distance function whose 2 inputs are of the data row type.}
+
+\item{is_part_of_data}{A logical of length 1. If \code{TRUE} we assume that the data point is already part of the `data`.}
 }
 \value{
 numeric, a real number between -1 and 1
