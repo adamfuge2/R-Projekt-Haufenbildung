@@ -103,31 +103,3 @@ extractClusters.reachability <- function(object, eps) {
   cluster
 }
 
-cluster_colors <- function(cluster) {
-  if (length(cluster) == 0) return(NULL)
-
-  K <- max(cluster, na.rm = TRUE)
-  cols <- grDevices::rainbow(K)
-  palette <- c("0" = "black", stats::setNames(cols, 1:K))
-
-  return(as.character(palette[as.character(cluster)]))
-}
-
-#plot_optics_tree <- function(data, result){ #this is currently useless, maybe will be implemented later
-  # also not necessary for OPTICS and/or reachability, only for similarity to wiki example
- # ord <- result$order
- #plot(data$X, data$Y, pch=16)
- # for(i in ord){
- #   p <- result$predecessor[i]
- #   if(!is.na(p)){
- #    segments(
-  #      data$X[i],
-   #     data$Y[i],
-    #    data$X[p],
-     #   data$Y[p],
-      #  col="grey"
-#      )
-#    }
-#  }
-#}
-

@@ -21,7 +21,7 @@ is.wholenumber <- function(x, tol = base::.Machine$double.eps^0.5)  base::abs(x 
 #'              input: rows or atomic vectors Of the data row type
 #'              returns: a whole number > 0, representing the related cluster
 #'
-clusteringFromCentroids<- function(centroids,metric=euclidean){
+clusteringFromCentroids <- function(centroids,metric=euclidean){
   function(x)
     1:base::nrow(centroids) |>
     sapply(function(k) metric(x,base::unlist(centroids[k,]))) |>

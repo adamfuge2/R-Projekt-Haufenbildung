@@ -5,6 +5,9 @@
     stopifnot("data must be data.frame or tibble" = is.data.frame(data))
     stopifnot("data must have at least one row" = nrow(data) >= 1)
     stopifnot("data must have at least one columns" = ncol(data) >= 1)
+    stopifnot("data must contain only numeric values" = all(vapply(data, is.numeric, logical(1)))
+    stopifnot("epsilon must be positive and numeric" = is.numeric(epsilon) && epsilon > 0)
+    stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
 
     x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
     dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data, verbessern wir möglicherweise noch
@@ -119,94 +122,9 @@
         coredist = core_distance,
         predecessor = predecessor,
         data = data
-        #cluster_amount = ncol(data) anzahl cluster noch ausgeben lassen
+        minPts = min_Pts
       ),
       description = "OPTICS ordering",
       class = "optics"
     ))
   }
-
-  # let's try!
-  #data <- generateClusterTestDataSimple2D(n = 100)
-  #result <- optics(data, epsilon = 0.1, min_Pts = 5)
-
-  # Reihenfolge als Rang speichern
-  #order_rank <- integer(nrow(data))
-  #order_rank[result$order] <- seq_along(result$order)
-  #data$order_rank <- order_rank
-
-  # Visualisierung: Punkte eingefärbt nach OPTICS-Reihenfolge
-  #ggplot2::ggplot(data, ggplot2::aes(X, Y, color = order_rank)) +
-  #  ggplot2::geom_point() +
-  #  ggplot2::scale_color_viridis_c()
-
-
-  #data <- generateClusterTestDataSimple2D(n = 200, nclusters = 3)
-  #result <- optics(data, epsilon = 0.1, min_Pts = 10)
-  #order_rank <- integer(nrow(data))
-  #order_rank[result$order] <- seq_along(result$order)
-  #data$order_rank <- order_rank
-  #cluster <- extractClusters(result, eps = 0.15)
-  #table(cluster)
-  #cols <- cluster_colors(cluster)
-  #ggplot2::ggplot(data, aes(X, Y)) +
-  #  geom_point(color = cols)
-  #plot(result, eps = 0.1)
-
-  ### testdaten ähnlich wie im Beispiel unter https://en.wikipedia.org/wiki/OPTICS_algorithm
-  ### die funktionen werden noch schöner irgendwohin geschoben aber heute nicht mehr
-  path1 <- tibble::tibble(
-    X = c(0.2,0.3,0.4,0.3,0.2),
-    Y = c(0.3,0.4,0.3,0.2,0.3)
-  )
-  path2 <- tibble::tibble(
-    X = c(0.45,0.5,0.45,0.4,0.45),
-    Y = c(0.9,0.85,0.8,0.85,0.9)
-  )
-  path3 <- tibble::tibble(
-    X = c(0.85,0.8,0.93,0.85),
-    Y = c(0.5,0.28,0.28,0.5)
-  )
-
-    ###
-  sample_points_from_path <- function(path_fun, n, sd = 0.03) {
-    pts <- lapply(runif(n), path_fun)
-    pts <- dplyr::bind_rows(pts)
-    tibble::tibble(
-      X = pts$X + rnorm(n,0,sd),
-      Y = pts$Y + rnorm(n,0,sd)
-    )
-  }
-
-  generate_noise <- function(n) {
-    tibble::tibble(
-      X = runif(n,0,1),
-      Y = runif(n,0,1)
-    )
-  }
-
-  generate_optics_test_data <- function() {
-    p1 <- sample_points_from_path(tibbleAsPath(path1),500,0.035)
-    p2 <- sample_points_from_path(tibbleAsPath(path2),500,0.035)
-    p3 <- sample_points_from_path(tibbleAsPath(path3),500,0.035)
-    noise <- generate_noise(100)
-    dplyr::bind_rows(p1,p2,p3,noise)
-  }
-
-  suggest_epsilon <- function(optics_obj) {
-    cd <- optics_obj$coredist
-    return(quantile(cd[!is.na(cd)], 0.9))
-  }
-
-  ##
-  data <- generate_optics_test_data()
-  ### actual testing
-  result <- optics(data, epsilon = 0.2, min_Pts = 20)
-  cluster<- extractClusters(result, eps = 0.1)
-  data$cluster <- cluster
-  viewClusters(data)
-  plot(result, eps = 0.08)
-  table(cluster)
-
-  eps_ideal <- suggest_epsilon(result)
-  plot(result, eps = eps_ideal)

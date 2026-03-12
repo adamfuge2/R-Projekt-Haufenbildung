@@ -15,7 +15,7 @@ dbscan <- function(data, epsilon, min_Pts) {
  stopifnot("data must have at least one row" = nrow(data) >= 1)
  stopifnot("data must have at least one columns" = ncol(data) >= 1)
  stopifnot("data must contain only numeric values" = #we can discuss if we want that check
-             all(tapply(data, is.numeric, logical(1)))) # Sonderfall einbauen; wenn alles numeric machen wir den so, sonst dissimillarity-matrix draufwerfen
+             all(vapply(data, is.numeric, logical(1)))) # Sonderfall einbauen; wenn alles numeric machen wir den so, sonst dissimillarity-matrix draufwerfen
  stopifnot("epsilon must be positive and numeric" = is.numeric(epsilon) && epsilon > 0)
  stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
  stopifnot("data must be data.frame or tibble" = is.data.frame(data))
@@ -54,7 +54,7 @@ dbscan <- function(data, epsilon, min_Pts) {
 
 
  # for each element in data (point in n)
- for(point in 1:n)
+ for(point in seq_len(n))
   if(visited[point] == FALSE) {
     visited[point] <- TRUE    # mark point as visited
     area <- regionQuery(point) # get neighbors
@@ -89,26 +89,3 @@ dbscan <- function(data, epsilon, min_Pts) {
    class= 'clustering'
  ))
 }
-
-
-### let's try it out (to be removed before merging in main)
-data <- generateClusterTestDataSimple2D(n=300)
-result <- dbscan(data, epsilon=0.2, min_Pts=3)
-viewClusters(result$clustered_data)
-
-data$cluster <- factor(
-  result$clustered_data,
-  levels = sort(unique(result$clustered_data)),
-  labels = paste("Cluster", sort(unique(result$clustered_data)))
-)
-ggplot2::ggplot(data, ggplot2::aes(X, Y, color = cluster)) +
-  ggplot2::geom_point() +
-  ggplot2::scale_color_manual(
-    values = c(
-      "Cluster 0" = "black",
-      setNames(
-        grDevices::rainbow(length(levels(data$cluster)) - 1),
-        levels(data$cluster)[-1]
-      )
-    )
-  )
