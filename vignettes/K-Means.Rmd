@@ -158,12 +158,12 @@ findClusterAmountElbow <- function(data, check_min = 1){
 
 Now lets try it on the data set from above
 ```{r}
-findClusterAmountElbow(favorite_colors,check_min = 20)
+findClusterAmountElbow(favorite_colors,check_min = 10)
 ```
-Here we look for an 'elbow' in the plot. So for example 7, 15 and 20 can be considered good amounts of clusters in this data set. 
+Here we look for an 'elbow' in the plot. So for example 7 can be considered a good amount of clusters in this data set. 
 
 Something similar can be done using the silhouette method and the mean_silhouette property of the clustering object:
-```{r}
+```{r genral_use_mean_silhouette}
 clustering$mean_silhouette
 ```
 
@@ -187,7 +187,7 @@ The data could even have multiple types, although `mean()` has to still make sen
 
 
 Lets go clustering!
-```{r}
+```{r data_examples}
 kMeans(data_1,K=3)
 kMeans(data_2,K=1)
 ```

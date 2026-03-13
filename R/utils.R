@@ -364,3 +364,12 @@ getDistanceFunction <- function(distance_method = 'euclidean',
   }
   else return(custom_distance_function)
 }
+
+as.clustered_data <- function(data,clustering_function){
+  if(length(unique(lapply(data,typeof))) == 1){
+    m_data <- as.matrix(data)
+    return(  data |> dplyr::mutate('cluster'=apply(m_data,1,function(data_point) clustering_function(data_point))))
+  }
+
+  return(data |> dplyr::mutate(cluster=sapply(1:nrow(data),function(data_point_index) clustering_function(data[data_point_index,]))))
+}

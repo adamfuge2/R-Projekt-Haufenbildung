@@ -42,7 +42,7 @@ viewClusters1D <-function(clustered_data){
   ## Display data as 2D scatter plot
   print(ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
           ggplot2::geom_point() +
-          ggplot2::scale_color_manual(values = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
+          ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
           ggplot2::labs(x='Data Points',x='Value')
 
   )
@@ -91,8 +91,8 @@ viewClusters2D <-function(clustered_data){
   ## Display data as 2D scatter plot
   print(ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
           ggplot2::geom_point() +
-          ggplot2::scale_color_manual(values = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
-          ggplot2::coord_fixed()
+          ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster)))))
+
   )
 }
 
@@ -141,7 +141,7 @@ viewClusters3D <-function(clustered_data){
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
-  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Outlier" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))[.data$cluster_label])
+  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
 
   x<- clustered_data$X
   y<- clustered_data$Y
@@ -199,7 +199,7 @@ viewClusters <- function(data,clustering=NULL){
   }
   else{
     if(!('cluster' %in% colnames(data))){
-      data <- data |> dplyr::rowwise() |> dplyr::mutate(cluster=clustering(dplyr::c_across(everything())))
+      data <- as.clustered_data(data,clustering_function = clustering)
     }
 
     dim <- base::ncol(data)-1
@@ -218,6 +218,26 @@ viewClusters <- function(data,clustering=NULL){
       viewClusters3D(data)
     }
   }
+}
+
+
+
+#' View 1D data as scatter plot
+#'
+#' @param data   A tibble with every row representing a data point.
+#'
+#' @examples
+#' data_1D <- generateClusterData(dim=1,cluster_amount=2)
+#' clusterfuck:::viewData1D(data_1D)
+#'
+viewData1D <- function(data){
+
+colnames(data) <- 'Y'
+
+## Display data as 2D scatter plot
+print(ggplot2::ggplot(data,ggplot2::aes(y=.data$Y, x=row(data)[,1] )) +
+        ggplot2::geom_point() +
+        ggplot2::labs(x='Data Points',y='Value'))
 }
 
 
@@ -278,10 +298,7 @@ viewData <- function(data){
   stopifnot('viewData can only display 1D to 3D data' = (1 <= dim && dim <= 3))
 
   if(dim==1){
-    message('this functionality is still work in progress')
-    data |> colnames() <- 'X'
-    data <- data |> dplyr::mutate(Y = 0)
-    viewData2D(data)
+    viewData1D(data)
   }
   else if(dim==2){
     viewData2D(data)
