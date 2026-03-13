@@ -11,12 +11,7 @@
 #' @param mode linkage mode used to determine the distance between two clusters.
 #' Available are \code{'centroid'}, \code{'single'}, \code{'complete'},
 #' \code{'average'}.
-#' @param distance_method A character. One of \code{'euclidean'}, \code{'maximum'},
-#'   \code{'Lp'} or \code{'manhattan'}.
-#' @param p A numeric greater than or equal to 1. If \code{distance_method} was
-#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_distance_function A semi definite and symmetric function whose inputs are
-#'   two of the \code{data} row type.
+#' @inheritParams getDistanceFunction
 #' @param .print_info A logical of length 1. If \code{TRUE} additional information
 #'   will be displayed during runtime. Used in debugging.
 #'
@@ -39,26 +34,17 @@ hierarchicalClustering <- function(data, K, mode = "centroid", distance_method =
   # assign each datapoint a cluster-ID
   cluster <- 1:n
 
-  # metric selection
-  if(is.null(custom_distance_function)){
-    if(distance_method == 'euclidean')
-      distance <- euclidean
-    else if(distance_method =='maximum')
-      distance <- maximumDistance
-    else if(distance_method == 'Lp'){
-      stopifnot('If you chose the Lp metric, please provide a value for p' = !is.null(p))
-      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      distance <- pDistance(p)
-    }
-    else if(distance_method == 'manhattan')
-      distance <- pDistance(1)
-    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_metric.')
-  }
-  else distance <- custom_distance_function
+
+  distance <- getDistanceFunction(distance_method = distance_method,
+                                  p = p,
+                                  custom_distance_function = custom_distance_function)
 
   # calculate distances
   if(.print_info) print('Calculating Dissimilarity Matrix')
-  D_points <- dissimilarityMatrix(data, distance)
+  D_points <- dissimilarityMatrix(data,
+                                  distance_method = distance_method,
+                                  p = p,
+                                  custom_distance_function = custom_distance_function)
   if(.print_info) print('Done')
 
   diag(D_points) <- Inf

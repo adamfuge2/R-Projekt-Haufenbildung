@@ -4,17 +4,29 @@
 \alias{clusteringFromCentroids}
 \title{Coerce a data frame to clustering}
 \usage{
-clusteringFromCentroids(centroids, distance = euclidean)
+clusteringFromCentroids(
+  centroids,
+  distance_method = "euclidean",
+  p = NULL,
+  custom_distance_function = NULL
+)
 }
 \arguments{
 \item{centroids}{a tibble with every row being a centroid}
 
-\item{distance}{a distance function whose 2 inputs are of the centroids row type
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
 
-Returns:
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
+}
+\value{
 function,    a clustering function relating any data point to their cluster.
              input: rows or atomic vectors Of the data row type
-             returns: a whole number > 0, representing the related cluster}
+             returns: a whole number > 0, representing the related cluster
 }
 \description{
 Coerces a tibble of cluster centers (centroids) to a clustering function

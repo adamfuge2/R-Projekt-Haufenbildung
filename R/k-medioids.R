@@ -13,12 +13,7 @@
 #'   sample size and called n.
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
-#' @param distance    A character. One of \code{'euclidean'}, \code{'maximum'},
-#'   \code{'Lp'} or \code{'manhattan'}
-#' @param p         A numeric greater than or equal to 1. If \code{distance} was
-#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_distance_function A semi definite and symmetric function whose inputs are
-#'   two of the \code{data} row type.
+#' @inheritParams getDistanceFunction
 #' @param .print_info A logical. Prints some useful information for debugging.
 #'
 #' @returns A list of the class 'clustering'. Contains \itemize{
@@ -28,30 +23,18 @@
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medioids.
 #'   }
 #' @export
-kMedioids <- function(data,K,distance = 'euclidean',p=NULL,custom_distance_function=NULL,.print_info = FALSE){
+kMedioids <- function(data,
+                      K,
+                      distance_method = 'euclidean',
+                      p=NULL,
+                      custom_distance_function=NULL,
+                      .print_info = FALSE){
 
   ## some necessary variables
   n <- base::nrow(data)
   dim <- base::ncol(data)
   old_min_cost <- Inf
   old_centroids <- tibble::tibble()
-
-
-  if(is.null(custom_distance_function)){
-    if(distance=='euclidean')
-      distance <- euclidean
-    else if(distance=='maximum')
-      distance <- maximumDistance
-    else if(distance=='Lp'){
-      stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
-      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      distance <- pDistance(p)
-      }
-    else if(distance=='manhattan')
-      distance <- pDistance(1)
-    else stop('Unknown distance functions. Look up on the help page which distance functions are available ore input a custum distance functions using the argument custom_distance_function.')
-  }
-  else distance <- custom_distance_function
 
   ## Invariants: test the input
   base::stopifnot('Data must have more than 0 rows' = n>0)
@@ -63,27 +46,32 @@ kMedioids <- function(data,K,distance = 'euclidean',p=NULL,custom_distance_funct
 
   ## As we will never need to handle new data points, calculate all distances
   ## between the data points now.
-  D <- dissimilarityMatrix(data,distance = distance)
+  D <- dissimilarityMatrix(data,
+                           distance_method = distance_method,
+                           p = p,
+                           custom_distance_function = custom_distance_function)
 
 
 
   if(.print_info) print('Done. \n now find starting medioids')
 
   ## (BUILD) Define starting medioids
-  medioid_indeces <- greedySearchMedioidIndeces(data,K,distance,dissimilarity_matrix=D)
+  medioid_indeces <- greedySearchMedioidIndeces(data,K,dissimilarity_matrix=D)
 
 
 
   if(.print_info) print('Done. \n now calculating first costs')
 
-  new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |> apply(c(2),min) |>  sum()
+  new_min_cost <-  structure(D[medioid_indeces,],dim=c(K,n)) |>
+    apply(c(2),min) |>
+    sum()
 
 
   # Special case: only 1 cluster. We want to allow it, to compare which cluster amount to choose
   if(K==1){
     return(structure(
       list(
-        clustered_data = dplyr::mutate(data, cluster=1),
+        clustered_data = structure(dplyr::mutate(data, cluster=1),class=c('clustered_data',class(data))),
         clustering_function = function(x) 1,
         centroids = data[medioid_indeces,],
         inner_inequality = new_min_cost,
@@ -127,6 +115,10 @@ kMedioids <- function(data,K,distance = 'euclidean',p=NULL,custom_distance_funct
 
   }
 
+  distance <- getDistanceFunction(distance_method = distance_method,
+                                  p = p,
+                                  custom_distance_function = custom_distance_function)
+
   clustering_function <- function(x) 1:K |>
     sapply(function(k) distance(x,base::unlist(data[old_medioid_indeces[k],]))) |>
     base::which.min()
@@ -137,7 +129,7 @@ kMedioids <- function(data,K,distance = 'euclidean',p=NULL,custom_distance_funct
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
   return(structure(
     list(
-      clustered_data = best_clustered_data,
+      clustered_data = structure(best_clustered_data,class=c('clustered_data',class(best_clustered_data))),
       clustering_function = clustering_function,
       medioids = data[old_medioid_indeces,],
       inner_inequality = old_min_cost,
@@ -194,11 +186,16 @@ innerInequalityAfterChangingMedioid <- function(o,medioid_indeces,m,dissimilarit
 #'   sample size and called n.
 #' @param K         A whole number between 0 and n+1. The amount of Clusters the
 #'   algorithm tries to find in the data
-#' @param distance    A distance function whose inputs are the rows of data.
+#' @inheritParams getDistanceFunction
 #' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
 #' @returns The indeces of good-enough clustering medioid in the \code{data}
-greedySearchMedioidIndeces <- function(data,K,distance=euclidean,dissimilarity_matrix=NULL){
+greedySearchMedioidIndeces <- function(data,
+                                       K,
+                                       distance_method='euclidean',
+                                       p=NULL,
+                                       custom_distance_function=NULL,
+                                       dissimilarity_matrix=NULL){
 
 
   ## Invariants: test the input
@@ -214,15 +211,22 @@ greedySearchMedioidIndeces <- function(data,K,distance=euclidean,dissimilarity_m
 
   # if not already given, calculate dissimilarity matrix
   if(is.null(dissimilarity_matrix)) {
-    M <- dissimilarityMatrix(data,distance)
+    M <- dissimilarityMatrix(data,
+                             distance_method = distance_method,
+                             p = p,
+                             custom_distance_function = custom_distance_function)
     }
   else M <- dissimilarity_matrix
+
+  dimnames(M) <- NULL
 
   # we choose the first medioid as the data point minimizing th sum of distances to all data points
   medioid_index <- M |> base::apply(c(1),sum) |> which.min()
   medioids <- data[medioid_index,]
 
-  # ignore chosen medioid in fourther decisions
+  D <- M[medioid_index,-medioid_index]
+
+  # ignore chosen medioid in fourther decisions,
   M <- M[-medioid_index,-medioid_index]
 
   medioid_indeces <- medioid_index
@@ -230,14 +234,10 @@ greedySearchMedioidIndeces <- function(data,K,distance=euclidean,dissimilarity_m
   if(K>1){
     for(k in 2:K){
 
-      # For all data points calculate their minimum distance to the chosen medioids
+      # For all data points calculate their minimum distance to the chosen medioid
 
-      D <- sapply(1:base::nrow(data),function(o) min(sapply(1:(k-1), function(m) distance(data[o,],medioids[m,]))))
-
-
-
-      # Remove the already chosen medioids and format to a matrix (for later)
-      D <- D[-medioid_indeces] |> base::rep(base::nrow(data)-k+1) |>
+      # Format to a matrix (for later)
+      D <- D |> base::rep(base::nrow(data)-k+1) |>
         base::matrix(ncol = base::nrow(data)-k+1, byrow = TRUE)
 
 
@@ -251,6 +251,14 @@ greedySearchMedioidIndeces <- function(data,K,distance=euclidean,dissimilarity_m
 
       # we take the data point, which would be most advantageous to add to the medioids
       medioid_index <- M_k |> base::apply(c(1),sum) |> which.max()
+
+      # calculate the minimum distance of a point to any already chosen medioid
+      # join D and the distances of the newly chosen medioid
+      D[2,] <- M[medioid_index,]
+      # simplify D
+      D <- D[c(1,2),-medioid_index]
+      # calculate new minimum
+      D <- apply(D,2,min)
 
       # remove this medioid from being chosen in the future
       M <- M[-medioid_index,-medioid_index]

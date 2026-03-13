@@ -6,7 +6,7 @@
 \usage{
 findClusterAmountSilhouette(
   data,
-  distance = "euclidean",
+  distance_method = "euclidean",
   p = NULL,
   custom_distance_function = NULL,
   check_min = 1,
@@ -16,10 +16,10 @@ findClusterAmountSilhouette(
 \arguments{
 \item{data}{a tibble with with every row representing a data point.}
 
-\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
-\item{p}{A numeric greater than or equal to 1. If \code{distance} was
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
 chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
 \item{custom_distance_function}{A semi definite and symmetric function whose inputs are

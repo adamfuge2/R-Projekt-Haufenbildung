@@ -7,7 +7,9 @@
 greedySearchMedioidIndeces(
   data,
   K,
-  distance = euclidean,
+  distance_method = "euclidean",
+  p = NULL,
+  custom_distance_function = NULL,
   dissimilarity_matrix = NULL
 )
 }
@@ -19,7 +21,14 @@ sample size and called n.}
 \item{K}{A whole number between 0 and n+1. The amount of Clusters the
 algorithm tries to find in the data}
 
-\item{distance}{A distance function whose inputs are the rows of data.}
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
+
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
 
 \item{dissimilarity_matrix}{A matrix having encoded all distances between data points}
 }

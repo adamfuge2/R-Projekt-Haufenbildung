@@ -10,12 +10,12 @@ clusterLabeling(n)
 \item{n}{A clusters identification. Can be a numeric or character.}
 }
 \value{
-A character like \code{'Cluster 15'}, or \code{'Outlier'} in case n is zero.
+A character like \code{'Cluster 15'}, or \code{'Noise'} in case n is zero.
 }
 \description{
 Helper function.
 Converts an identification (generally integers) of a cluster to a more descriptive cluster label.
-The 0th cluster gets labeled as the Outliers cluster.
+The 0th cluster gets labeled as the Noise cluster.
 }
 \examples{
 # example code

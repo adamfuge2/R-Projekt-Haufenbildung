@@ -297,11 +297,11 @@ viewData <- function(data){
 #'
 #' Helper function.
 #' Converts an identification (generally integers) of a cluster to a more descriptive cluster label.
-#' The 0th cluster gets labeled as the Outliers cluster.
+#' The 0th cluster gets labeled as the Noise cluster.
 #'
 #' @param n A clusters identification. Can be a numeric or character.
 #'
-#' @returns A character like \code{'Cluster 15'}, or \code{'Outlier'} in case n is zero.
+#' @returns A character like \code{'Cluster 15'}, or \code{'Noise'} in case n is zero.
 #'
 #' @examples
 #' # example code
@@ -312,7 +312,7 @@ viewData <- function(data){
 #'
 #'
 clusterLabeling <- function(n){
-  if(is.na(n) || n==0 || n=='0' || is.null(n)) return('Outlier')
+  if(is.na(n) || n==0 || n=='0' || is.null(n)) return('Noise')
   return(paste0('Cluster ',n))
 }
 

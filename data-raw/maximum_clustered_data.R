@@ -5,10 +5,4 @@ r_2 <- tibble::tibble('X' = stats::runif(n/2, min = 1, max = 4), 'Y' = runif(n/2
 
 maximum_clustered_data <- dplyr::bind_rows(r_1, r_2)
 
-maximum_cluster_data <- maximum_clustered_data |> dplyr::select(-3)
-
-usethis::use_data(maximum_cluster_data, overwrite = TRUE)
-
-
-#viewData(maximum_cluster_data)
-#viewClusters(maximum_clustered_data)
+usethis::use_data(maximum_clustered_data, overwrite = TRUE)

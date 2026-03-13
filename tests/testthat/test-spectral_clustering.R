@@ -33,8 +33,8 @@ test_that("Spectral Projection", {
   #for special cases
   custum_kernel <- kernelByCustomDistanceFunction(maximumDistance, 1.4)
   testthat::expect_warning(spectralProjection(data, k, gamma = gamma, custom_mercer_kernel = custum_kernel))
-  testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4))
-  testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4)$projected_data), k)
+  testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4))
+  testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4)$projected_data), k)
 })
 
 

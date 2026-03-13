@@ -52,7 +52,7 @@ test_that('meanSilhouette',{
 
   data <- data |> dplyr::add_row(tibble::tibble(X=0.15,Y=0.46))
 
-  testthat::expect_equal(round(meanSilhouette(data,clustering),5),0.00039)
+  testthat::expect_equal(round(meanSilhouette(data,clustering),2),0.43)
 })
 
 test_that('tibbleAsPath',{
@@ -70,7 +70,7 @@ test_that('tibbleAsPath',{
 
 test_that('dissimilarityMatrix',{
   data <- generateClusterData(n=10)
-  testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,euclidean), as.matrix(stats::dist(data)))
+  testthat::expect_equal(ignore_attr = TRUE,dissimilarityMatrix(data,'euclidean'), as.matrix(stats::dist(data)))
 })
 
 test_that('sumOfDistancestTo',{

@@ -123,5 +123,105 @@
 #'
 'three_connected_concentric_circles'
 
+################ distance methods cluster examples ##############
+
+#' Data of three (euclidean) clusters
+#'
+#' Data set of 400 data points perfect for clustering with euclidean distance.
+#' [euclidean_clustered_data] is the same data set with a column identifying the
+#' points with their cluster.
+#'
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+'euclidean_cluster_data'
 
 
+#' Data of three (euclidean) clusters
+#'
+#' Data set of 400 data points perfect for clustering with euclidean distance.
+#' [euclidean_cluster_data] is the same data set without the column identifying the
+#' points with their cluster.
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' \item{cluster}{Integers identifying which cluster the points belong to}
+#' }
+'euclidean_clustered_data'
+
+
+#' Data of two (maximum) clusters
+#'
+#' Data set of 400 data points perfect for clustering with maximum distance.
+#' [maximum_clustered_data] is the same data set with a column identifying the
+#' points with their cluster.
+#'
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+'maximum_cluster_data'
+
+
+#' Data of two (maximum) clusters
+#'
+#' Data set of 400 data points perfect for clustering with maximum distance.
+#' [maximum_cluster_data] is the same data set without the column identifying the
+#' points with their cluster.
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' \item{cluster}{Integers identifying which cluster the points belong to}
+#' }
+'maximum_clustered_data'
+
+
+#' Data of two (manhattan) clusters
+#'
+#' Data set of 400 data points perfect for clustering with manhattan distance.
+#' [manhattan_clustered_data] is the same data set with a column identifying the
+#' points with their cluster.
+#'
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+'manhattan_cluster_data'
+
+
+#' Data of two (manhattan) clusters
+#'
+#' Data set of 400 data points perfect for clustering with manhattan distance.
+#' [manhattan_cluster_data] is the same data set without the column identifying the
+#' points with their cluster.
+#'
+#' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' \item{cluster}{Integers identifying which cluster the points belong to}
+#' }
+'manhattan_clustered_data'

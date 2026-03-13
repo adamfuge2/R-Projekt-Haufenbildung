@@ -6,7 +6,7 @@
 \alias{clusterfuck-package}
 \title{clusterfuck: A collection of common clustering algorithms}
 \description{
-This package includes the algoriithms K-Means, K-Medioids, hierarchical clustering, DBSCAN and OPTICS. Also included are easy to use functions to - score the clusterings, - plot the clusterings, - generate clustered test data.
+This package includes the algoriithms K-Means, K-Medioids, spectral clustering, hierarchical clustering, DBSCAN and OPTICS. Also included are easy to use functions to - score the clusterings, - plot the clusterings, - generate clustered test data.
 }
 \details{
 Details
@@ -19,12 +19,12 @@ NA
 Richter
 }
 \author{
-\strong{Maintainer}: Roman Hektor \email{roman.hektor@stud.uni-heidelberg.de}
+\strong{Maintainer}: Adam Fuge \email{adam.fuge@stud.uni-heidelberg.de}
 
 Authors:
 \itemize{
   \item Aaron Fath \email{aaron.fath@stud.uni-heidelberg.de}
-  \item Adam Fuge \email{adam.fuge@stud.uni-heidelberg.de}
+  \item Roman Hector \email{roman.hector@stud.uni-heidelberg.de}
 }
 
 }

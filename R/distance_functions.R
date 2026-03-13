@@ -1,18 +1,19 @@
-######################### metrics #################################
-##
-## A distance is a function measuring the
-## distance/closeness/inequality/relatedness/etc...
-## for every distance here the following must (approximately) hold:
-## 1. distance(x,y) = 0  if and only if x = y
-## 2. distance(x,y) = distance(y,x)
-##
-## Inputs:
-## x,         an atomic vector or tibble row.
-## y,         the same type as x.
-##
-## Returns:
-## numeric,   a real number >= 0.
+######################### distance functions #################################
 
+# Distance Function
+#
+# A distance function is a function measuring the
+# distance/closeness/inequality/relatedness/etc...
+# for every distance function here the following must (approximately) hold:
+# 1. distance(x,y) = 0  if and only if x = y
+# 2. distance(x,y) = distance(y,x)
+#
+# Inputs:
+# x,         an atomic vector or tibble row.
+# y,         the same type as x.
+#
+# Returns:
+# numeric,   a real number >= 0.
 
 
 #' The standard euclidean distance
@@ -43,7 +44,7 @@ maximumDistance <- function(x,y) base::max(base::abs(x-y))
 
 
 
-#' The standard Lp distance
+#' The standard minkowski/Lp distance
 #'
 #'
 #' @param p         a real numeric with 1 <= p < Inf
@@ -177,8 +178,8 @@ distanceByLongitudeAndLatitude <- function(x,y){
   x <- unlist(x,use.names = FALSE)[2:1] * 2*pi/360
   y <- unlist(y,use.names = FALSE)[2:1] * 2*pi/360
   round(2*6371000 * asin(sqrt(sin((y[1]-x[1])/2)^2 +
-                       cos(x[1]) * cos(y[1]) *
-                     sin((y[2]-x[2])/2)^2)),2)
+                                cos(x[1]) * cos(y[1]) *
+                                sin((y[2]-x[2])/2)^2)),2)
 }
 
 #paris <- tibble::tibble(lattitude=48.8566,longitude=2.3522)

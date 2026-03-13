@@ -16,7 +16,7 @@ hierarchicalClustering(
 }
 \arguments{
 \item{data}{a tibble or matrix of arbitrary dimension with each row representing
-one datapoint.}
+one data point.}
 
 \item{K}{guessed number of clusters (at which the iteration stops).}
 
@@ -32,6 +32,9 @@ chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
 \item{custom_distance_function}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
+
+\item{.print_info}{A logical of length 1. If \code{TRUE} additional information
+will be displayed during runtime. Used in debugging.}
 }
 \value{
 A list of the class 'clustering'. Contains \itemize{
