@@ -1,15 +1,20 @@
 # DBSCAN Algorithm
-# Was dieser Code am Ende können soll:
-# (gefühlt ist alles was man findet also werden Begriffe sehr inkonsistent deutsch und englisch gemixt bis ich lust habe das zu vereinheitlichen <3)
-# 1.: Dichte abschätzen / estimate density
-#   um jeden Datenpunkt wird die Anzahl der Punkte innerhalb eines angegebenen Umfelds
-#   (Variable "epsilon") gezählt und die drei Arten an Punkten (Kernobjekte, Dichte-erreichbare
-#   Objekte, Rauschpunkte) mit einer angegebenen Schwelle "minPts" als minimale Anzahl an
-#   Dichte-erreichbare Objekte (inkl. Datenpunkt) ermittelt
-# 2.: Kernpunkte zu einem Cluster zusammenfügen, wenn sie "density-reachable" sind,
-#    also über Dichte-erreichbare Objekte verbunden werden können
-# 3.: Dichte-erreichbare Punkte Clustern zuweisen mit Parametern epsilon und minPts
-
+#'
+#' Density-based clustering of applications with noise.
+#'
+#' @param data      a tibble with with every row representing a data point.
+#'            The number columns is therefore the dimensionality,
+#'            The number of rows is the sample size and called n.
+#' @param epsilon neighborhood radius
+#' @param min_Pts minimum number of points to form a cluster
+#'
+#' @returns A list of class `"clustering"` containing
+#' \itemize{
+#'   \item `clustered_data` original data with cluster labels
+#'   \item `clustering_function` function assigning clusters
+#' }
+#'
+#' @export
 dbscan <- function(data, epsilon, min_Pts) {
 
  stopifnot("data must have at least one row" = nrow(data) >= 1)

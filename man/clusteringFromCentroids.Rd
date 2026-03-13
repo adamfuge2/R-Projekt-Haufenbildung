@@ -4,7 +4,7 @@
 \alias{clusteringFromCentroids}
 \title{Coerce a data frame to clustering}
 \usage{
-clusteringFromCentroids(centroids, distance = euclidean)
+clusteringFromCentroids(centroids, metric = euclidean)
 }
 \arguments{
 \item{centroids}{a tibble with every row being a centroid}

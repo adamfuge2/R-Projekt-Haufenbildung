@@ -3,6 +3,12 @@ as.reachability <- function(object, ...) {
   UseMethod("as.reachability")
 }
 
+#' Form reachability object from optics clusterin
+#'
+#' @param `object` reachability object
+#' @param ...
+#'
+#' @export
 as.reachability.optics <- function(object, ...) {
   structure(
     list(
@@ -13,6 +19,30 @@ as.reachability.optics <- function(object, ...) {
   )
 }
 
+#' Reachability plot for OPTICS
+#'
+#' Visualizes the reachability distances of an OPTICS object.
+#'
+#' @param x an object of class `"optics"`
+#' @param ... additional plotting arguments
+#'
+#' @returns a reachability plot of the clustered data
+#'
+#' @export
+plot.optics <- function(x, ...) {
+  reach <- as.reachability(x)
+  plot(reach, ...)
+}
+
+#' Plot reachability object
+#'
+#' @param x reachability object
+#' @param eps epsilon marin
+#' @param ...
+#'
+#' @returns a reachability plot of the clustered data
+#'
+#' @export
 plot.reachability <- function(x, eps=NULL,...){
   rd <- x$reachdist[x$order]
   n <- length(rd)
@@ -46,15 +76,26 @@ plot.reachability <- function(x, eps=NULL,...){
     abline(h=eps, col="red", lty=2)
 }
 
-plot.optics <- function(x, ...) {
-  reach <- as.reachability(x)
-  plot(reach, ...)
-}
-
 extractClusters <- function(object, ...) {
   UseMethod("extractClusters")
 }
 
+#' Extract clusters from an OPTICS ordering
+#'
+#' Computes cluster assignments from an OPTICS result using
+#' a reachability threshold.
+#'
+#' @param object an object of class `"optics"`
+#' @param eps reachability threshold epsilon
+#'
+#' @returns integer vector of cluster labels
+#'
+#' @examples
+#' data <- generateClusterTestDataSimple2D(n = 100)
+#' result <- optics(data, epsilon = 0.1, min_Pts = 5)
+#' cluster <- extractClusters(result, eps = 0.05)
+#'
+#' @export
 extractClusters.optics <- function(object, eps){
   rd <- object$reachdist[object$order]
   cd <- object$coredist[object$order]
@@ -88,6 +129,15 @@ extractClusters.optics <- function(object, eps){
   return(cluster)
 }
 
+#' Extract clusters from an reachability object
+#'
+#' Computes cluster assignments from an object using the reachability threshold directly
+#'
+#' @param object an object of class `reachability`
+#' @param eps reachability threshold epsilon
+#'
+#' @returns integer vector of cluster labels
+#' @export
 extractClusters.reachability <- function(object, eps) {
   rd <- object$reachdist[object$order]
   n <- length(rd)

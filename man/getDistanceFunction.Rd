@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{getDistanceFunction}
 \alias{getDistanceFunction}
-\title{defer distance function from inputs}
+\title{Defer distance function from inputs}
 \usage{
 getDistanceFunction(
   distance = "euclidean",
@@ -10,6 +10,19 @@ getDistanceFunction(
   custom_distance_function = NULL
 )
 }
+\arguments{
+\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
+
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
+
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
+}
+\value{
+a distance function
+}
 \description{
-defer distance function from inputs
+Defer distance function from inputs
 }
