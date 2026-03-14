@@ -145,7 +145,7 @@ viewClusters3D <-function(clustered_data,print_directly=TRUE){
   color <- clustered_data$color
 
   ## Display data as 3D scatter plot
-  scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color)
+  invisible(scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color))
 }
 
 #' View cluster data
@@ -206,19 +206,29 @@ viewClusters <- function(data,clustering=NULL,print_directly=TRUE){
 
     if(ncol(data)-1==1){
       plot <- viewClusters1D(data)
+
+      # only print directly, if wished so
+      if(print_directly)
+        print(plot)
+      else
+        return(plot)
     }
     else if(ncol(data)-1==2){
       plot <- viewClusters2D(data)
+
+      # only print directly, if wished so
+      if(print_directly)
+        print(plot)
+      else
+        return(plot)
     }
     else if(ncol(data)-1==3){
-      plot <- viewClusters3D(data)
+
+      # scatter always prints directly,
+      viewClusters3D(data)
     }
 
 
-    if(print_directly)
-      print(plot)
-    else
-      return(plot)
   }
 }
 
@@ -382,12 +392,14 @@ print.spectral_clustering <- function(x, ...){
      ncol(x$projected_clustered_data) >= 2){
 
     par(mfrow = c(1, 2))
-    viewClusters(x$projected_clustered_data, print_directly = TRUE)
-    viewClusters(x$clustered_data, print_directly = TRUE)
+    viewClusters(x$projected_clustered_data)
+    viewClusters(x$clustered_data)
     par(mfrow = c(1,1))
 
-    NextMethod(x,plot=FALSE)}
-  else
+
+    NextMethod(x,plot=FALSE)
+    }
+    else
     NextMethod(x)
 }
 
@@ -410,4 +422,3 @@ clustered_data <- function(data,cluster=NULL){
   clustered_data_validate(clustered_data)
   clustered_data
 }
-
