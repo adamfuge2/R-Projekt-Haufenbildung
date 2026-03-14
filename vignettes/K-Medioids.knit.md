@@ -1,12 +1,12 @@
 ---
-title: "The K-Medioids Clustering Algortihm"
+title: "The K-Medioids Clustering Algorithm"
 output: 
   rmarkdown::html_vignette:
     toc: true
     tabset: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{The K-Medioids Clustering Algortihm}
+  %\VignetteIndexEntry{The K-Medioids Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -400,7 +400,7 @@ kMedioids(data_1,K=4)$clustered_data
 
 ### 3.2 clustering_function
 A function which can relate any data point to their cluster. 
-Why this is special with K-Means: **This clustering function CAN be applied to new data!**
+Why this is special with K-Medioids: **This clustering function CAN be applied to new data!**
 
 
 ``` r
@@ -412,7 +412,7 @@ training_data <- generateClusterDataFromPaths(n=50, clusters)
 unknown_data <- generateClusterDataFromPaths(n=100, clusters)
 more_data <- generateNoiseData(5000,lower_bounds=c(0,0), upper_bounds = c(0.1,0.1))
 
-# derive a clustering using K-Means
+# derive a clustering using K-Medioids
 f <- kMedioids(training_data,K=4)$clustering_function
 
 f

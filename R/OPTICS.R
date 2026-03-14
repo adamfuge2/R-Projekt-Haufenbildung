@@ -14,7 +14,6 @@
 #'   \item `order` ordering of the points
 #'   \item `reachdist` reachability distances
 #'   \item `coredist` core distances
-#'   \item `predecessor` predecessor indices
 #'   \item `data`
 #'   \item `minPts` minimum number of points for core distance
 #' }
@@ -59,12 +58,10 @@ optics <- function(data, epsilon, min_Pts) {
         if(is.infinite(reachability[o])){ # if (o.reachability-distance = NULL)
           # o not in Seeds:
           reachability[o] <<- new_reach #o.reachability-distance = new-reach-dist
-          predecessor[o] <<- point # for spanning tree (see wiki article)
           list(add_point = o, add_reach = new_reach)
 
         } else if(new_reach < reachability[o]){ #else: o in Seeds, check improvement// if (new-reach-dist < o.reachability-distance)
           reachability[o] <<- new_reach # o.reachability-distance = new-reach-dist
-          predecessor[o] <<- point
           # Seeds.move-up(o, new-reach-dist)
           i <- which(seeds_points == o)
           if(length(i) > 0) seeds_reach[i] <<- new_reach
@@ -134,11 +131,10 @@ optics <- function(data, epsilon, min_Pts) {
       order = ordered,
       reachdist = reachability,
       coredist = core_distance,
-      predecessor = predecessor,
       data = data,
       minPts = min_Pts
     ),
     description = "OPTICS ordering",
-    class = "optics"
+    class = c("optics", "clustering")
   ))
 }
