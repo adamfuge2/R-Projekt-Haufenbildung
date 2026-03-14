@@ -22,7 +22,8 @@ test_that("Hierarchical Clustering -> Linkage Modes", {
 test_that("Hierarchical Clustering -> Distance Methods", {
   testthat::expect_no_error(hierarchicalClustering(data, 2, distance_method = "euclidean"))
   testthat::expect_no_error(hierarchicalClustering(data, 2, distance_method = "maximum"))
-  testthat::expect_error(hierarchicalClustering(data, 2, distance_method = "Lp"))
+  # the next one fails as we have not provided a value for p
+  testthat::expect_error(hierarchicalClustering(data, 2, distance_method = "minkowski"))
   testthat::expect_no_error(hierarchicalClustering(data, 2, distance_method = "maximum", p = 4))
   testthat::expect_no_error(hierarchicalClustering(data, 2, distance_method = "manhattan"))
   testthat::expect_no_error(hierarchicalClustering(data, 2, custom_distance_function=function(x,y) as.numeric(!identical(x,y))))
@@ -30,12 +31,19 @@ test_that("Hierarchical Clustering -> Distance Methods", {
 
 
 test_that("Hierarchical Clustering -> Different Amounts of Clusters", {
-  testthat::expect_no_error(hierarchicalClustering(data, 1))
-  testthat::expect_no_error(hierarchicalClustering(data, 5))
+  testthat::expect_no_error(hierarchicalClustering(data, exact_cluster_amount = 1))
+  testthat::expect_no_error(hierarchicalClustering(data, exact_cluster_amount = 5))
 })
 
 
 test_that("Hierarchical Clustering -> Too Many Clusters", {
   testthat::expect_error(hierarchicalClustering(data, 25))
   #print("Hierarchical Clustering has been tested!")
+})
+
+test_that("Hierarchical Clustering -> Different cluster amount methods", {
+  testthat::expect_no_error(hierarchicalClustering(data))
+  testthat::expect_no_error(hierarchicalClustering(data, exact_cluster_amount=5))
+  testthat::expect_no_error(hierarchicalClustering(data, min_cluster_amount=5))
+  testthat::expect_no_error(hierarchicalClustering(data, distance_limit=10))
 })

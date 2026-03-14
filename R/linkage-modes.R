@@ -237,12 +237,11 @@ linkCompleteFast <- function(cluster_id_1, cluster_id_2, cluster, dissimilarity_
 #' minimal distance
 #'
 #' @return a real number (numeric) >= 0
-#' @export
 .dist <- function(x, mode, cluster, D_points, neighbors){
-  if(x == neighbors[1])
+  if(x == neighbors[2])
     return(Inf)
   else
-    return(mode(neighbors[1], x, cluster, D_points))
+    return(mode(neighbors[2], x, cluster, D_points))
 }
 
 
