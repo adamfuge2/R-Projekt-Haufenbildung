@@ -72,9 +72,6 @@ dbscan <- function(data, epsilon, min_Pts) {
     }
   }
 
- clustered_data <- data
- clustered_data$cluster <- cluster_labels
-
  clustering_function <- function(point) {
    point <- as.numeric(point)
    d <- sqrt(rowSums((x - matrix(point, nrow(x), ncol(x), byrow = TRUE))^2))
@@ -87,10 +84,10 @@ dbscan <- function(data, epsilon, min_Pts) {
 
  return(structure(
    list(
-     clustered_data = clustered_data,
+     clustered_data = clustered_data(data,cluster_labels),
      clustering_function = clustering_function
    ),
    description = 'Data clustered by DBSCAN algorithm',
-   class= 'clustering'
+   class= c('dbscan','clustering')
  ))
 }

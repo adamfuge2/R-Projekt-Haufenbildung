@@ -4,7 +4,7 @@
 \alias{viewClusters3D}
 \title{View 3D cluster data}
 \usage{
-viewClusters3D(clustered_data)
+viewClusters3D(clustered_data, print_directly = TRUE)
 }
 \arguments{
 \item{clustered_data}{A tibble with every row representing a data point.

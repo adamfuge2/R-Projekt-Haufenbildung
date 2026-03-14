@@ -9,7 +9,7 @@ hierarchicalClustering(
   min_cluster_amount = 2,
   exact_cluster_amount = NULL,
   distance_limit = NULL,
-  mode = "centroid",
+  mode = "single",
   distance_method = "euclidean",
   p = NULL,
   custom_distance_function = NULL,

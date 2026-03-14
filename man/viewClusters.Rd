@@ -4,7 +4,7 @@
 \alias{viewClusters}
 \title{View cluster data}
 \usage{
-viewClusters(data, clustering = NULL)
+viewClusters(data, clustering = NULL, print_directly = TRUE)
 }
 \arguments{
 \item{data}{a tibble with every row representing a data point. If

@@ -17,7 +17,7 @@
 #' clustered_data_1D <- kMeans(data_1D,K=3)$clustered_data
 #' clusterfuck:::viewClusters1D(clustered_data_1D)
 #'
-viewClusters1D <-function(clustered_data){
+viewClusters1D <-function(clustered_data,print_directly=TRUE){
 
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters1D can only display clusterings of 1D data' = dim==1)
@@ -40,12 +40,10 @@ viewClusters1D <-function(clustered_data){
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  print(ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
-          ggplot2::geom_point() +
-          ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
-          ggplot2::labs(x='Data Points',x='Value')
+  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
 
-  )
+  plot(clustered_data$X,clustered_data$Y,col=clustered_data$color)
+
 }
 
 
@@ -66,7 +64,7 @@ viewClusters1D <-function(clustered_data){
 #' clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
 #' clusterfuck:::viewClusters2D(clustered_data_2D)
 #'
-viewClusters2D <-function(clustered_data){
+viewClusters2D <-function(clustered_data,print_directly=TRUE){
 
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters2D can only display clusterings of 2D data' = dim==2)
@@ -89,11 +87,9 @@ viewClusters2D <-function(clustered_data){
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  print(ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
-          ggplot2::geom_point() +
-          ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster)))))
+  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
 
-  )
+  plot(clustered_data$X,clustered_data$Y,col=clustered_data$color)
 }
 
 
@@ -116,7 +112,7 @@ viewClusters2D <-function(clustered_data){
 #' clustered_data_3D <- kMeans(data_3D,K=5)$clustered_data
 #' clusterfuck:::viewClusters3D(clustered_data_3D)
 #'
-viewClusters3D <-function(clustered_data){
+viewClusters3D <-function(clustered_data,print_directly=TRUE){
   dim <- ncol(clustered_data)-1
   stopifnot('clustered_data must have a row called \'cluster\''= 'cluster'%in%colnames(clustered_data))
   stopifnot('viewClusters3D can only display clusterings of 3D data' = dim==3)
@@ -148,8 +144,8 @@ viewClusters3D <-function(clustered_data){
   z<- clustered_data$Z
   color <- clustered_data$color
 
-  ## Display data as 2D scatter plot
-  print(scatterplot3d::scatterplot3d(x,y,z,color = color,pch = 16))
+  ## Display data as 3D scatter plot
+  scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color)
 }
 
 #' View cluster data
@@ -191,7 +187,7 @@ viewClusters3D <-function(clustered_data){
 #'
 #'
 #' @export
-viewClusters <- function(data,clustering=NULL){
+viewClusters <- function(data,clustering=NULL,print_directly=TRUE){
 
 
   if(base::missing(clustering) & !('cluster' %in% colnames(data))) {
@@ -209,14 +205,20 @@ viewClusters <- function(data,clustering=NULL){
 
 
     if(ncol(data)-1==1){
-      viewClusters1D(data)
+      plot <- viewClusters1D(data)
     }
     else if(ncol(data)-1==2){
-      viewClusters2D(data)
+      plot <- viewClusters2D(data)
     }
     else if(ncol(data)-1==3){
-      viewClusters3D(data)
+      plot <- viewClusters3D(data)
     }
+
+
+    if(print_directly)
+      print(plot)
+    else
+      return(plot)
   }
 }
 
@@ -230,7 +232,7 @@ viewClusters <- function(data,clustering=NULL){
 #' data_1D <- generateClusterData(dim=1,cluster_amount=2)
 #' clusterfuck:::viewData1D(data_1D)
 #'
-viewData1D <- function(data){
+viewData1D <- function(data,print_directly=TRUE){
 
 colnames(data) <- 'Y'
 
@@ -337,20 +339,29 @@ clusterLabeling <- function(n){
 #################### as method for clustering class ######################
 
 #' @export
-print.clustering <- function(x, ...){
+print.clustering <- function(x, plot=TRUE,...){
   cat('A clustering object:\n')
   cat(attr(x,'description'),'\n\n')
-  for(i in 1:length(x))
-    print(x[i])
+  names <- attr(x,'names')
+  for(i in 1:length(x)){
+    cat('\n$',names[[i]],'\n',sep='')
+    if('clustered_data' %in% class(x[[i]])){
+      print(x[[i]], plot)}
+    else{
+      print(x[[i]])}
+  }
 }
 
 #' @export
-print.clustered_data <- function(x, ...){
+print.clustered_data <- function(x, plot=TRUE, ...){
   cat('A clustered_data object:\n')
   cat('a tibble with a column called \'cluster\'\n')
-  NextMethod(x,...)
-  if(ncol(x) <= 4 && ncol(x) >= 2)
+  if(ncol(x) <= 4 && ncol(x) >= 2 && plot==TRUE)
     viewClusters(x)
+
+  # doing this, beacause NextMethod was doing WEIRD stuff
+  class(x) <- class(x)[2:length(class(x))]
+  print(x)
 }
 
 #' @export
@@ -359,6 +370,25 @@ print.cluster_data <- function(x, ...){
   NextMethod(x,...)
   if(ncol(x) <= 3 && ncol(x) >= 1)
     viewData(x)
+}
+
+#' @export
+print.spectral_clustering <- function(x, ...){
+  if(!is.null(x$clustered_data) &&
+     !is.null(x$projected_clustered_data) &&
+     ncol(x$clustered_data) <= 4 &&
+     ncol(x$clustered_data) >= 2 &&
+     ncol(x$projected_clustered_data) <= 4 &&
+     ncol(x$projected_clustered_data) >= 2){
+
+    par(mfrow = c(1, 2))
+    viewClusters(x$projected_clustered_data, print_directly = TRUE)
+    viewClusters(x$clustered_data, print_directly = TRUE)
+    par(mfrow = c(1,1))
+
+    NextMethod(x,plot=FALSE)}
+  else
+    NextMethod(x)
 }
 
 #' @export
@@ -380,3 +410,4 @@ clustered_data <- function(data,cluster=NULL){
   clustered_data_validate(clustered_data)
   clustered_data
 }
+
