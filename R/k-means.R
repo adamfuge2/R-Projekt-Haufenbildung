@@ -52,7 +52,7 @@ kMeans <- function(data,K,distance_method='euclidean',p=NULL,custom_distance_fun
 
     return(structure(
       list(
-        clustered_data = dplyr::mutate(data, cluster=1),
+        clustered_data = clustered_data(data, cluster=1),
         clustering_function = function(x) 1,
         centroids = data |> dplyr::summarise(across(everything(),mean)),
         inner_inequality = distances |> sum(),
@@ -162,7 +162,7 @@ kMeans <- function(data,K,distance_method='euclidean',p=NULL,custom_distance_fun
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
   return(structure(
               list(
-                clustered_data = best_clustered_data,
+                clustered_data = clustered_data(best_clustered_data),
                 clustering_function = f,
                 centroids = best_centroids,
                 inner_inequality = minimal_cost,

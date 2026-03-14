@@ -71,7 +71,7 @@ kMedioids <- function(data,
   if(K==1){
     return(structure(
       list(
-        clustered_data = structure(dplyr::mutate(data, cluster=1),class=c('clustered_data',class(data))),
+        clustered_data = clustered_data(data, cluster=1),
         clustering_function = function(x) 1,
         centroids = data[medioid_indeces,],
         inner_inequality = new_min_cost,
@@ -129,7 +129,7 @@ kMedioids <- function(data,
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
   return(structure(
     list(
-      clustered_data = structure(best_clustered_data,class=c('clustered_data',class(best_clustered_data))),
+      clustered_data = clustered_data(best_clustered_data),
       clustering_function = clustering_function,
       medioids = data[old_medioid_indeces,],
       inner_inequality = old_min_cost,

@@ -338,11 +338,45 @@ clusterLabeling <- function(n){
 
 #' @export
 print.clustering <- function(x, ...){
-  viewClusters(x$clustered_data)
+  cat('A clustering object:\n')
+  cat(attr(x,'description'),'\n\n')
+  for(i in 1:length(x))
+    print(x[i])
 }
 
+#' @export
+print.clustered_data <- function(x, ...){
+  cat('A clustered_data object:\n')
+  cat('a tibble with a column called \'cluster\'\n')
+  NextMethod(x,...)
+  if(ncol(x) <= 4 && ncol(x) >= 2)
+    viewClusters(x)
+}
 
+#' @export
+print.cluster_data <- function(x, ...){
+  cat('Data made for clustering:\n')
+  NextMethod(x,...)
+  if(ncol(x) <= 3 && ncol(x) >= 1)
+    viewData(x)
+}
 
+#' @export
+clustered_data_validate <- function(x){
+  stopifnot('cluster' %in% colnames(x))
+}
 
+#' @export
+new_clustered_data <- function(data,cluster){
+  structure(dplyr::mutate(data,'cluster'=cluster),class=c('clustered_data',class(data)))
+}
 
-
+#' @export
+clustered_data <- function(data,cluster=NULL){
+  if(is.null(cluster))
+    clustered_data <- structure(data,class=c('clustered_data',class(data)))
+  else
+    clustered_data <- new_clustered_data(data,cluster)
+  clustered_data_validate(clustered_data)
+  clustered_data
+}
