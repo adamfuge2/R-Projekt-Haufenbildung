@@ -208,24 +208,46 @@ spectralClustering <- function(data,
   if(cluster_algorithm == 'K-Means'){
     # apply kMeans
     clustering <- kMeans(spectral_projection$projected_data, ... )
+
+    # we would like to be able to access the projected data
+    clustering$projected_clustered_data <- clustering$clustered_data
+    # but were interested in the clustering of the original data points
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'K-Medioids'){
     # apply kMeadioids
     clustering <- kMedioids(spectral_projection$projected_data, ...)
+
+    # we would like to be able to access the projected data
+    clustering$projected_clustered_data <- clustering$clustered_data
+    # but were interested in the clustering of the original data points
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'hierarchical clustering'){
     # apply hierarchical_clustering
     clustering <- hierarchicalClustering(spectral_projection$projected_data, ...)
+
+    # we would like to be able to access the projected data
+    clustering$projected_clustered_data <- clustering$clustered_data
+    # but were interested in the clustering of the original data points
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'DBSCAN'){
     # apply DBSCAN
-    clustering <- DBSCAN(spectral_projection$projected_data, ...)
+    clustering <- dbscan(spectral_projection$projected_data, ...)
 
-    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)
+    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)# we would like to be able to access the projected data
+    clustering$projected_clustered_data <- clustering$clustered_data
+    # but were interested in the clustering of the original data points
+    clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
+
   }
   else if(cluster_algorithm == 'OPTICS'){
     # apply OPTICS
-    clustering <- OPTICS(spectral_projection$projected_data, ...)
+    clustering <- optics(spectral_projection$projected_data, ...)
 
     # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)
   }
@@ -233,14 +255,9 @@ spectralClustering <- function(data,
     stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
   }
 
-  # we would like to be able to access the projected data
-  clustering$projected_clustered_data <- clustering$clustered_data
-  # but were interested in the clustering of the original data points
-  clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
-
   if(.print_info) print('Success, All done!')
 
-  return(clustering)
+  return(structure(clustering,class=c('spectral_clustering',class(clustering))))
 }
 
 #data <- generateClusterTestDataSimple(n=100,dim=3,cluster_amount = 3)

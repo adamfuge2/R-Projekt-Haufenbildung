@@ -2,7 +2,7 @@ test_that("OPTICS works", {
 
   set.seed(123)
 
-  data <- generateClusterTestDataSimple2D(n = 100)
+  data <- generateClusterData(n = 100)
 
   result <- optics(data, epsilon = 0.1, min_Pts = 5)
 
@@ -20,7 +20,7 @@ test_that("OPTICS accepts different parameters", {
 
   set.seed(123)
 
-  data <- generateClusterTestDataSimple2D(n = 100)
+  data <- generateClusterData(n = 100)
 
   testthat::expect_no_error(optics(data, epsilon = 0.05, min_Pts = 3))
   testthat::expect_no_error(optics(data, epsilon = 0.2, min_Pts = 10))
@@ -30,7 +30,7 @@ test_that("OPTICS accepts different parameters", {
 
 test_that("OPTICS handles wrong inputs",{
 
-  data <- generateClusterTestDataSimple2D(n=100)
+  data <- generateClusterData(n=100)
 
   expect_error(optics(data,epsilon=-1,min_Pts=5))
   expect_error(optics(data,epsilon=0.1,min_Pts=0))
