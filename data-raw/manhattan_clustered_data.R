@@ -8,6 +8,12 @@ maximum_cluster_data <- dplyr::bind_rows(r_1, r_2)
 rot <- sin(pi/4)
 mat <- base::matrix(c(rot, rot, -rot, rot), ncol = 2)
 
-manhattan_cluster_data <- base::as.matrix(maximum_cluster_data) %*% mat |> tibble::as_tibble()
+manhattan_clustered_data <- base::as.matrix(maximum_cluster_data) %*% mat |> tibble::as_tibble(.name_repair = 'minimal')
 
-usethis::use_data(manhattan_cluster_data, overwrite = TRUE)
+colnames(manhattan_clustered_data) <- c('X','Y')
+
+manhattan_clustered_data$cluster <- c(rep(1,n/2),rep(2,n/2))
+
+usethis::use_data(manhattan_clustered_data, overwrite = TRUE)
+
+#viewClusters(manhattan_clustered_data)

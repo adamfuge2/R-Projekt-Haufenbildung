@@ -66,7 +66,7 @@ These can be clustered by the standard usage of Hierarchical Clustering:
 
 ```{r standard_usage}
 hierarchicalClustering(data_1, 3)
-hierarchicalClustering(data_2, 1)
+hierarchicalClustering(data_2, exact_cluster_amount=1)
 ```
 
 
@@ -83,7 +83,7 @@ Some examples
 hierarchicalClustering(data_1, 3)
 hierarchicalClustering(data_1, 5)
 hierarchicalClustering(data_1, 10)
-hierarchicalClustering(data_2, 1)
+hierarchicalClustering(data_2, exact_cluster_amount = 1)
 # hierarchicalClustering(data_2, 5) throws error
 ```
 
@@ -151,17 +151,17 @@ Use this parameter to choose one of the following:
 
 ##### euclidean
 ```{r metric_examples_euclidean}
-hierarchicalClustering(euclidean_cluster_data, K=2, distance_method = 'euclidean')
+hierarchicalClustering(euclidean_cluster_data, exact_cluster_amount =2, distance_method = 'euclidean')
 ```
 
 ##### maximum
 ```{r metric_examples_maximum}
-hierarchicalClustering(maximum_cluster_data, K=2, distance_method = 'maximum')
+hierarchicalClustering(maximum_cluster_data, exact_cluster_amount=2, distance_method = 'maximum')
 ```
 
 ##### manhattan
 ```{r metric_examples_manhattan}
-hierarchicalClustering(manhattan_cluster_data, K=2, distance_method = 'manhattan')
+hierarchicalClustering(manhattan_cluster_data, exact_cluster_amount=2, distance_method = 'manhattan')
 ```
 
 
@@ -206,7 +206,7 @@ if(require('maps')){
 set.seed(124)
 slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=200, maps::world.cities[ ,c('long','lat')]))
 
-hierarchicalClustering(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
+hierarchicalClustering(slice_of_the_world, custom_distance_function = distanceByLongitudeAndLatitude)
 } 
 ```
 
@@ -229,7 +229,7 @@ This is useful for debugging or finding loops caused by custom metrics. If `TRUE
 
 Example: 
 ```{r .print_info_example}
-hierarchicalClustering(data_1, K=7, .print_info = TRUE)
+hierarchicalClustering(data_1, .print_info = TRUE)
 ```
 
 
@@ -243,5 +243,13 @@ A list of the class clustering with at least an element called `'clustered_data'
 The original data with a column called `'cluster'` added.
 
 ```{r clustered_data}
-hierarchicalClustering(data_1, K=4)$clustered_data
+hierarchicalClustering(data_1, exact_cluster_amount =4)$clustered_data
 ```
+
+### 3.2 cluster_amount
+The amount of clusters deferred by the algorithm
+
+```{r cluster_amount}
+hierarchicalClustering(data_1)$cluster_amount
+```
+

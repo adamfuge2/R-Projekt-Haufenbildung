@@ -7,7 +7,7 @@
 kMeans(
   data,
   K,
-  distance = "euclidean",
+  distance_method = "euclidean",
   p = NULL,
   custom_distance_function = NULL,
   tries = K,
@@ -22,10 +22,10 @@ The number of rows is the sample size and called n.}
 \item{K}{A whole number between 0 and n+1.
 The amount of Clusters the algorithm tries to find in the data}
 
-\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
-\item{p}{A numeric greater than or equal to 1. If \code{distance} was
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
 chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
 \item{custom_distance_function}{A semi definite and symmetric function whose inputs are

@@ -10,7 +10,7 @@ spectralProjection(
   mercer_kernel = "gauss",
   gamma = NULL,
   custom_mercer_kernel = NULL,
-  distance = NULL,
+  distance_method = NULL,
   p = NULL,
   custom_distance_function = NULL,
   kernel_epsilon = Inf,
@@ -29,11 +29,14 @@ points}
 
 \item{custom_mercer_kernel}{kernel function (see algorithm description)}
 
-\item{distance}{distance used in kernel function}
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\code{'Lp'} or \code{'manhattan'}.}
 
-\item{p}{if distance function is 'Lp', this value will be used for p}
+\item{p}{A numeric greater than or equal to 1. If \code{distance_method} was
+chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 
-\item{custom_distance_function}{a custom distance function used in kernel function}
+\item{custom_distance_function}{A semi definite and symmetric function whose inputs are
+two of the \code{data} row type.}
 
 \item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
 

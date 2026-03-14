@@ -27,25 +27,144 @@ library(clusterfuck)
 ```
 
 
-Here we will go over all information needed to use the kMeans function of the clusterfuck package
+Here we will go over all information needed to use the kMeans function of the clusterfuck package.
+
+1. First we will 
 
 
 ## 1. General use
-This will illustrate the most basic use case for this clustering function:
+This will illustrate a use case for this clustering function:
 
-Lets create some test data
-```{r general_use_1}
-data <- generateClusterData(n=100, cluster_amount = 4)
+### Categorizing spherical data
+```{r general_use_1, include=FALSE}
+data <- generateClusterData(n=100, 
+                            cluster_amount = 4, 
+                            clusters_mean = tibble::tibble('X'=c(0.2,0.7,0.5,0.9),
+                                                           'Y'=c(0.2,0.2,0.7,0.3)),
+                            clusters_sd = c(0.05,0.01,0.1,0.05)
+                            )
 ```
 
-This is what it looks like
+We are given data which we want do divide into Categories, so called clusters.
 ```{r general_use_2}
 viewData(data)
 ```
 
+From insider information we are informed:
+- The clusters are roughly (euclidean) spherical.
+- There are supposed to be 4 clusters in this data. (note that for the Kmeans clustering algorithm needs to be known in advance.)
+
 **Apply the K-means-algorithm with K = 4**       
 ```{r general_use_3}
 kMeans(data, K = 4, tries = 4)
+```
+Well done!
+
+### Finding representatives
+Now we are given another problem. You are tasked to found a counsel debating on which color is the best color. If we were to give every humans favorite color a seat in this counsel it would be highly inefficient. Thus we want to pick only 7 representative colors. We are provided with data gathered from people formatted as a tibble of the columns red, green and blue. 
+
+```{r fav_col_def, include=FALSE}
+favorite_colors <- generateClusterData(n=200, 
+                                       cluster_amount = 20,
+                                       lower_bounds = c(0,0,0),
+                                       upper_bounds = c(255,255,255),
+                                       clusters_sd = 5+1:20,
+                                       clusters_prob = c(5,5,5,5,5,1:15),
+                                       colnames = c('red','green','blue'))
+
+favorite_colors <- favorite_colors |> dplyr::filter(red>=0,red<=255,green>=0,green<=255,blue>=0,blue<=255) |> round()
+
+favorite_colors
+```
+So what shall we do? We use our trusted K-Means clustering algorithm of course!
+For illustrative purposes one could argue that a distance based one the maximum norm would represent a distance of color well (as then a difference between [50,50,50] 'dark grey' and [150,150,150] 'lighter gray' would be the same as between [50,0,0] 'dark blue' and [150,0,0] 'lighter blue').
+Thus we apply kMeans:
+
+```{r clustering_fav_colors}
+clustering <- kMeans(favorite_colors, K = 7, distance_method = 'maximum')
+```
+
+This clustering object that gets returned has some useful properties, including centroids which are the representatives we were looking for:
+
+```{r color_reps}
+clustering$centroids
+```
+```{r display_rep_colors}
+ddf <- clustering$centroids
+image(1:nrow(ddf), 1, as.matrix(1:nrow(ddf)), 
+      col=rgb(ddf$red, ddf$green, ddf$blue,maxColorValue = 255),
+      xlab="", ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+```
+
+
+### Categorizing unknown data
+We continoue the example from above:
+
+- Hey, you say, I was'nt asked what my favorite color is!
+Luckily this is another example where kMeans excells at. Unknown data, on which the clustering has'nt been trained can still be clustered.
+
+Another part of a K-Means-clustering object is the clustering function. A function which can relate a new data point to a cluster it would be part of.
+Whats your favorite color? - mines a golden yellow: [255, 223, 0]
+
+```{r adams_favorite_color}
+adams_favorite_color <- c(250,180,0)
+clustering$clustering_function(adams_favorite_color)
+```
+This is the cluster which my favorite color would be assigned to. - But what does it mean? Nothing much without context. Remember the representatives from before? Now we can defer which member of the color counsel would represent you best:
+
+```{r favorite_representative}
+clustering$centroids[
+clustering$clustering_function(adams_favorite_color),]
+```
+```{r comparing_favorites}
+ddf <- clustering$centroids[
+clustering$clustering_function(adams_favorite_color),]
+ddf[2,1] <- adams_favorite_color[1]
+ddf[2,2] <- adams_favorite_color[2]
+ddf[2,3] <- adams_favorite_color[3]
+image(1:nrow(ddf), 1, as.matrix(1:nrow(ddf)), 
+      col=rgb(ddf$red, ddf$green, ddf$blue,maxColorValue = 255),
+      xlab="", ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+```
+### Unknown Cluster amount 
+Sometimes one may not know the cluster amount right away. Instinctively this may deter you from using K-Means to cluster. But some methods allow you to search for the 'right' cluster amount, by clustering for many different values for K and then comparing the clusterings. One of those methods is the elbow method. This makes use of the fact that this implementation of the K-Means-Clustering algorithm already provides a score of the clustering in its output. From the example above:
+```{r general_use_sum_of_squares}
+clustering$sum_of_squares
+```
+This number only makes sense in context. See this rudementary implementation of the elbow method:
+```{r elbow_function_def}
+findClusterAmountElbow <- function(data, check_min = 1){
+  sum_of_squares <- numeric()
+  improvement <- list(Inf)
+  K <- 1
+
+  sum_of_squares[[1]] <- kMeans(data,1,tries = 10)$sum_of_squares
+
+  while(improvement[[K]]>1000 || K <= check_min){
+    K <- K+1
+
+    sum_of_squares[[K]] <- kMeans(data,K,tries = 10)$sum_of_squares
+
+    improvement[[K]] <- sum_of_squares[[K-1]] - sum_of_squares[[K]]
+  }
+
+  improvement[improvement<1] <- Inf
+
+  plot(1:K,sum_of_squares)
+  
+  return(which.min(improvement))
+}
+```
+
+Now lets try it on the data set from above
+```{r}
+findClusterAmountElbow(favorite_colors,check_min = 10)
+```
+Here we look for an 'elbow' in the plot. So for example 7 can be considered a good amount of clusters in this data set. 
+
+Something similar can be done using the silhouette method and the mean_silhouette property of the clustering object:
+```{r genral_use_mean_silhouette}
+clustering$mean_silhouette
 ```
 
 
@@ -68,7 +187,7 @@ The data could even have multiple types, although `mean()` has to still make sen
 
 
 Lets go clustering!
-```{r}
+```{r data_examples}
 kMeans(data_1,K=3)
 kMeans(data_2,K=1)
 ```
@@ -89,82 +208,88 @@ kMeans(data_2,K=1)
 # kMeans(data_1,K=5) throws error
 ```
 
-### 2.3 metric (distance)
+### 2.3 distance_method
 This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
 
-- `'euclidean'` (default)
-- `'maximum'`
-- `'manhattan'`
-- `'Lp'` (see more in [2.4](#2.4))
-
-The differences can be visualized using the Voronoi cells:
-```{r mertric_generate_full_data, echo=FALSE}
-full_data <- generateNoiseData(n=2000,lower_bounds = c(0,0),upper_bounds= c(1,1))
+```{r distance_method_generate_full_data, echo=FALSE}
+full_data <- generateNoiseData(n=1000,lower_bounds = c(0,0),upper_bounds= c(1,1))
 colnames(full_data) <- c('X','Y')
 ```
 
 
+- 'euclidean' (default)
+- 'maximum' 
+- 'manhattan'
+- 'canberra', 
+- 'binary',
+- 'minkowski' (see more in 2.4)
+
 #### Examples {.tabset}
+##### intended clusterings
+```{r distance_method_examples_intended_clusterings}
+viewClusters(euclidean_clustered_data)
+viewClusters(maximum_clustered_data)
+viewClusters(manhattan_clustered_data)
+```
 
 ##### euclidean
-```{r mertric_examples_euclidean}
-set.seed(123)
-euclidean_clustering <- kMeans(data_1,K=4, distance = 'euclidean', tries=10)
-viewClusters(full_data,euclidean_clustering$clustering_function)
+```{r metric_examples_euclidean}
+kMeans(euclidean_cluster_data, K=3, distance_method = 'euclidean')
+kMeans(maximum_cluster_data, K=2, distance_method = 'euclidean')
+kMeans(manhattan_cluster_data, K=2, distance_method = 'euclidean')
 ```
 
 ##### maximum
-```{r mertric_examples_maximum}
-set.seed(123)
-maximum_clustering <- kMeans(data_1,K=4, distance = 'maximum', tries=10)
-viewClusters(full_data,maximum_clustering$clustering_function)
+```{r metric_examples_maximum}
+kMeans(euclidean_cluster_data, K=3, distance_method = 'maximum')
+kMeans(maximum_cluster_data, K=2, distance_method = 'maximum')
+kMeans(manhattan_cluster_data, K=2, distance_method = 'maximum')
 ```
 
 ##### manhattan
-```{r mertric_examples_manhattan}
-set.seed(123)
-manhattan_clustering <- kMeans(data_1,K=4, distance = 'manhattan', tries=10)
-viewClusters(full_data,manhattan_clustering$clustering_function)
+```{r metric_examples_manhattan}
+kMeans(euclidean_cluster_data, K=3, distance_method = 'manhattan')
+kMeans(maximum_cluster_data, K=2, distance_method = 'manhattan')
+kMeans(manhattan_cluster_data, K=2, distance_method = 'manhattan')
 ```
 
-
 ### 2.4 p
-If you chose `'Lp'` for the parameter `distance` (2.3) then this is where you can input the value for the p-metric. Will be ignored, if other metrics are chosen.
+If you chose `'minkowski'` for the parameter `distance_method` (2.3) then this is where you can input the value for the minkowski metric. Will be ignored, if other distance methods are chosen.
 
 #### Examples {.tabset}
 
 ##### p = 1 (manhattan)
 ```{r p_examples_1}
 set.seed(123)
-p_clustering_1 <- kMeans(data_1,K=4, distance = 'Lp', p=1 , tries=10)
+p_clustering_1 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=1 , tries=10)
 viewClusters(full_data,p_clustering_1$clustering_function)
 ```
 
 ##### p = 1.5 
 ```{r p_examples_1_5}
 set.seed(123)
-p_clustering_1_5 <- kMeans(data_1,K=4, distance = 'Lp', p=1.5 , tries=10)
+p_clustering_1_5 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=1.5 , tries=10)
 viewClusters(full_data,p_clustering_1_5$clustering_function)
 ```
 
 ##### p = 2 (euclidean)
 ```{r p_examples_2}
 set.seed(123)
-p_clustering_2 <- kMeans(data_1,K=4, distance = 'Lp', p=2 , tries=10)
+p_clustering_2 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=2 , tries=10)
 viewClusters(full_data,p_clustering_2$clustering_function)
 ```
 
 ##### p = 4 
 ```{r p_examples_4}
 set.seed(123)
-p_clustering_4 <- kMeans(data_1,K=4, distance = 'Lp', p=4 , tries=10)
+p_clustering_4 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=4 , tries=10)
 viewClusters(full_data,p_clustering_4$clustering_function)
 ```
 
 ##### p = 8 
 ```{r p_examples_8}
 set.seed(123)
-p_clustering_8 <- kMeans(data_1,K=4, distance = 'Lp', p=8 , tries=10)
+p_clustering_8 <- kMeans(data_1,K=4, distance = 'minkowski', p=8 , tries=10)
 viewClusters(full_data,p_clustering_8$clustering_function)
 ```
 
@@ -196,8 +321,8 @@ kMeans(data_1, K=4, custom_distance_function = discrete_distance)
 Because this is a main feature of the package, here is another example:
 ```{r custom_distance_function_example_2}
 WIDE_euclidean <- function(x,y) {
-  x[[1]] <- 0.1*x[[1]]
-  y[[1]] <- 0.1*y[[1]]
+  x[[1]] <- 0.5*x[[1]]
+  y[[1]] <- 0.5*y[[1]]
   euclidean(x,y)
   }
 kMeans(data_1, K=4, custom_distance_function = WIDE_euclidean)

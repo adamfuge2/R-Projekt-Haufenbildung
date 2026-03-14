@@ -55,9 +55,7 @@ kernelByCustomDistanceFunction <- function(distance,gamma)
 #' @param mercer_kernel kernel function (see algorithm description)
 #' @param gamma projection factor for the kernel function
 #' @param custom_mercer_kernel kernel function (see algorithm description)
-#' @param distance distance used in kernel function
-#' @param p if distance function is 'Lp', this value will be used for p
-#' @param custom_distance_function a custom distance function used in kernel function
+#' @inheritParams getDistanceFunction
 #' @param kernel_epsilon maximal distance at which data points are still considered neighbored.
 #' @param .print_info A logical of length 1. If \code{TRUE} additional
 #'   information will be displayed during runtime. Used in debugging.
@@ -70,7 +68,7 @@ spectralProjection <- function(data,
                               mercer_kernel = 'gauss',
                               gamma = NULL,
                               custom_mercer_kernel = NULL,
-                              distance = NULL,
+                              distance_method = NULL,
                               p = NULL,
                               custom_distance_function = NULL,
                               kernel_epsilon = Inf,
@@ -78,16 +76,16 @@ spectralProjection <- function(data,
   n <- nrow(data)
 
   if(.print_info) print(all(c(is.null(custom_mercer_kernel),
-                              is.null(distance),
+                              is.null(distance_method),
                               is.null(custom_distance_function),
                               kernel_epsilon==Inf)))
   if(.print_info) print(c(is.null(custom_mercer_kernel),
-                              is.null(distance),
+                              is.null(distance_method),
                               is.null(custom_distance_function),
                               kernel_epsilon==Inf))
 
   if(all(c(is.null(custom_mercer_kernel),
-           is.null(distance),
+           is.null(distance_method),
            is.null(custom_distance_function),
            kernel_epsilon==Inf))){
     if(mercer_kernel == 'gauss') {
@@ -99,14 +97,14 @@ spectralProjection <- function(data,
   }
   else {
     if(!is.null(custom_mercer_kernel)){
-      if(any(c(!is.null(distance),
+      if(any(c(!is.null(distance_method),
                !is.null(custom_distance_function),
                !is.null(kernel_epsilon))))
-        warning('Custom Kernel provided, other parameters distance, custom_distance_function or kernel_epsilon discarded')
-      W <- dissimilarityMatrix(data,custom_mercer_kernel)
+        warning('Custom Kernel provided, other parameters distance_method, custom_distance_function or kernel_epsilon discarded')
+      W <- dissimilarityMatrix(data,custom_distance_function = custom_mercer_kernel)
       K <- custom_mercer_kernel
     }else{
-      almost_distance <- getDistanceFunction(distance,p,custom_distance_function)
+      almost_distance <- getDistanceFunction(distance_method,p,custom_distance_function)
       if(kernel_epsilon < Inf) {
         distance <- function(x,y) almost_distance(x,y)* (kernel_epsilon >= almost_distance(x,y))
       }else distance <- almost_distance
@@ -116,7 +114,7 @@ spectralProjection <- function(data,
         K <- function(x,y) almost_kernel(x,y)* (kernel_epsilon >= almost_distance(x,y))
       }else K <- almost_kernel
 
-      W <- dissimilarityMatrix(data,K)
+      W <- dissimilarityMatrix(data,custom_distance_function=K)
     }
   }
 
@@ -182,7 +180,7 @@ spectralClustering <- function(data,
                                mercer_kernel = 'gauss',
                                gamma = NULL,
                                custom_mercer_kernel = NULL,
-                               distance = NULL,
+                               distance_method = NULL,
                                p = NULL,
                                custom_distance_function = NULL,
                                kernel_epsilon = Inf,
@@ -198,7 +196,7 @@ spectralClustering <- function(data,
                                           mercer_kernel = mercer_kernel,
                                           gamma=gamma,
                                           custom_mercer_kernel = custom_mercer_kernel,
-                                          distance = distance,
+                                          distance_method = distance_method,
                                           p = p,
                                           custom_distance_function = custom_distance_function,
                                           kernel_epsilon = kernel_epsilon)

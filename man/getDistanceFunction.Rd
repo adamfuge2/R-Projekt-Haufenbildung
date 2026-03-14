@@ -5,13 +5,13 @@
 \title{Defer distance function from inputs}
 \usage{
 getDistanceFunction(
-  distance = "euclidean",
+  distance_method = "euclidean",
   p = NULL,
   custom_distance_function = NULL
 )
 }
 \arguments{
-\item{distance}{A character. One of \code{'euclidean'}, \code{'maximum'},
+\item{distance_method}{A character. One of \code{'euclidean'}, \code{'maximum'},
 \code{'Lp'} or \code{'manhattan'}.}
 
 \item{p}{A numeric greater than or equal to 1. If \code{distance_method} was

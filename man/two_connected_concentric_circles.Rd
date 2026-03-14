@@ -21,6 +21,12 @@ where as they would succeed in clustering the [two_concentric_circles] data set.
 }
 \seealso{
 Other cluster data examples: 
+\code{\link{euclidean_cluster_data}},
+\code{\link{euclidean_clustered_data}},
+\code{\link{manhattan_cluster_data}},
+\code{\link{manhattan_clustered_data}},
+\code{\link{maximum_cluster_data}},
+\code{\link{maximum_clustered_data}},
 \code{\link{three_concentric_circles}},
 \code{\link{three_connected_concentric_circles}},
 \code{\link{two_concentric_circles}}

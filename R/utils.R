@@ -14,14 +14,17 @@ is.wholenumber <- function(x, tol = base::.Machine$double.eps^0.5)  base::abs(x 
 #' Coerces a tibble of cluster centers (centroids) to a clustering function
 #'
 #' @param centroids   a tibble with every row being a centroid
-#' @param distance           a distance function whose 2 inputs are of the centroids row type
+#' @inheritParams getDistanceFunction
 #'
-#' Returns:
-#' function,    a clustering function relating any data point to their cluster.
+#'
+#' @returns function,    a clustering function relating any data point to their cluster.
 #'              input: rows or atomic vectors Of the data row type
 #'              returns: a whole number > 0, representing the related cluster
 #'
-clusteringFromCentroids <- function(centroids,metric=euclidean){
+clusteringFromCentroids<- function(centroids,distance_method='euclidean',p=NULL,custom_distance_function=NULL){
+  distance <- getDistanceFunction(distance_method = distance_method,
+                                  p = p,
+                                  custom_distance_function = custom_distance_function)
   function(x)
     1:base::nrow(centroids) |>
     sapply(function(k) distance(x,base::unlist(centroids[k,]))) |>
@@ -203,38 +206,28 @@ silhouette_faster <- function(clustered_data,index_of_o,dissimilarity_matrix){
 #' Be aware: Trivial cases outputs have been chosen arbitrarily/heuristically
 #'
 #' @param data        a tibble with with every row representing a data point.
-#' @param clustering  a clustering function relating any data point to their cluster.
-#' @param distance    A character. One of \code{'euclidean'}, \code{'maximum'},
-#'   \code{'Lp'} or \code{'manhattan'}.
-#' @param p         A numeric greater than or equal to 1. If \code{distance} was
-#'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
-#' @param custom_distance_function A semi definite and symmetric function whose inputs are
-#'   two of the \code{data} row type.
+#' @param clustering_function  a clustering function relating any data point to their cluster.
+#' @inheritParams getDistanceFunction
 #'
 #' @returns a numeric, a real number between -1 and 1
 #'
-meanSilhouette <- function(data,clustering,distance='euclidean',p=NULL,custom_distance_function=NULL){
+meanSilhouette <- function(data,
+                           clustering_function,
+                           distance_method='euclidean',
+                           p=NULL,
+                           custom_distance_function=NULL){
 
+  D <- dissimilarityMatrix(data,
+                           distance_method = distance_method,
+                           p=p,
+                           custom_distance_function=custom_distance_function)
 
+  cluster <- data |>
+    apply(1,clustering_function)
 
-  if(is.null(custom_distance_function)){
-    if(distance=='euclidean')
-      distance <- euclidean
-    else if(distance=='maximum')
-      distance <- maximumDistance
-    else if(distance=='Lp'){
-      stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
-      stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
-      distance <- pDistance(p)
-    }
-    else if(distance=='manhattan')
-      distance <- pDistance(1)
-    else stop('Unknown distance function. Look up on the help page which metrics/distance functions are available ore input a custum distance function using the argument custom_distance_function.')
-  }
-  else distance <- custom_distance_function
+  data$cluster <- cluster
 
-  if( data |>
-      apply(1,clustering) |>
+  if( cluster |>
       unique() |>
       length() == 1){
     ## If there's only one cluster, we cut the calculation short and return 0.
@@ -243,10 +236,12 @@ meanSilhouette <- function(data,clustering,distance='euclidean',p=NULL,custom_di
     return(0)
   }
 
+
   ## Calculate the silhouette for every point and return their mean
-  return( data |>
-            apply(1,function(data_point) silhouette(data,clustering,data_point,distance)) |>
+  return( 1:nrow(data) |>
+            sapply(function(data_point_index) silhouette_faster(data,data_point_index,D)) |>
             mean()
+
   )
 }
 
@@ -277,19 +272,32 @@ tibbleAsPath <- function(data){
 #' Calculates the matrix encoding the differences inbetween all data points
 #'
 #' @param data      a tibble with with every row representing a data point.
-#' @param distance    A distance function whose inputs are of the data row type
+#' @inheritParams getDistanceFunction
 #'
 #' @returns a dissimilarity matrix, a row and coloumn for every data point
-#'
-dissimilarityMatrix <-function(data,distance){
-  if(length(unique(lapply(data,typeof))) == 1){
-    data <- as.matrix(data)}
-  basis <- array(base::rep(1:base::nrow(data),base::nrow(data)), dim=c(base::nrow(data),base::nrow(data) ))
-  M <- array(dim = c(base::nrow(data),base::nrow(data),2 ))
-  M[,,1] <- basis
-  M[,,2] <- t(basis)
+#' @export
+dissimilarityMatrix <-function(data,distance_method='euclidean',p=NULL,custom_distance_function=NULL){
+  if(is.null(custom_distance_function)){
+    if(any(distance_method == c('euclidean',
+                                'maximum',
+                                'manhattan',
+                                'canberra',
+                                'binary',
+                                'minkowski')))
+      return(structure(as.matrix(dist(data,method = distance_method,p=p)),dimnames=NULL))
+    else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_distance_function.')
+  }
 
-  return(apply(M,c(1,2),function(x) distance(data[x[1],],data[x[2],])))
+
+  if(length(unique(lapply(data,typeof))) == 1){
+    data <- as.matrix(data)
+    return(  apply(data,1,function(x) apply(data,1,function(y) custom_distance_function(x,y))))
+  }
+
+  # if nothing else works, at least half the work by only calculating the upper
+  # triangle matrix
+  upper <- sapply(1:nrow(data),function(i) c(sapply(1:i,function(j) custom_distance_function(data[i,],data[j,])),rep(0,nrow(data)-i)))
+  return(upper + t(upper))
 }
 
 
@@ -328,7 +336,7 @@ sumOfDistancestTo <- function(data,vector,distance){
 
 #' Defer distance function from inputs
 #'
-#' @param distance A character. One of \code{'euclidean'}, \code{'maximum'},
+#' @param distance_method A character. One of \code{'euclidean'}, \code{'maximum'},
 #'   \code{'Lp'} or \code{'manhattan'}.
 #' @param p A numeric greater than or equal to 1. If \code{distance_method} was
 #'   chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.
@@ -337,20 +345,31 @@ sumOfDistancestTo <- function(data,vector,distance){
 #'
 #' @returns a distance function
 #' @export
-getDistanceFunction <- function(distance='euclidean',p=NULL,custom_distance_function=NULL){
+getDistanceFunction <- function(distance_method = 'euclidean',
+                                p = NULL,
+                                custom_distance_function = NULL){
   if(is.null(custom_distance_function)){
-    if(distance=='euclidean')
+    if(distance_method == 'euclidean')
       return(euclidean)
-    else if(distance=='maximum')
+    else if(distance_method == 'maximum')
       return(maximumDistance)
-    else if(distance=='Lp'){
+    else if(distance_method=='minkowski'){
       stopifnot('If you chose the Lp distance function, please provide a value for p' = !is.null(p))
       stopifnot('p must be a numeric greater than or equal to 1' = is.numeric(p) && p>=1 )
       return(pDistance(p))
     }
-    else if(distance=='manhattan')
+    else if(distance_method=='manhattan')
       return(pDistance(1))
     else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_distance_function.')
   }
   else return(custom_distance_function)
+}
+
+as.clustered_data <- function(data,clustering_function){
+  if(length(unique(lapply(data,typeof))) == 1){
+    m_data <- as.matrix(data)
+    return(  data |> dplyr::mutate('cluster'=apply(m_data,1,function(data_point) clustering_function(data_point))))
+  }
+
+  return(data |> dplyr::mutate(cluster=sapply(1:nrow(data),function(data_point_index) clustering_function(data[data_point_index,]))))
 }

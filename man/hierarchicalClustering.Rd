@@ -6,7 +6,9 @@
 \usage{
 hierarchicalClustering(
   data,
-  K,
+  min_cluster_amount = 2,
+  exact_cluster_amount = NULL,
+  distance_limit = NULL,
   mode = "centroid",
   distance_method = "euclidean",
   p = NULL,
@@ -15,10 +17,23 @@ hierarchicalClustering(
 )
 }
 \arguments{
-\item{data}{a tibble or matrix of arbitrary dimension with each row representing
-one data point.}
+\item{data}{a tibble or matrix of arbitrary dimension with each row
+representing one data point.}
 
-\item{K}{guessed number of clusters (at which the iteration stops).}
+\item{min_cluster_amount}{An integer greater than 1. The \strong{first approach} to
+decide the cluster amount: Prevent the merge of the clusters with the
+largest step up in distances, but consider(and calculate) at least all
+merges resulting in this many (or more) clusters. The clustering will have
+at least this many clusters. Note that because we are comparing merges, you
+can not end up with one big cluster this way. (You can only choose one of these approaches)}
+
+\item{exact_cluster_amount}{An integer greater than 0. The \strong{second approach} to
+decide the cluster amount: Stop merging clusters when this cluster amount
+has been reached. (You can only choose one of these approaches)}
+
+\item{distance_limit}{A numeric greater than 0. The \strong{third approach} to decide
+the cluster amount: Stop merging clusters when the distance between the
+clusters is greater than this limit. (You can only choose one of these approaches)}
 
 \item{mode}{linkage mode used to determine the distance between two clusters.
 Available are \code{'centroid'}, \code{'single'}, \code{'complete'},
@@ -33,8 +48,8 @@ chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 \item{custom_distance_function}{A semi definite and symmetric function whose inputs are
 two of the \code{data} row type.}
 
-\item{.print_info}{A logical of length 1. If \code{TRUE} additional information
-will be displayed during runtime. Used in debugging.}
+\item{.print_info}{A logical of length 1. If \code{TRUE} additional
+information will be displayed during runtime. Used in debugging.}
 }
 \value{
 A list of the class 'clustering'. Contains \itemize{

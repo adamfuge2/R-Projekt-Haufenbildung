@@ -33,8 +33,8 @@ test_that("Spectral Projection", {
   #for special cases
   custum_kernel <- kernelByCustomDistanceFunction(maximumDistance, 1.4)
   testthat::expect_warning(spectralProjection(data, k, gamma = gamma, custom_mercer_kernel = custum_kernel))
-  testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4))
-  testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance = "Lp", p = 4)$projected_data), k)
+  testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4))
+  testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4)$projected_data), k)
 })
 
 
@@ -46,7 +46,7 @@ test_that("Spectral Clustering", {
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, K = 4))
 
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "K-Medioids", K = 4))
-  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "hierarchical clustering", K = 2))
+  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "hierarchical clustering", min_cluster_amount = 2))
 
   #fill with additional arguments if fully implemented
   #testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "DBSCAN"))
