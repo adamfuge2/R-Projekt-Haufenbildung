@@ -76,6 +76,7 @@ plot.reachability <- function(x, eps=NULL,...){
     abline(h=eps, col="red", lty=2)
 }
 
+#' @export
 extractClusters <- function(object, ...) {
   UseMethod("extractClusters")
 }
@@ -91,9 +92,9 @@ extractClusters <- function(object, ...) {
 #' @returns integer vector of cluster labels
 #'
 #' @examples
-#' data <- generateClusterTestDataSimple2D(n = 100)
+#' data <- generateClusterData(n = 100)
 #' result <- optics(data, epsilon = 0.1, min_Pts = 5)
-#' cluster <- extractClusters(result, eps = 0.05)
+#' cluster <- clusterfuck::extractClusters(result, eps = 0.05)
 #'
 #' @export
 extractClusters.optics <- function(object, eps){
