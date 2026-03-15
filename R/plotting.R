@@ -368,12 +368,14 @@ print.clustering <- function(x, plot=TRUE,...){
 print.clustered_data <- function(x, plot=TRUE, ...){
   cat('A clustered_data object:\n')
   cat('a tibble with a column called \'cluster\'\n')
-  if(ncol(x) <= 4 && ncol(x) >= 2 && plot==TRUE)
-    viewClusters(x)
 
   # doing this, beacause NextMethod was doing WEIRD stuff
   class(x) <- class(x)[2:length(class(x))]
   print(x)
+
+  if(ncol(x) <= 4 && ncol(x) >= 2 && plot==TRUE)
+    viewClusters(x)
+
 }
 
 #' @export
@@ -415,7 +417,6 @@ clustered_data_validate <- function(x){
 #' @param data a tibble
 #' @param cluster an atomic vector with cluster identifications
 #'
-#' @export
 new_clustered_data <- function(data,cluster){
   structure(dplyr::mutate(data,'cluster'=cluster),class=c('clustered_data',class(data)))
 }

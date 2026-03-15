@@ -30,4 +30,4 @@ study_courses_dissimilarity_matrix_upper <- matrix(c(00,15,10,03,03,08,12,13,07,
 # The real dissimilarity matrix must be symmetrical
 study_courses_dissimilarity_matrix <- study_courses_dissimilarity_matrix_upper + t(study_courses_dissimilarity_matrix_upper)
 
-usethis::use_data(study_courses_dissimilarity_matrix, overwrite = TRUE)
+usethis::use_data(study_courses_dissimilarity_matrix, overwrite = TRUE, internal = TRUE)

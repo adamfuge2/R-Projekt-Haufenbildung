@@ -1,0 +1,323 @@
+---
+title: "Data for clustering"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    tabset: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Data for clustering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(
+  fig.align = 'center',
+  fig.width = 7,
+  dev='svg'
+)
+```
+
+```{r setup}
+library(clusterfuck)
+```
+
+The clusterfuck package provides a generous amount of data to test the clusterings on, as well as some generators to test it. We will first explore these Generators and then take a look at the pre made data sets
+
+# Data Generators
+If you want to generate some Data for testing clustering functions, start by using the powerful and versatile [generateClusterData](#generateClusterData) and if that does not suffice check out the other generators. 
+
+## generateClusterData
+This function generates data perfect for clustering. 
+Note that this will generate data in **spherical** clusters.
+
+The Parameters:
+
+- `n`           A positive integer. The number of total data points to be
+ generated.
+- `cluster_amount`  A positive integer. The number of clusters to
+ generate. If none given, choose a random amount less than both $2^{dim}$ and $\frac{n}{4}$.
+- `dim` A positive integer. The dimension of the data points to be
+ generated
+- `lower_bounds`,`upper_bounds` numeric vectors with length equal dim (if
+ given). Bound the cluster centers in a \code{dim}-dimensional rectangle defined
+ by these parameters. Beware: These bound the cluster centers and **not**
+ the data points!
+- `clusters_mean` A tibble with every row representing a center of a
+ cluster. The column amount must match the dimensions implied by `dim` or the
+ bounds.
+- `clusters_sd` A numeric vector with length matching the \code{cluster_amount}
+ or number of rows in `clusters_mean`. The standard deviations used in the
+ generation of data points around the cluster centers (using a symmetrical
+ normal distribution).
+- `clusters_prob` A numeric vector with length matching the cluster_amount
+ or number of rows in `clusters_mean`. The probability weights used to choose
+ which which cluster a generated data point belongs to.
+- `colnames` A character vector with length matching dim or the length of
+ the bounds. Default is `'X_1'` to `'X_n'`
+- `include_cluster` A logical of length 1. If `TRUE` a column `'cluster'`
+ will be included in the generated data which will also be assigned the class `'clustered_data'`.
+- `.print_info` A logical of length 1. If `TRUE` additional information
+ will be displayed during runtime. Used in debugging.
+ 
+ Examples:
+```{r generateClusterData_examples}
+generateClusterData(cluster_amount = 4)|> viewClusters()
+generateClusterData(n = 1000,
+                    clusters_mean =
+                       tibble::tibble(longitude = c(-100,-60,10,20,70,130),
+                                      latitude =  c(  40,-10,50,20,50,-20)),
+                    clusters_sd = c(8,8,3,6,15,5),
+                    clusters_prob = c(20,20,10,100,100,10),
+                    include_cluster = TRUE) |> viewClusters()
+generateClusterData(n = 1,
+                    lower_bounds = -(20:1),
+                    upper_bounds = 1:20,
+                    dim = 20,
+                    .print_info = TRUE) 
+```
+
+## generateClusterDataFromPaths
+If you want to generate clusters that have **non spherical** shapes use this function.
+It generates data points along paths.
+
+The parameters:
+- `n`               a positive integer. The number of total data points to
+  be generated.
+- `list_of_paths`   a list containing tibbles. Each tibble containing
+  points (in rows) to be interpreted as paths along which the data is
+  generated.
+- `clusters_sd` A numeric vector with the same length as `list_of_paths.`
+  The standard deviations used in the generation of data points around the
+  clusters (using a symmetrical normal distribution).
+- `clusters_prob` A numeric vector with the same length as `list_of_paths`.
+  The probability weights used to choose which which cluster a generated data
+  point belongs to.
+- `include_cluster` A logical of length 1. If `TRUE` a column `'cluster'`
+  will be included in the generated data which will also be assigned the class `'clustered_data'`.
+- `.print_info` A logical of length 1. If `TRUE` additional information
+  will be displayed during runtime. Used in debugging.
+
+Some Examples:
+```{r}
+generateClusterDataFromPaths(list_of_paths =
+                                list(tibble::tibble(X = c(0,1,1),
+                                                    Y = c(0,0,1)),
+                                     tibble::tibble(X = c(0,0.8),
+                                                    Y = c(1,0.2))))|> viewClusters()
+generateClusterDataFromPaths(n = 1000,
+                             list_of_paths =
+                                list(tibble::tibble(X = c(0),
+                                                    Y = c(0)),
+                                     tibble::tibble(X = c(1),
+                                                    Y = c(1))),
+                             clusters_sd = c(0.1,0.5),
+                             clusters_prob = c(1,2),
+                             include_cluster = TRUE,
+                             .print_info = TRUE) |> viewClusters()
+
+```
+
+## generateNoiseData
+In the generators above the data points will always be clearly assigned to clusters. 
+This does not always reflect real world data. 
+generateNoiseData generates a rectangular space filled uniformly with data points. If you include the cluster of each data point they will be all assigned to the Cluster 0 - the 'Noise' Cluster.
+
+
+- `n`           A positive integer. The number of total data points to be
+ generated.
+- `lower_bounds`,`upper_bounds` numeric vectors with equal length. Bounds the (multidimensional) rectangle in which the data points will be generated.
+- `colnames` A character vector with length matching dim or the length of
+ the bounds. Default is `'X_1'` to `'X_n'`.
+- `include_cluster` A logical of length 1. If `Noise` a column
+ `'cluster'` will be included in the generated data which will also be
+ assigned the class `'clustered_data'`. Because this is a noise generator
+ all data points will be assigned cluster 0.
+- `.print_info` A logical of length 1. If `TRUE` additional
+ information will be displayed during runtime. Used in debugging.
+ 
+```{r generateNoiseData}
+generateNoiseData(lower_bounds = c(-1,0),
+                 upper_bounds = c(1,1))
+generateNoiseData(n = 1000,
+                 lower_bounds = c(-180,-90),
+                 upper_bounds = c(180,90),
+                 colnames = c('longitude','latitude'),
+                 .print_info = TRUE)
+
+```
+
+## generate_optics_test_data/generateOpticsTestData
+If you don't want the hassle of combining the generators above you can use this function.
+As the name suggests the results can be a very nice data sets for the [OPTICS](optics.html) clustering algorithm.
+
+The parameters:
+-  `paths` list of paths as in [generateClusterDataFromPaths](#generateClusterDataFromPaths)
+-  `n_points` number of points to be generated along each path
+-  `noise_points` number of noise points over the data
+-  `sd` standard deviation of noise
+
+```{r}
+path1 <- tibble::tibble(
+  X = c(0.2,0.3,0.4,0.3,0.2),
+  Y = c(0.3,0.4,0.3,0.2,0.3)
+)
+path2 <- tibble::tibble(
+  X = c(0.45,0.5,0.45,0.4,0.45),
+  Y = c(0.9,0.85,0.8,0.85,0.9)
+)
+path3 <- tibble::tibble(
+  X = c(0.85,0.8,0.93,0.85),
+  Y = c(0.5,0.28,0.28,0.5)
+)
+paths <- list(path1, path2, path3)
+
+generate_optics_test_data(paths, n_points = 500, noise_points = 100, sd = 0.035 )
+```
+
+# Data sets included in clusterfuck
+There are quite a few nice example data sets included in this package.
+We will go over them here and, if relevant, discribe how different clustering algorithms act on it.
+
+Note: During this vignette we will make heavy use of the function `viewData` and `viewClusters` which are just nice little wrappers of plotting functions and should not distract you from the data sets.
+
+## optics_wikipedia_data
+Exactly the data set generated in the example of the optics data generator.
+Imitates the Data set featured on the Wikipedia page for OPTICS.
+
+```{r}
+optics_wikipedia_data |> viewData()
+```
+
+## euclidean_cluster_data
+
+```{r}
+euclidean_cluster_data |> viewData()
+```
+
+We also have the same data set with clusters included
+
+```{r}
+euclidean_cluster_data |> viewClusters()
+```
+
+## manhattan_cluster_data
+This data set should be clustered using manhattan distances.
+
+```{r}
+manhattan_cluster_data |> viewData()
+```
+
+
+We also have the same data set with clusters included
+
+
+```{r}
+manhattan_clustered_data |> viewClusters()
+```
+
+## maximum_cluster_data
+This data set should be clustered using maximum (norm) distances.
+
+```{r}
+maximum_cluster_data |> viewData()
+```
+
+
+We also have the same data set with clusters included
+
+
+```{r}
+maximum_clustered_data |> viewClusters()
+```
+
+## concentric circles
+These data sets make K-Means and K-Medioids **fail**. 
+(If not using any fancy distance functions)
+
+### two_concentric_circles
+```{r}
+two_concentric_circles |> viewData()
+```
+
+### three_concetric_circles
+
+```{r}
+three_concentric_circles |> viewData()
+```
+
+## connected concentric circles
+These data sets make
+
+- K-Means and K-Medioids using standard distance functions **fail** 
+-  [hierarchical clustering], [optics()] and [dbscan()] **fail** because they would all find one big connected cluster
+
+We suggest using spectral clustering on this one
+ 
+### two_connected_concentric_circles 
+ 
+```{r}
+two_connected_concentric_circles |> viewData()
+```
+
+### three_connected_concentric_circles
+
+```{r}
+three_connected_concentric_circles |> viewData()
+```
+
+## looping data sets
+The following are data sets are data sets in 'pacman' (go out to the right, come in from the left) space embedded in $$\mathbb{R}^2$$.
+
+
+### hours_of_the_day
+```{r}
+hours_of_a_day |> viewData()
+```
+
+### hours_full_data
+
+```{r}
+hours_full_data |> viewData()
+```
+
+### hours_data
+
+```{r}
+hours_data |> viewData()
+```
+
+### oh_no_ive_spilled_my_pacman_dots
+Not: This is a nice data set with data points sharing the same exact coordinates
+
+```{r}
+oh_no_ive_spilled_my_pacman_dots |> viewData()
+```
+
+### pacman_full_data
+
+```{r}
+pacman_full_data |> viewData()
+```
+
+## study_courses_data
+This is a data set with char values.
+
+- As `mean()` is ill defined on characters, K-Means cannot be used on it.
+
+```{r}
+study_courses_data |> viewData()
+```
+
+## numbers_and_characters
+A data set with a column of type double and a column of type character.
+Must be accompanied by applicable distance function when clustering. 
+
+```{r}
+numbers_and_characters |> viewData()
+```

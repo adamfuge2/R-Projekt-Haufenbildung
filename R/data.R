@@ -1,23 +1,33 @@
 ############# study courses ##############
 
-#' Some names of study courses
-#'
-#' An atomic character vector containing names of study courses. Beware: The
-#' order of the entries does matter, as study_courses_dissimilarity_matrix has
-#' been constructed using this order.
-'study_courses_names'
-
-#' A dissimilarity matrix of study courses
-#'
-#' A matrix encoding the dissimilarties/distances of study courses.
-#' The names are given by study_courses_names at construction.
-'study_courses_dissimilarity_matrix'
+##' Some names of study courses
+##'
+##' An atomic character vector containing names of study courses. Beware: The
+##' order of the entries does matter, as study_courses_dissimilarity_matrix has
+##' been constructed using this order.
+#'study_courses_names'
+#
+##' A dissimilarity matrix of study courses
+##'
+##' A matrix encoding the dissimilarties/distances of study courses.
+##' The names are given by study_courses_names at construction.
+#'study_courses_dissimilarity_matrix'
 
 #' Some Study courses
 #'
 #' A tibble with only one column. Its entries are unique study courses.
 'study_courses_data'
 
+#' A data with numeric and character entries
+#'
+#' A tibble
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{numbers}{positive integers}
+#' \item{characers}{some strings of study courses}
+#' }
+'numbers_and_characters'
 
 
 ################### hours #########################

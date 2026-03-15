@@ -19,4 +19,4 @@ study_courses_names <- c('architecture',
                          'translation',
                          'theater education')
 
-usethis::use_data(study_courses_names, overwrite = TRUE)
+usethis::use_data(study_courses_names, overwrite = TRUE, internal = TRUE)

@@ -250,10 +250,7 @@ findClusterAmountSilhouette <- function(data,distance_method='euclidean',p=NULL,
 
     fit[[K]] <- kMedioids(data = data,K = K,distance_method = distance_method,p=p,custom_distance_function=custom_distance_function, .print_info = .print_info)$mean_silhouette
 
-    plot(1:K,fit)
-
     if(K>1) improvement <- fit[[K]] - fit[[K-1]]
-
 
     if(.print_info)
       print(paste0('Improvement from K = ',K-1,' to K = ',K,' is ',improvement))
@@ -262,6 +259,8 @@ findClusterAmountSilhouette <- function(data,distance_method='euclidean',p=NULL,
 
   }
 
+
+  plot(1:(K-1),fit)
 
   return(which.max(fit))
 }

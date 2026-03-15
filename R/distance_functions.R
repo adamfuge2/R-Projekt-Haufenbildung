@@ -83,7 +83,7 @@ binary <- function(x,y) sum(as.logical(as.logical(x)-as.logical(y)))/sum(as.logi
 #' @param y         an atomic vector or tibble row with only real numbers
 #'
 #' @export
-canberra <- function(x,y) sum((x-y)/(x+y))
+canberra <- function(x,y) sum(abs(x-y)/(abs(x)+abs(y)))
 
 
 
@@ -100,7 +100,7 @@ canberra <- function(x,y) sum((x-y)/(x+y))
 #' study_courses_distance('law','geology')
 #'
 #' @export
-study_courses_distance <- function(x,y) clusterfuck::study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
+study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
 
 #viewData(students_data)
 #
@@ -176,22 +176,18 @@ hours_distance <- pacman_distance(dim_lengths=24)
 #' @export
 original_pacman_distance <- pacman_distance(dim_lengths = c(26,30),base_distance = manhattan)
 
-#clustering <- kMedioids(hours_data,custom_distance_function = hour_difference,K=3)
-#viewClusters(more_hours_data,clustering$clustering_function)
-#clustering
-#
-#clustering <- kMedioids(oh_no_ive_spilled_my_pacman_dots,custom_distance_function = original_pacman_distance,K=4)
-#viewClusters(more_pacman_dots,clustering$clustering_function)
-#clustering
-
-#viewData(spectralReduction(oh_no_ive_spilled_my_pacman_dots,1,custom_mercian_kernel = gaussKernelByCustomDistance(original_pacman_distance,gamma = 1),k=3)$reduced_data)
-#viewData(spectralReduction(hours_data,gamma=1,k=2,custom_mercian_kernel = gaussKernelByCustomDistance(hours_distance,gamma = 50))$reduced_data)
-
 
 ################## distance on the globe #################
 ## lets assume the earth was round
 ##
 
+#' Distance of two points by Longitude and Latitude
+#'
+#' Uses the haversine formula to calculate the distances of two points the earth
+#'
+#' @param x,y A numeric vector of length 2. Between c(-180,-90) and c(180,90).
+#'
+#' @export
 distanceByLongitudeAndLatitude <- function(x,y){
   x <- unlist(x,use.names = FALSE)[2:1] * 2*pi/360
   y <- unlist(y,use.names = FALSE)[2:1] * 2*pi/360
@@ -199,18 +195,3 @@ distanceByLongitudeAndLatitude <- function(x,y){
                                 cos(x[1]) * cos(y[1]) *
                                 sin((y[2]-x[2])/2)^2)),2)
 }
-
-#paris <- tibble::tibble(lattitude=48.8566,longitude=2.3522)
-#y <- tibble::tibble(lattitude=50.0647,longitude=19.9450)
-#
-#distanceByLongitudeAndLatitude(x,y)
-#
-#viewData(dplyr::slice_sample(world.cities[,c('long','lat')],n=100))
-#kMedioids(dplyr::slice_sample(world.cities[,c('long','lat')],n=1000),custom_distance_function = distanceByLongitudeAndLatitude,K=2,.print_info=TRUE)
-#slice_of_the_world <- dplyr::slice_sample(world.cities[,c('long','lat')],n=1000)
-#the_world <- tibble::as_tibble(matrix(c(runif(1000,min=-180,max = 180),runif(1000,min=-90,max = 90)),ncol = 2))
-
-
-#clustering <- kMedioids(slice_of_the_world,custom_distance_function = distanceByLongitudeAndLatitude,K=6,.print_info=TRUE)
-#viewClusters(world.cities[,c('long','lat')],clustering$clustering_function)
-

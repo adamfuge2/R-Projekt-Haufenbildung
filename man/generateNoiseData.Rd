@@ -17,10 +17,8 @@ generateNoiseData(
 \item{n}{A positive integer. The number of total data points to be
 generated.}
 
-\item{lower_bounds, upper_bounds}{numeric vectors with length equal dim (if
-given). Bound the cluster centers in a \code{dim}-dimensional rectangle
-defined by these parameters. Beware: These bound the cluster centers and
-\strong{not} the data points!}
+\item{lower_bounds, upper_bounds}{numeric vectors with equal length.
+Bounds the (multidimensional) rectangle in which the data points will be generated.}
 
 \item{colnames}{A character vector with length matching dim or the length of
 the bounds. Default is `'X_1'` to `'X_n'`.}

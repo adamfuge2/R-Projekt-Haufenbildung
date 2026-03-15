@@ -73,7 +73,7 @@ data_5 <- generateClusterData(n=100,
 
 The data can even have multiple types
 ```{r data_examples_2}
-data_4 <- tibble::tibble(numbers = 1:19,characters = study_courses_names)
+numbers_and_characters
 ```
 
 ```{r data_examples_3, include=FALSE}
@@ -87,7 +87,7 @@ Lets go clustering!
 ```{r data_examples_4, results = FALSE}
 spectralClustering(data_1,k=3,gamma=50,K=3)
 spectralClustering(data_3,k=1,gamma=50,custom_distance_function = study_courses_distance,K=3)
-spectralClustering(data_4,k=3,gamma=50,custom_distance_function = numericAndCharacterMixedDistance,K=3)
+spectralClustering(numbers_and_characters,k=3,gamma=50,custom_distance_function = numericAndCharacterMixedDistance,K=3)
 ```
 
 ## k

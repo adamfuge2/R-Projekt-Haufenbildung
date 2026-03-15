@@ -3,7 +3,7 @@
 \docType{data}
 \name{study_courses_data}
 \alias{study_courses_data}
-\title{Some Study courses}
+\title{Some names of study courses}
 \format{
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 19 rows and 1 columns.
 }
@@ -11,6 +11,18 @@ An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) w
 study_courses_data
 }
 \description{
+An atomic character vector containing names of study courses. Beware: The
+order of the entries does matter, as study_courses_dissimilarity_matrix has
+been constructed using this order.
+study_courses_names'
+A dissimilarity matrix of study courses
+}
+\details{
+A matrix encoding the dissimilarties/distances of study courses.
+The names are given by study_courses_names at construction.
+study_courses_dissimilarity_matrix'
+Some Study courses
+
 A tibble with only one column. Its entries are unique study courses.
 }
 \keyword{datasets}

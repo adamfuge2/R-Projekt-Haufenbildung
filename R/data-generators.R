@@ -103,7 +103,9 @@ generateClusterData <- function(n=100,
     colnames <- paste0('X_',1:dim)
 
   # invariants
+  stopifnot('there must be more generated data points than clusters'= n >= cluster_amount)
   stopifnot('dim must be greater than 0' = dim > 0)
+  stopifnot('lower_bounds and upper_bounds must have length of dim'= length(lower_bounds) == dim && length(upper_bounds) == dim)
   stopifnot('lower_bounds and upper bounds must not be empty' = length(lower_bounds) > 0 && length(upper_bounds) > 0)
   stopifnot('lower_bounds and upper_bounds must have the same length'= length(lower_bounds) == length(upper_bounds))
   stopifnot('lower bounds must not be higher than upper bounds' = all(lower_bounds <= upper_bounds))
@@ -303,10 +305,8 @@ generateClusterDataFromPaths <-  function(n=100,
 #'
 #' @param n           A positive integer. The number of total data points to be
 #'   generated.
-#' @param lower_bounds,upper_bounds numeric vectors with length equal dim (if
-#'   given). Bound the cluster centers in a \code{dim}-dimensional rectangle
-#'   defined by these parameters. Beware: These bound the cluster centers and
-#'   \strong{not} the data points!
+#' @param lower_bounds,upper_bounds numeric vectors with equal length.
+#'   Bounds the (multidimensional) rectangle in which the data points will be generated.
 #' @param colnames A character vector with length matching dim or the length of
 #'   the bounds. Default is `'X_1'` to `'X_n'`.
 #' @param include_cluster A logical of length 1. If \code{TRUE} a column
