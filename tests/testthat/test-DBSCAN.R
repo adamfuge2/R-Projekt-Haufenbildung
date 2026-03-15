@@ -12,7 +12,6 @@ test_that("DBSCAN works", {
   testthat::expect_true(is.numeric(clustering$clustered_data$cluster) || is.integer(clustering$cluster))
   testthat::expect_true(is.function(clustering_f))
   testthat::expect_true(is.numeric(clustering_f(c(0.4,0.7))))
-  print('DBSCAN has been tested in general')
 })
 
 test_that("DBSCAN accepts different parameters", {
@@ -24,10 +23,9 @@ test_that("DBSCAN accepts different parameters", {
   testthat::expect_no_error(dbscan(data, epsilon = 0.05, min_Pts = 3))
   testthat::expect_no_error(dbscan(data, epsilon = 0.2, min_Pts = 10))
   testthat::expect_no_error(dbscan(data, epsilon = 0.5, min_Pts = 2))
-  print('DBSCAN has been tested on different parameters')
 })
 
-test_that("DBSCAN is deterministic", { #we'll see if it actually is or if I messed up
+test_that("DBSCAN is deterministic", {
 
   set.seed(123)
 
@@ -37,7 +35,6 @@ test_that("DBSCAN is deterministic", { #we'll see if it actually is or if I mess
   res2 <- dbscan(data, epsilon=0.1, min_Pts=5)
 
   testthat::expect_equal(res1$cluster, res2$cluster)
-  print('DBSCAN has been tested on being deterministic')
 })
 
 test_that("DBSCAN handles wrong inputs", {
@@ -48,5 +45,4 @@ test_that("DBSCAN handles wrong inputs", {
   expect_error(dbscan(data, epsilon=0.1, min_Pts=0))
   expect_error(dbscan(tibble::tibble(), epsilon=0.1, min_Pts=5))
   expect_error(dbscan(data, epsilon="abc", min_Pts=5))
-  print('DBSCAN has been tested on wrong inputs')
 })
