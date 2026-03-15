@@ -2,7 +2,7 @@
 % Please edit documentation in R/spectral-clustering.R
 \name{gaussKernel}
 \alias{gaussKernel}
-\title{Gauss Kernel}
+\title{Gaussian Kernel}
 \usage{
 gaussKernel(x, y, gamma)
 }

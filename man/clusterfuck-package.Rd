@@ -18,6 +18,14 @@ NA
 \references{
 Richter
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/adamfuge2/R-Projekt-Haufenbildung}
+  \item Report bugs at \url{https://github.com/adamfuge2/R-Projekt-Haufenbildung/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Adam Fuge \email{adam.fuge@stud.uni-heidelberg.de}
 

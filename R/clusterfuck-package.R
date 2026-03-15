@@ -10,8 +10,10 @@
 # The following block is used by usethis to automatically generate
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
+#' @importFrom graphics abline
 #' @importFrom gridExtra grid.arrange
 #' @importFrom rlang .data
+#' @importFrom stats dist
 #' @importFrom stats rnorm
 #' @importFrom stats runif
 ## usethis namespace: end
