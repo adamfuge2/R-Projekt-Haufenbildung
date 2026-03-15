@@ -434,6 +434,8 @@ print.spectral_clustering <- function(x, ...){
 #'
 #' Check if tibble has a column named cluster
 #'
+#' @param x any object
+#'
 #' @export
 clustered_data_validate <- function(x){
   stopifnot('cluster' %in% colnames(x))

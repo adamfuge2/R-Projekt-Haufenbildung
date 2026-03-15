@@ -1,12 +1,17 @@
-# reachability plot for OPTICS algorithm
+#' reachability plot for OPTICS algorithm
+#'
+#' @param object reachability or optics object
+#' @param ... additional plotting arguments
+#'
 #' @export
 as.reachability <- function(object, ...) {
   UseMethod("as.reachability")
 }
 
-#' Form reachability object from optics clusterin
+#' Form reachability object from optics clustering
 #'
 #' @param object reachability object
+#' @param ... additional plotting arguments
 #'
 #' @export
 as.reachability.optics <- function(object, ...) {
@@ -27,6 +32,7 @@ as.reachability.optics <- function(object, ...) {
 #' Visualizes the reachability distances of an OPTICS object.
 #'
 #' @param x an object of class `"optics"`
+#' @param epsilon epsilon margin
 #' @param ... additional plotting arguments
 #'
 #' @returns a reachability plot of the clustered data
@@ -41,6 +47,7 @@ plot.optics <- function(x, epsilon=NULL,...) {
 #'
 #' @param x reachability object
 #' @param epsilon epsilon margin
+#' @param ... additional plotting arguments
 #'
 #' @returns a reachability plot of the clustered data
 #'
@@ -83,6 +90,11 @@ plot.reachability <- function(x, epsilon=NULL,...){
     abline(h=epsilon, col="red", lty=2)
 }
 
+#' Generic: Defer a clustering
+#'
+#' @param object an object of class `"optics"` or `'reachability'`
+#' @param epsilon reachability threshold epsilon
+#'
 #' @export
 extractClusters <- function(object, epsilon) {
   UseMethod("extractClusters")
@@ -113,7 +125,7 @@ extractClusters.optics <- function(object, epsilon){
 #'
 #' Computes cluster assignments from an object using the reachability threshold directly
 #'
-#' @param object an object of class `reachability`
+#' @param object an object of class `'reachability'`
 #' @param epsilon reachability threshold epsilon
 #'
 #' @returns integer vector of cluster labels
