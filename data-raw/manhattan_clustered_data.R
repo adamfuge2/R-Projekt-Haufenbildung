@@ -12,7 +12,7 @@ manhattan_clustered_data <- base::as.matrix(maximum_cluster_data) %*% mat |> tib
 
 colnames(manhattan_clustered_data) <- c('X','Y')
 
-manhattan_clustered_data$cluster <- c(rep(1,n/2),rep(2,n/2))
+manhattan_clustered_data <- clustered_data(manhattan_clustered_data,c(rep(1,n/2),rep(2,n/2)))
 
 usethis::use_data(manhattan_clustered_data, overwrite = TRUE)
 
