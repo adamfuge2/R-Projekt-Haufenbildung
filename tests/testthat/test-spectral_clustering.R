@@ -53,3 +53,37 @@ test_that("Spectral Clustering", {
 
 })
 
+
+test_that("Spectral Clustering kernels", {
+  data <- generateClusterData(n = 20, dim = 3)
+  k <- 2
+  gamma <- 1.4
+
+  testthat::expect_no_error(spectralClustering(data, k, mercer_kernel = 'gauss', gamma=gamma, K = 4))
+  testthat::expect_no_error(spectralClustering(data, k, mercer_kernel = 'linear', K = 4))
+  testthat::expect_error(spectralClustering(data, k, mercer_kernel = 'fkjsdalfhjashlfa', K = 4))
+
+
+})
+
+
+test_that("Spectral Clustering kernel epsilon", {
+  data <- generateClusterData(n = 20, dim = 3)
+  k <- 2
+  gamma <- 1.4
+
+  testthat::expect_no_error(spectralClustering(data, k, kernel_epsilon = 0.1, gamma=gamma, K = 2))
+
+})
+
+test_that('spectra clust misc inputs',{
+  data <- generateClusterData(n = 20, dim = 3)
+  k <- 2
+  gamma <- 1.4
+
+  capture_output(expect_no_error(invisible(spectralClustering(data,
+                                                              k,
+                                                              gamma=gamma,
+                                                              K=3,
+                                                              .print_info = TRUE))), print=FALSE)
+})

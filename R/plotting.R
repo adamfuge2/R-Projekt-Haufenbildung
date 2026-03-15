@@ -39,6 +39,7 @@ viewClusters1D <-function(clustered_data){
   clusters <- sort(unique(clustered_data$cluster))
   clusters <- clusters[clusters != 0] # don't count noise as cluster
 
+
   if(length(clusters) == 0) {
     palette <- c("Noise" = "black") # no clusters return only noise
   } else {
@@ -49,13 +50,11 @@ viewClusters1D <-function(clustered_data){
     )
   }
 
-  clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
-  if(K==0) clusternames <- character()
 
   ## Display data as 2D scatter plot
   ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
             ggplot2::geom_point() +
-            ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),clusternames))) +
+            ggplot2::scale_color_manual(values = palette) +
             ggplot2::labs(x='Data Points',x='Value')
 }
 
@@ -109,13 +108,13 @@ viewClusters2D <-function(clustered_data){
     )
   }
 
-  clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
-  if(K==0) clusternames <- character()
+
+
 
   ## Display data as 2D scatter plot
   ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
     ggplot2::geom_point() +
-    ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),clusternames)))
+    ggplot2::scale_color_manual(values = palette)
 }
 
 
@@ -407,13 +406,6 @@ print.clustered_data <- function(x, plot=TRUE, ...){
 
 }
 
-#' @export
-print.cluster_data <- function(x, ...){
-  cat('Data made for clustering:\n')
-  NextMethod(x,...)
-  if(ncol(x) <= 3 && ncol(x) >= 1)
-    viewData(x)
-}
 
 #' @export
 print.spectral_clustering <- function(x, ...){
@@ -427,9 +419,15 @@ print.spectral_clustering <- function(x, ...){
     viewClusters(x$projected_clustered_data)
     viewClusters(x$clustered_data)
 
-    NextMethod(x,plot=FALSE)}
+    # doing this, beacause NextMethod was doing WEIRD stuff
+    class(x) <- class(x)[2:length(class(x))]
+    print(x,plot=FALSE)
+
+}
   else
-    NextMethod(x)
+    # doing this, beacause NextMethod was doing WEIRD stuff
+    class(x) <- class(x)[2:length(class(x))]
+    print(x,plot=FALSE)
 }
 
 #' Validator for clustered_data object
