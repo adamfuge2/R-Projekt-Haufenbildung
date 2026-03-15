@@ -1,4 +1,5 @@
 # reachability plot for OPTICS algorithm
+#' @export
 as.reachability <- function(object, ...) {
   UseMethod("as.reachability")
 }
@@ -76,6 +77,7 @@ plot.reachability <- function(x, epsilon=NULL,...){
     abline(h=epsilon, col="red", lty=2)
 }
 
+#' @export
 extractClusters <- function(object, ...) {
   UseMethod("extractClusters")
 }

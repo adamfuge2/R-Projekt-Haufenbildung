@@ -81,7 +81,7 @@ viewClusters(data_3)
 Points assigned to cluster 0 represent noise points that were not
 assigned to any cluster.
 
-### 2.2 epsilon
+### 2.2 epsilon (required)
 The maximum radius used to determine neighbors of a point. In OPTICS, epsilon mainly acts as an upper bound radius for the neighborhood. Clusters can later be extracted using a smaller radius.
 epsilon must be a positive number greater than 0.
 
@@ -95,7 +95,7 @@ result_big_epsilon <- optics(data_1, epsilon=0.4, min_Pts=5)
 viewClusters(result_big_epsilon$clustered_data)
 ```
 
-### 2.3 min_Pts
+### 2.3 min_Pts (required)
 The number of points that have to be within epsilon neighborhood of each other to compute a core distance. Points with less than min_Pts neighbors within epsilon distance are not considered core points.
 min_Pts must be a positive integer greater than 0. 
 
@@ -108,6 +108,11 @@ viewClusters(result_medium_minPts$clustered_data)
 result_big_minPts <- optics(data_1, epsilon=0.2, min_Pts=10)
 viewClusters(result_big_minPts$clustered_data)
 ```
+
+### 2.4 distance_method, p, custom_distance_function (optional)
+These parameters control how distances between data points are computed.
+They behave identical to the parameters described in the K-Means vignette.
+
 ## 3. Output
 The output is a clustering object:
 A list of the class "clustering" and "optics", which is required for the reachability plot.

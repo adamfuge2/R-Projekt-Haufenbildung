@@ -8,6 +8,7 @@
 #'            The number of rows is the sample size and called n.
 #' @param epsilon maximum neighborhood radius
 #' @param min_Pts minimum number of points for core distance
+#' @inheritParams getDistanceFunction
 #'
 #' @returns An object of class `"optics"` containing
 #' \itemize{
@@ -19,17 +20,30 @@
 #' }
 #'
 #' @export
-optics <- function(data, epsilon, min_Pts) {
+optics <- function(data, epsilon, min_Pts,
+                   distance_method = "euclidean",
+                   p = NULL,
+                   custom_distance_function = NULL) {
 
   stopifnot("data must be data.frame or tibble" = is.data.frame(data))
   stopifnot("data must have at least one row" = nrow(data) >= 1)
   stopifnot("data must have at least one columns" = ncol(data) >= 1)
-  stopifnot("data must contain only numeric values" = all(vapply(data, is.numeric, logical(1))))
+  if(is.null(distance_method) && is.null(custom_distance_function)) {
+    stopifnot("data must contain only numeric values for default distance" = all(vapply(data, is.numeric, logical(1))))
+  }
   stopifnot("epsilon must be positive and numeric" = is.numeric(epsilon) && epsilon > 0)
   stopifnot("min_Pts must be a positive integer" = is.wholenumber(min_Pts) && min_Pts > 0)
 
-  x <- as.matrix(data)    # data will be created by generateClusterTestDataSimple2D() or similiar function
-  dist_x <- as.matrix(stats::dist(x)) # die Distanzmatrix von data, verbessern wir möglicherweise noch
+  x <- as.matrix(data)
+  if(is.null(distance_method)) {
+    dist_x <- as.matrix(stats::dist(x))
+  } else {
+    dist_x <- dissimilarityMatrix( # die Distanzmatrix von data
+      data,
+      distance_method = distance_method,
+      p = p,
+      custom_distance_function = custom_distance_function)
+  }
   n <- nrow(x) # number of points
 
   processed <- rep(FALSE, n)
