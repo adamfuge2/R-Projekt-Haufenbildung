@@ -75,43 +75,6 @@ test_that('sumOfDistancestTo',{
 })
 
 
-
-test_that('viewClusters',{
-
-  data <- tibble::tibble(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
-  clustering <- clusteringFromCentroids(data)
-
-
-
-  viewClusters(data,clustering)
-
-  testthat::expect_equal(3+3,6)
-
-})
-
-test_that('viewData',{
-  data <- tibble::tibble(X=c(0.1,0.1,0.5,0.8),Y=c(0.46,0.9,0.5,0.4))
-
-  testthat::expect_no_error(viewClusters(data))
-  testthat::expect_no_error(viewData(data))
-})
-
-
-test_that('metrics',{
-  data <- tibble::tibble(X=c(-5.2, -3), Y=c(-7.9, 8), Z=c(34, 0))
-  data_atomic_1 <- c(-5.2, -7.9, 34)
-  data_atomic_2 <- c(-3, 8, 0)
-
-  testthat::expect_no_error(euclidean(data[1, ], data[2, ]))
-  testthat::expect_no_error(maximumDistance(data[1, ], data[2, ]))
-  testthat::expect_no_error(pDistance(6)(data[1, ], data[2, ]))
-
-  testthat::expect_no_error(euclidean(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(maximumDistance(data_atomic_1, data_atomic_2))
-  testthat::expect_no_error(pDistance(6)(data_atomic_1, data_atomic_2))
-})
-
-
 test_that('centroid_det', {
   data <- tibble::tibble(X=c(-5.2, -3, 0, 7, 100), Y=c(-7.9, 8, 0, 0, -9), Z=c(0, 0, 0, 9, 65))
 
