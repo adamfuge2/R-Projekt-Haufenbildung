@@ -16,7 +16,7 @@ gaussKernelWeights <- function(data,gamma){
 }
 
 
-#' Gauss Kernel
+#' Gaussian Kernel
 #'
 #' Kernel function using the euclidean norm
 #'
@@ -28,6 +28,20 @@ gaussKernelWeights <- function(data,gamma){
 #' @export
 gaussKernel <- function(x,y,gamma){
   base::exp(- gamma * sqrt(sum((x-y)^2)))
+}
+
+
+#' Linear Kernel
+#'
+#' Kernel function using the scalar product
+#'
+#' @param x tibble with one row or atomic vector
+#' @param y tibble with one row or atomic vector
+#'
+#' @returns numeric between 0 and 1
+#' @export
+linearKernel <- function(x,y){
+  t(matrix(x)) %*% matrix(y)
 }
 
 
@@ -93,17 +107,25 @@ spectralProjection <- function(data,
       W <- gaussKernelWeights(data,gamma)
       K <- gaussKernel
     }
+    else if(mercer_kernel == 'linear') {
+      K <- linearKernel
+      W <- dissimilarityMatrix(data,custom_distance_function=K)
+    }
     else stop('Unknown mercer kernel and no custom mercer kernel provided')
   }
   else {
     if(!is.null(custom_mercer_kernel)){
       if(any(c(!is.null(distance_method),
                !is.null(custom_distance_function),
-               !is.null(kernel_epsilon))))
+               !is.null(gamma),
+               kernel_epsilon<Inf)))
         warning('Custom Kernel provided, other parameters distance_method, custom_distance_function or kernel_epsilon discarded')
       W <- dissimilarityMatrix(data,custom_distance_function = custom_mercer_kernel)
       K <- custom_mercer_kernel
     }else{
+      # restoring default for getDistanceFunction
+      if(is.null(distance_method)) distance_method <- 'euclidean'
+
       almost_distance <- getDistanceFunction(distance_method,p,custom_distance_function)
       if(kernel_epsilon < Inf) {
         distance <- function(x,y) almost_distance(x,y)* (kernel_epsilon >= almost_distance(x,y))
@@ -117,7 +139,7 @@ spectralProjection <- function(data,
       W <- dissimilarityMatrix(data,custom_distance_function=K)
     }
   }
-
+  if(.print_info) print(W)
 
   D <- apply(W,1,sum) |> diag()
 
@@ -207,7 +229,7 @@ spectralClustering <- function(data,
   # Based on the cluster algorithm chosen: Apply it and modify the Output
   if(cluster_algorithm == 'K-Means'){
     # apply kMeans
-    clustering <- kMeans(spectral_projection$projected_data, ... )
+    clustering <- kMeans(spectral_projection$projected_data, ..., distance_method = 'euclidean')
 
     # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
@@ -217,7 +239,7 @@ spectralClustering <- function(data,
   }
   else if(cluster_algorithm == 'K-Medioids'){
     # apply kMeadioids
-    clustering <- kMedioids(spectral_projection$projected_data, ...)
+    clustering <- kMedioids(spectral_projection$projected_data, ..., distance_method = 'euclidean')
 
     # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
@@ -227,7 +249,7 @@ spectralClustering <- function(data,
   }
   else if(cluster_algorithm == 'hierarchical clustering'){
     # apply hierarchical_clustering
-    clustering <- hierarchicalClustering(spectral_projection$projected_data, ...)
+    clustering <- hierarchicalClustering(spectral_projection$projected_data, ..., distance_method = 'euclidean')
 
     # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
