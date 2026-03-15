@@ -6,8 +6,7 @@ as.reachability <- function(object, ...) {
 
 #' Form reachability object from optics clusterin
 #'
-#' @param `object` reachability object
-#' @param ...
+#' @param object reachability object
 #'
 #' @export
 as.reachability.optics <- function(object, ...) {
@@ -39,7 +38,6 @@ plot.optics <- function(x, ...) {
 #'
 #' @param x reachability object
 #' @param epsilon epsilon margin
-#' @param ...
 #'
 #' @returns a reachability plot of the clustered data
 #'
@@ -78,7 +76,7 @@ plot.reachability <- function(x, epsilon=NULL,...){
 }
 
 #' @export
-extractClusters <- function(object, ...) {
+extractClusters <- function(object, epsilon) {
   UseMethod("extractClusters")
 }
 
