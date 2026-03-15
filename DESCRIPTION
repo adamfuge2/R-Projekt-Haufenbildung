@@ -47,3 +47,5 @@ Imports:
 Depends:
     R (>= 4.1.0)
 VignetteBuilder: knitr
+URL: https://github.com/adamfuge2/R-Projekt-Haufenbildung
+BugReports: https://github.com/adamfuge2/R-Projekt-Haufenbildung/issues
