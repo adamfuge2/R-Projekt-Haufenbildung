@@ -152,42 +152,14 @@ generateNoiseData(n = 1000,
 
 ```
 
-## generate_optics_test_data/generateOpticsTestData
-If you don't want the hassle of combining the generators above you can use this function.
-As the name suggests the results can be a very nice data sets for the [OPTICS](optics.html) clustering algorithm.
-
-The parameters:
--  `paths` list of paths as in [generateClusterDataFromPaths](#generateClusterDataFromPaths)
--  `n_points` number of points to be generated along each path
--  `noise_points` number of noise points over the data
--  `sd` standard deviation of noise
-
-```{r}
-path1 <- tibble::tibble(
-  X = c(0.2,0.3,0.4,0.3,0.2),
-  Y = c(0.3,0.4,0.3,0.2,0.3)
-)
-path2 <- tibble::tibble(
-  X = c(0.45,0.5,0.45,0.4,0.45),
-  Y = c(0.9,0.85,0.8,0.85,0.9)
-)
-path3 <- tibble::tibble(
-  X = c(0.85,0.8,0.93,0.85),
-  Y = c(0.5,0.28,0.28,0.5)
-)
-paths <- list(path1, path2, path3)
-
-generate_optics_test_data(paths, n_points = 500, noise_points = 100, sd = 0.035 )
-```
 
 # Data sets included in clusterfuck
 There are quite a few nice example data sets included in this package.
-We will go over them here and, if relevant, discribe how different clustering algorithms act on it.
+We will go over them here and, if relevant, describe how different clustering algorithms act on it.
 
 Note: During this vignette we will make heavy use of the function `viewData` and `viewClusters` which are just nice little wrappers of plotting functions and should not distract you from the data sets.
 
-## optics_wikipedia_data
-Exactly the data set generated in the example of the optics data generator.
+## optics_wikipedia_data.
 Imitates the Data set featured on the Wikipedia page for OPTICS.
 
 ```{r}
