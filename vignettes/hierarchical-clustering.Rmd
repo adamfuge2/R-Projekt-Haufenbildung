@@ -170,13 +170,11 @@ If you chose `'Lp'` for the parameter `distance_method` then this is where you c
 
 
 
-### 2.6 custom_metric
-You can also choose a custom metric function. This distance function must be a function with the following properties. If a custom metric is provided, the parameters `metric` and `p` are ignored. 
+### 2.6 custom_distance_function
+You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance function is provided, the parameters `distance_method` and `p` are ignored. 
 
 But please consider:
-- Your custom metric must applicable on the data (on which `mean()` must be applicable)
-- Non continuous custom metrics can cause loops
-- **Using an unoptimized custom metric can slow** the calculation of clustering algorithms down significantly! 
+- **Using an unoptimized custom distance function can slow** the calculation of clustering algorithms down significantly! 
 
 Inputs:   
 - `x` and `y` : Two of the data row type. (The internally chosen names do not matter)
@@ -219,7 +217,7 @@ WIDE_euclidean <- function(x,y) {
   y[[1]] <- 0.1*y[[1]]
   euclidean(x,y)
   }
-hierarchicalClustering(data_1, K=4, custom_distance_function = WIDE_euclidean)
+hierarchicalClustering(data_1, min_cluster_amount =4, custom_distance_function = WIDE_euclidean)
 ```
 
 

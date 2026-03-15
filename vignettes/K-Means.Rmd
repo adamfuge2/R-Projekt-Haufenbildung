@@ -4,6 +4,7 @@ output:
   rmarkdown::html_vignette:
     toc: true
     tabset: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{The K-Means Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
@@ -32,10 +33,10 @@ Here we will go over all information needed to use the kMeans function of the cl
 1. First we will 
 
 
-## 1. General use
+# General use
 This will illustrate a use case for this clustering function:
 
-### Categorizing spherical data
+## Categorizing spherical data
 ```{r general_use_1, include=FALSE}
 data <- generateClusterData(n=100, 
                             cluster_amount = 4, 
@@ -60,7 +61,7 @@ kMeans(data, K = 4, tries = 4)
 ```
 Well done!
 
-### Finding representatives
+## Finding representatives
 Now we are given another problem. You are tasked to found a counsel debating on which color is the best color. If we were to give every humans favorite color a seat in this counsel it would be highly inefficient. Thus we want to pick only 7 representative colors. We are provided with data gathered from people formatted as a tibble of the columns red, green and blue. 
 
 ```{r fav_col_def, include=FALSE}
@@ -97,7 +98,7 @@ image(1:nrow(ddf), 1, as.matrix(1:nrow(ddf)),
 ```
 
 
-### Categorizing unknown data
+## Categorizing unknown data
 We continoue the example from above:
 
 - Hey, you say, I was'nt asked what my favorite color is!
@@ -126,7 +127,7 @@ image(1:nrow(ddf), 1, as.matrix(1:nrow(ddf)),
       col=rgb(ddf$red, ddf$green, ddf$blue,maxColorValue = 255),
       xlab="", ylab = "", xaxt = "n", yaxt = "n", bty = "n")
 ```
-### Unknown Cluster amount 
+## Unknown Cluster amount 
 Sometimes one may not know the cluster amount right away. Instinctively this may deter you from using K-Means to cluster. But some methods allow you to search for the 'right' cluster amount, by clustering for many different values for K and then comparing the clusterings. One of those methods is the elbow method. This makes use of the fact that this implementation of the K-Means-Clustering algorithm already provides a score of the clustering in its output. From the example above:
 ```{r general_use_sum_of_squares}
 clustering$sum_of_squares
@@ -151,8 +152,6 @@ findClusterAmountElbow <- function(data, check_min = 1){
   improvement[improvement<1] <- Inf
 
   plot(1:K,sum_of_squares)
-  
-  return(which.min(improvement))
 }
 ```
 
@@ -160,7 +159,7 @@ Now lets try it on the data set from above
 ```{r}
 findClusterAmountElbow(favorite_colors,check_min = 10)
 ```
-Here we look for an 'elbow' in the plot. So for example 7 can be considered a good amount of clusters in this data set. 
+Here we look for an 'elbow' in the plot. Any corners in this graph can be considered a good amount of clusters in this data set. 
 
 Something similar can be done using the silhouette method and the mean_silhouette property of the clustering object:
 ```{r genral_use_mean_silhouette}
@@ -169,9 +168,9 @@ clustering$mean_silhouette
 
 
 
-## 2. Parameters
+# Parameters
 
-### 2.1 data (necessary)
+## data
 This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point. 
 
 - Must have at least 1 data point.
@@ -192,12 +191,12 @@ kMeans(data_1,K=3)
 kMeans(data_2,K=1)
 ```
 
-### 2.2 K
+## K
 The number of clusters the algorithm tries to fit the data in.
 This number must be
 - a positive integer 
 - larger than 0
-- at maximum equal to the amount of unique data points in `data`
+- at maximum equal to the amount of unique data points in [`data`](#data)
 
 Some examples:
 ```{r K_examples}
@@ -208,12 +207,11 @@ kMeans(data_2,K=1)
 # kMeans(data_1,K=5) throws error
 ```
 
-### 2.3 distance_method
+## distance_method
 This function comes with a handful of common metrics pre made. Use this parameter to choose one of the following:
 
-```{r distance_method_generate_full_data, echo=FALSE}
+```{r full_data_def, include=FALSE}
 full_data <- generateNoiseData(n=1000,lower_bounds = c(0,0),upper_bounds= c(1,1))
-colnames(full_data) <- c('X','Y')
 ```
 
 
@@ -224,76 +222,76 @@ colnames(full_data) <- c('X','Y')
 - 'binary',
 - 'minkowski' (see more in 2.4)
 
-#### Examples {.tabset}
-##### intended clusterings
+### Examples {.tabset}
+#### intended clusterings
 ```{r distance_method_examples_intended_clusterings}
 viewClusters(euclidean_clustered_data)
 viewClusters(maximum_clustered_data)
 viewClusters(manhattan_clustered_data)
 ```
 
-##### euclidean
+#### euclidean
 ```{r metric_examples_euclidean}
 kMeans(euclidean_cluster_data, K=3, distance_method = 'euclidean')
 kMeans(maximum_cluster_data, K=2, distance_method = 'euclidean')
 kMeans(manhattan_cluster_data, K=2, distance_method = 'euclidean')
 ```
 
-##### maximum
+#### maximum
 ```{r metric_examples_maximum}
 kMeans(euclidean_cluster_data, K=3, distance_method = 'maximum')
 kMeans(maximum_cluster_data, K=2, distance_method = 'maximum')
 kMeans(manhattan_cluster_data, K=2, distance_method = 'maximum')
 ```
 
-##### manhattan
+#### manhattan
 ```{r metric_examples_manhattan}
 kMeans(euclidean_cluster_data, K=3, distance_method = 'manhattan')
 kMeans(maximum_cluster_data, K=2, distance_method = 'manhattan')
 kMeans(manhattan_cluster_data, K=2, distance_method = 'manhattan')
 ```
 
-### 2.4 p
+## p
 If you chose `'minkowski'` for the parameter `distance_method` (2.3) then this is where you can input the value for the minkowski metric. Will be ignored, if other distance methods are chosen.
 
-#### Examples {.tabset}
+### Examples {.tabset}
 
-##### p = 1 (manhattan)
+#### p = 1 (manhattan)
 ```{r p_examples_1}
 set.seed(123)
 p_clustering_1 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=1 , tries=10)
 viewClusters(full_data,p_clustering_1$clustering_function)
 ```
 
-##### p = 1.5 
+#### p = 1.5 
 ```{r p_examples_1_5}
 set.seed(123)
 p_clustering_1_5 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=1.5 , tries=10)
 viewClusters(full_data,p_clustering_1_5$clustering_function)
 ```
 
-##### p = 2 (euclidean)
+#### p = 2 (euclidean)
 ```{r p_examples_2}
 set.seed(123)
 p_clustering_2 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=2 , tries=10)
 viewClusters(full_data,p_clustering_2$clustering_function)
 ```
 
-##### p = 4 
+#### p = 4 
 ```{r p_examples_4}
 set.seed(123)
 p_clustering_4 <- kMeans(data_1,K=4, distance_method = 'minkowski', p=4 , tries=10)
 viewClusters(full_data,p_clustering_4$clustering_function)
 ```
 
-##### p = 8 
+#### p = 8 
 ```{r p_examples_8}
 set.seed(123)
 p_clustering_8 <- kMeans(data_1,K=4, distance = 'minkowski', p=8 , tries=10)
 viewClusters(full_data,p_clustering_8$clustering_function)
 ```
 
-### 2.5 custom_distance_function
+## custom_distance_function
 You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance is provided, the parameters `distance` (2.3) and `p` (2.4) are ignored. 
 
 But please consider:
@@ -328,7 +326,7 @@ WIDE_euclidean <- function(x,y) {
 kMeans(data_1, K=4, custom_distance_function = WIDE_euclidean)
 ```
 
-### 2.6 tries
+## tries
 K-Means depends heavily on the starting centroids. You can account for bad luck by increasing the amount of times the algorithm is chooses new starting centroids. The clustering with minimal Inner Inequality will be returned.
 
 Example:
@@ -339,31 +337,31 @@ kMeans(data_5,K=7,tries = 10)$inner_inequality
 ```
 
 
-### 2.7 .print_info
+## .print_info
 A logical of length 1
 This is useful for debugging or finding loops caused by custom metrics (2.5). If `TRUE` some extra info will be displayed in the console
 
 Example: 
-```{r .print_info_example}
+```{r .print_info_example, fig.show='hide'}
 set.seed(12345)
 kMeans(data_1,K=7,tries = 50, .print_info = TRUE)
 ```
 
-## 3 Output
+# Output
 The output is a clustering object:
 A list of the class clustering with at least an element called `'clustered_data'`.
 Reed more about clustering objects here TODO
 
 A clustering generated by K-Means also has the following properties (elements of the list):
 
-### 3.1. clustered_data
+## clustered_data
 The original data with a column called `'cluster'` added.
 
 ```{r clustered_data}
 kMeans(data_1,K=4)$clustered_data
 ```
 
-### 3.2 clustering_function
+## clustering_function
 A function which can relate any data point to their cluster. 
 Why this is special with K-Means: **This clustering function CAN be applied to new data!**
 
@@ -388,14 +386,14 @@ viewClusters(unknown_data,f)
 viewClusters(more_data,f)
 ```
 
-### 3.3 centroids
+## centroids
 The clustering is calculated by the distance of the data points to the centroids (means) of each cluster. These centroids are also part of the output.
 
 ```{r centroids}
 kMeans(data_1,K=4)$centroids
 ```
 
-### 3.4 inner_inequality
+## inner_inequality
 This is the sum of the distances of all data points to their cluster.
 For fixed K this value can score the clustering: The lower, the better.
 Be Aware: This is not enough, to directly* find an optimal value for `K`, as this sum will always decrease for K \rightarrow n.
@@ -405,14 +403,14 @@ Be Aware: This is not enough, to directly* find an optimal value for `K`, as thi
 kMeans(data_1,K=4)$inner_inequality
 ```
 
-### 3.5 sum_of_squares
+## sum_of_squares
 Similar to `inner_inequality` (3.4) but the distances are squared before being summed up.
 
 ```{r sum_of_squares}
 kMeans(data_1,K=4)$sum_of_squares
 ```
 
-### 3.6 mean_silhouette
+## mean_silhouette
 The mean silhouette quantifies how good the data fits into the derived clusters.
 It can be valued between -1 and 1:
 

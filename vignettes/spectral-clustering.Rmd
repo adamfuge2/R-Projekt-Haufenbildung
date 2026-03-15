@@ -1,0 +1,358 @@
+---
+title: "The Spectral Clustering Algortihm"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    tabset: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{The Spectral Clustering Algortihm}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(
+  fig.align = 'center',
+  fig.width = 7,
+  dev='svg'
+)
+```
+
+```{r setup, results = FALSE}
+library(clusterfuck)
+```
+
+Here we will go over all information needed to use the spectralClustering function of the clusterfuck package
+
+# General use
+This algorithm is perfect for data sets where
+
+- DBSCAN and OPTICS fail because e.g. all points are connected by 'bridges'
+- K-Means and K-Medioids fail, because the clusters are non spherical. 
+
+One such data set is this one:
+```{r general_use_viewData}
+three_connected_concentric_circles |> viewData()
+```
+
+**Apply the Spectral-clustering-algorithm**       
+```{r general_use_apply_clustering}
+three_connected_concentric_circles |>
+spectralClustering(k=3,
+                   gamma = 50,
+                   cluster_algorithm = 'K-Medioids',
+                   K = 3
+                   )
+```
+
+
+
+
+
+# Parameters
+
+## data
+This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point. Must have at least 1 data point. 
+
+Here some examples: 
+```{r data_examples_1}
+data_1 <- generateClusterData(n=100)
+data_2 <- generateClusterData(n=1)
+data_3 <- study_courses_data
+data_5 <- generateClusterData(n=100,
+                              clusters_mean = tibble::tibble('X'=c(0.4,0.4,0.8,1),
+                                                             'Y'=c(0.7,0.1,0.7,1)),
+                              clusters_sd=c(0.01,0.02,0.01,0.05),
+                              cluster_amount = 4)
+```
+
+The data can even have multiple types
+```{r data_examples_2}
+data_4 <- tibble::tibble(numbers = 1:19,characters = study_courses_names)
+```
+
+```{r data_examples_3, include=FALSE}
+numericAndCharacterMixedDistance <- function(x,y){
+ return(length(x[[2]])-length(y[[2]]) +  abs(x[[1]]-y[[1]]))
+}
+```
+
+
+Lets go clustering!
+```{r data_examples_4, results = FALSE}
+spectralClustering(data_1,k=3,gamma=50,K=3)
+spectralClustering(data_3,k=1,gamma=50,custom_distance_function = study_courses_distance,K=3)
+spectralClustering(data_4,k=3,gamma=50,custom_distance_function = numericAndCharacterMixedDistance,K=3)
+```
+
+## k
+The Dimension of the space the data points get projected to. 
+A higher amount of k can decrease the dependency on choosing the right value for 
+[gamma](#gamma) **significantly**!
+
+Some examples:
+```{r k_examples, results = FALSE}
+spectralClustering(data_1,k=1,gamma=50,K=3)
+spectralClustering(data_1,k=2,gamma=50,K=3)
+spectralClustering(data_1,k=3,gamma=50,K=3)
+```
+
+## mercer_kernel 
+
+The mercer kernel is a measure of similarity between data points and is used in the spectral projection part of the algorithm.
+
+Here You can select one of
+
+- `'gauss'`: $\exp{(-\gamma~~||x-y||_2)}$ (default)
+If chosen please provide a non negative value for [gamma](#gamma)  
+  (Note: in this implementation as we use the stats::dist function, we do not square the distances as it would be another calculation) 
+- `'linear'`: $x^Ty$ 
+
+```{r, results=FALSE}
+spectralClustering(three_connected_concentric_circles,
+          k=3,
+          mercer_kernel='gauss',
+          gamma=1,
+          K=3)
+```
+ 
+
+
+## gamma {.tabset}
+This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
+
+The value of gamma describes how much the distances will be exaggerated by the projection. This is very finicky to get right. Thus we recommend choosing a higher value for [k](#k) which can decrease the dependency on choosing the right value for gamma.
+
+Will be ignored, if 
+
+- another [mercer_kernel](#mercer_kernel) or
+- a [custom_mercer_kernel](#custom_mercer_kernel) got selected
+
+### low gamma 
+```{r gamma_example_low, results=FALSE}
+spectralClustering(three_connected_concentric_circles,
+                   k=3,
+                   gamma=1,
+                   K=3,
+                   tries=10)
+```
+
+### good gamma 
+```{r gamma_example_good, results=FALSE}
+spectralClustering(three_connected_concentric_circles,
+                   k=3,
+                   gamma=50,
+                   K=3,
+                   tries=10)
+```
+
+### high gamma
+```{r gamma_example_high, results=FALSE}
+spectralClustering(three_connected_concentric_circles,
+                   k=3,
+                   gamma=100,
+                   K=3,
+                   tries=10)
+```
+
+## kernel_epsilon {.tabset}
+This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
+
+Its value represents a distance limit at which the similarity of data points will be set to `0`.
+
+Must be a numeric greater than `0`.
+
+### low epsilon
+```{r kernel_epsilon_1, results=FALSE}
+spectralClustering(two_connected_concentric_circles,
+                   k=3,
+                   gamma=50,
+                   kernel_epsilon = 0.01,
+                   K=3)
+```
+
+### high epsilon
+```{r kernel_epsilon_2, results=FALSE}
+spectralClustering(two_connected_concentric_circles,
+                   k=3,
+                   gamma=50,
+                   kernel_epsilon = 0.5,
+                   K=3)
+```
+
+## custom_mercer_kernel
+This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
+
+Using this parameter you can provide a custom mercer kernel to be used in the spectral clustering algorithm.
+
+If this is provided, any other aforementioned parameter will be ignored.
+
+```{r custom_mercer_kernel, result=FALSE}
+discrete_similarity <- function(x,y) identical(x,y) |> as.numeric()
+spectralClustering(tibble::tibble(X=c(1,1,4,1,5,1,4)),
+                   k=2,
+                   custom_mercer_kernel = discrete_similarity,
+                   K=3,
+                   tries=10)
+```
+
+## distance_method
+This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
+
+It is a use friendly way to use common distance functions in spectral clusterings.
+Calculates the gaussian kernel in [mercian_kernel](#mercian_kernel) using this distance instead of the euclidean distance. This means: please provide a non negative value for [gamma](#gamma)
+
+Choose one of:
+
+- `'euclidean'` (default)
+- `'maximum'` 
+- `'manhattan'`
+- `'canberra'` 
+- `'binary'`
+- `'minkowski'` (see more in [p](#p))
+
+```{r distance_method_example, results=FALSE}
+spectralClustering(maximum_cluster_data,
+                   k=1,
+                   gamma=10,
+                   distance_method = 'maximum', 
+                   K=2)
+```
+
+## p 
+This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
+
+If you chose `'minkowski'` for the parameter [distance_method](#distance_method) then this is where you can input the value for the p-metric/minkowski-metric. 
+```{r p_example, results=FALSE}
+spectralClustering(manhattan_cluster_data,
+                   k=1,
+                   gamma=10,
+                   distance_method = 'minkowski',
+                   p = 1.3,
+                   K=2)
+```
+
+
+## custom_distance_function
+You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance function is provided, the parameters [distance_method](#distance_method) and [p](#p) are ignored. 
+
+But please consider:
+
+- Your custom distance function must applicable on the data
+- **Using an unoptimized custom distance function can slow** the calculation down significantly!
+
+
+Inputs:   
+
+- x and y : Two of the data row type. (The internally chosen names do not matter)
+
+Output: 
+
+- Must be greater or equal to 0 (semi-definite)
+- Must be zero, if x and y are identical
+- Must have the same output, when x and y are switched. (symmetry)
+
+
+Example:
+Clustering study courses by projecting them to the 2D space
+```{r custom_distance_function, result=FALSE}
+spectralClustering(study_courses_data, 
+                   k=2, 
+                   gamma = 1,
+                   custom_distance_function = study_courses_distance,
+                   K=7)
+```
+
+Because this is a main feature of the package, here is another example:
+Clustering the WORLD
+```{r globe_example_distance, result=FALSE}
+# the custom function for distance on a globe
+distanceByLongitudeAndLatitude <- function(x,y){
+  x <- unlist(x,use.names = FALSE)[2:1] * 2*pi/360
+  y <- unlist(y,use.names = FALSE)[2:1] * 2*pi/360
+  round(2*6371000 * asin(sqrt(sin((y[1]-x[1])/2)^2 +
+                       cos(x[1]) * cos(y[1]) *
+                     sin((y[2]-x[2])/2)^2)),2)
+}
+```
+
+
+```{r globe_example_1, echo=-c(1,6), result=FALSE}
+if(require('maps')){
+# load some data of word cities
+slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,
+                                                         maps::world.cities[,c('long','lat')]))
+
+spectralClustering(slice_of_the_world, 
+                   k=3, 
+                   gamma = 0.00001,
+                   custom_distance_function = distanceByLongitudeAndLatitude,
+                   K=7)
+} 
+```
+
+## cluster_algorithm
+One of the **most important** parameters of this clustering algorithm. This algorithm will be used to cluster the projected data points.
+
+Choose one of:
+
+- `'K-Means'` (default) [see vignette](K-Means.html)
+- `'K-Medioids'` [see vignette](K-Medioids.html)
+- `'hierarchical clustering'` [see vignette](hierarchical-clustering.html) 
+- `'DBSCAN'` [see vignette](dbscan.html)
+- `'OPTICS'` [see vignette](optics.html)
+
+Mote that you need to provide all necessary parameters for the selected clustering algorithm using the `...` parameter.
+
+```{r cluster_algorithm_example}
+spectralClustering(two_concentric_circles, 
+                   k=1, 
+                   gamma = 20,
+                   cluster_algorithm = 'DBSCAN',
+                   epsilon=0.0001, 
+                   min_Pts=5
+                   )
+```
+## ...
+Arguments to be passed on to the [selected clustering algorithm](#cluster_alorithm)
+
+## .print_info
+A logical of length 1.
+If TRUE some extra info will be displayed in the console
+
+Example: 
+```{r .print_info_example, fig.show='hide'}
+spectralClustering(data_1,k=5,gamma=30,K=7, .print_info = TRUE)
+```
+
+# Output
+The output depends on the chosen clustering algorithm
+
+Most oftely a clustering object:
+A list of the class clustering with at least an element called 'clustered_data'.
+Reed more about clustering objects here TODO
+
+A clustering generated like this also has the following properties (elements of the list):
+
+## clustered_data
+The original data with a column called 'cluster' added.
+
+```{r clustered_data}
+spectralClustering(data_1,k=5,gamma=30,K=7)$clustered_data
+```
+
+## clustered_projected_data
+
+The projected data with a column called 'cluster' added.
+
+```{r clustered_projected_data}
+spectralClustering(data_1,k=5,gamma=30,K=7)$projected_clustered_data
+```
+
+## more
+Further Elements depending on the clustering algorithm,
