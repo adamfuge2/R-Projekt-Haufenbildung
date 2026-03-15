@@ -401,16 +401,33 @@ print.spectral_clustering <- function(x, ...){
     NextMethod(x)
 }
 
+#' Validator for clustered_data object
+#'
+#' Check if tibble has a column named cluster
+#'
 #' @export
 clustered_data_validate <- function(x){
   stopifnot('cluster' %in% colnames(x))
 }
 
+#' Create a new clustered_data object using data and a cluster vector
+#'
+#' @param data a tibble
+#' @param cluster an atomic vector with cluster identifications
+#'
 #' @export
 new_clustered_data <- function(data,cluster){
   structure(dplyr::mutate(data,'cluster'=cluster),class=c('clustered_data',class(data)))
 }
 
+#' Create a clustered_data object
+#'
+#' Create a new clustered_data object using data and a cluster vector OR a tibble with already a column named 'cluster'
+#'
+#' @param data a tibble
+#' @param cluster an atomic vector with cluster identifications. If `NULL`, please provide data with a column called `'cluster'`
+#'
+#' @returns a clustered_data object
 #' @export
 clustered_data <- function(data,cluster=NULL){
   if(is.null(cluster))
