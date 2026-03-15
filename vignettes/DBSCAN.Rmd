@@ -1,5 +1,5 @@
 ---
-title: "The DBSCAN Clustering Algortihm"
+title: "The DBSCAN Clustering Algorithm"
 output: 
   rmarkdown::html_vignette:
     toc: true

@@ -6,7 +6,7 @@ output:
     tabset: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{The OPTICS Clustering Algortihm}
+  %\VignetteIndexEntry{The OPTICS Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -67,7 +67,6 @@ result_1 <- optics(data_1, epsilon=0.2, min_Pts=3)
 cluster <- extractClusters(result_1, epsilon = 0.1)
 data_1$cluster <- cluster
 viewClusters(data_1)
-
 result_2 <- optics(data_2, epsilon=0.2, min_Pts=3)
 cluster <- extractClusters(result_2, epsilon = 0.1)
 data_2$cluster <- cluster
@@ -75,7 +74,7 @@ viewClusters(data_2)
 
 result_3 <- optics(data_3, epsilon=0.2, min_Pts=3)
 cluster <- extractClusters(result_3, epsilon = 0.1)
-data_1$cluster <- cluster
+data_3$cluster <- cluster
 viewClusters(data_3)
 ```
 Points assigned to cluster 0 represent noise points that were not
@@ -224,8 +223,8 @@ path3 <- tibble::tibble(
   Y = c(0.5,0.28,0.28,0.5)
 )
 paths <- list(path1, path2, path3)
-optics_wikipedia_data <- generate_optics_test_data(paths, n_points = 500, noise_points = 100, sd = 0.035 )
-wikipedia_result <- optics(optics_wikipedia_data, epsilon=0.15, min_Pts=3)
+optics_wikipedia_data <- generate_optics_test_data(paths, n_points = 500, noise_points = 30, sd = 0.03 )
+wikipedia_result <- optics(optics_wikipedia_data, epsilon=0.1, min_Pts=3)
 ```
 This can then be visualized as shown before, and we see a result similar to the example on the OPTICS wikipedia article.
 ```{r wikipedia_visualized}

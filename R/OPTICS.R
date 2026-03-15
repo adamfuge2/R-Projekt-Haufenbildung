@@ -140,6 +140,7 @@ optics <- function(data, epsilon, min_Pts,
       }
     }
   }
+
   return(structure(
     list(
       order = ordered,
