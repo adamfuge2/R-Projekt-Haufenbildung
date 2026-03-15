@@ -32,38 +32,6 @@ clusteringFromCentroids<- function(centroids,distance_method='euclidean',p=NULL,
 }
 
 
-#' Calculate the inner inequality of the clusters, also called cost
-#'
-#' The lower the number, the heuristically better the clustering
-#'
-#'
-#' @param data,        a tibble with with every row representing a data point.
-#' @param clustering_function,  a clustering function relating any data point to their cluster.
-#' @param distance,      a distance function whose 2 inputs are of the data row type.
-#'
-#' @returns numeric, a real number > 0.
-#'
-innerInequality <- function(data,clustering_function,distance=euclidean){
-
-  clustered_data <- data |>
-    dplyr::rowwise() |>
-    dplyr::mutate('cluster'=clustering_function(dplyr::c_across(dplyr::everything())))
-
-  centroids <- clustered_data |>
-    dplyr::ungroup() |>
-    dplyr::group_by('cluster') |>
-    dplyr::summarise_at(1:base::ncol(data),base::mean) |>
-    dplyr::select(dplyr::all_of(1:(ncol(data)-1)))
-
-  return(
-    clustered_data |>
-      dplyr::rowwise() |>
-      dplyr::mutate('distances' = distance(dplyr::c_across(1:base::ncol(data)), centroids[.data$cluster,])) |>
-      dplyr::ungroup() |>
-      dplyr::summarise(base::sum(.data$distances)) |>
-      unlist(use.names=FALSE)
-  )
-}
 
 
 #' Silhouette of a clustering on ONE SPECIFIC data point.

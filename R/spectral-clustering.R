@@ -41,7 +41,7 @@ gaussKernel <- function(x,y,gamma){
 #' @returns numeric between 0 and 1
 #' @export
 linearKernel <- function(x,y){
-  t(matrix(x)) %*% matrix(y)
+  (t(matrix(x)) %*% matrix(y))[1,1]
 }
 
 
