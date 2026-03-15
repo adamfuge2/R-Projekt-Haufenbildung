@@ -69,6 +69,24 @@ pDistance <- function(p) {function(x,y) base::sum(base::abs(x-y)^p)^(1/p)}
 #' @export
 manhattan <- function(x,y) base::sum(base::abs(x-y))
 
+#' Binary distance
+#'
+#' @param x         an atomic vector or tibble row with only real numbers
+#' @param y         an atomic vector or tibble row with only real numbers
+#'
+#' @export
+binary <- function(x,y) sum(as.logical(as.logical(x)-as.logical(y)))/sum(as.logical(as.logical(x)+as.logical(y)))
+
+#' Canberra distance
+#'
+#' @param x         an atomic vector or tibble row with only real numbers
+#' @param y         an atomic vector or tibble row with only real numbers
+#'
+#' @export
+canberra <- function(x,y) sum((x-y)/(x+y))
+
+
+
 ##################### Study courses distance ####################
 #' A distance function on study courses
 #'
@@ -82,7 +100,7 @@ manhattan <- function(x,y) base::sum(base::abs(x-y))
 #' study_courses_distance('law','geology')
 #'
 #' @export
-study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
+study_courses_distance <- function(x,y) clusterfuck::study_courses_dissimilarity_matrix[[unlist(x),unlist(y)]]
 
 #viewData(students_data)
 #

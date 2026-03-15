@@ -284,7 +284,7 @@ dissimilarityMatrix <-function(data,distance_method='euclidean',p=NULL,custom_di
                                 'canberra',
                                 'binary',
                                 'minkowski')))
-      return(structure(as.matrix(dist(data,method = distance_method,p=p)),dimnames=NULL))
+      return(structure(as.matrix(stats::dist(data,method = distance_method,p=p)),dimnames=NULL))
     else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_distance_function.')
   }
 
@@ -359,7 +359,11 @@ getDistanceFunction <- function(distance_method = 'euclidean',
       return(pDistance(p))
     }
     else if(distance_method=='manhattan')
-      return(pDistance(1))
+      return(manhattan)
+    else if(distance_method=='canberra')
+      return(canberra)
+    else if(distance_method=='binary')
+      return(binary)
     else stop('Unknown metric. Look up on the help page which metrics are available ore input a custum metric using the argument custom_distance_function.')
   }
   else return(custom_distance_function)
