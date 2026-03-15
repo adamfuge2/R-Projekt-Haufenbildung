@@ -192,65 +192,19 @@ plot(result, epsilon=0.1)
 Valleys in the reachability plot correspond to clusters of points with similar density. Each colour represents a cluster.
 
 ## 6. optics_wikipedia_data 
-The wikipedia article of the OPTICS algorithm displays a example of OPTICS clustering on a certain dataset. This is recreated in data-raw/optics_wikipedia_data.R
-The dataset is build from three paths, vaguely representing three clusters, and additional noise data over the paths.
-
-### 6.1 sample_points_from_path
-Generate twodimensional noise points between 0 and 1.
-
-#### 6.1.1 Parameters
-path_fun is the function describing the paths that should be turned into data points.
-n is the number of wanted points to be generated along each path.
-sd is the standard noise deviation on the paths.
-
-#### 6.1.2 Output
-A tibble of points vaguely representing the input path(s).
-
-
-### 6.2 generate_noise
-Generate twodimensional noise points between 0 and 1.
-
-#### 6.2.1 Parameter
-n is the number of wanted noise points.
-
-#### 6.2.2 Output
-A tibble of randomly distributed points between 0 and 1.
-
-
-### 6.3 generate_optics_test_data
-Generates clustered data along given paths with Gaussian noise.
-
-#### 6.3.1 Parameters
-paths is the list of paths to be turned into datapoints.
-n is the number of wanted points to be generated along each path.
-n is the number of wanted number of noise points over the data.
-sd is the standard noise deviation on the paths, 0.035 in this wikipedia data example.
-
-#### 6.3.2 Output
-A tibble representing the paths + noise as data points.
+The wikipedia article of the OPTICS algorithm displays an example of OPTICS clustering on a certain dataset. This is recreated as `optics_wikipedia_data`.
+The dataset is built from three paths, vaguely representing three clusters, and additional noise points distributed over the paths.
 
 ### 6.4 Recreating the example
 ```{r wikipedia_example}
-path1 <- tibble::tibble(
-  X = c(0.2,0.3,0.4,0.3,0.2),
-  Y = c(0.3,0.4,0.3,0.2,0.3)
-)
-path2 <- tibble::tibble(
-  X = c(0.45,0.5,0.45,0.4,0.45),
-  Y = c(0.9,0.85,0.8,0.85,0.9)
-)
-path3 <- tibble::tibble(
-  X = c(0.85,0.8,0.93,0.85),
-  Y = c(0.5,0.28,0.28,0.5)
-)
-paths <- list(path1, path2, path3)
-optics_wikipedia_data <- generate_optics_test_data(paths, n_points = 500, noise_points = 30, sd = 0.03 )
+data(optics_wikipedia_data)
+
 wikipedia_result <- optics(optics_wikipedia_data, epsilon=0.1, min_Pts=3)
 ```
 This can then be visualized as shown before, and we see a result similar to the example on the OPTICS wikipedia article.
 ```{r wikipedia_visualized}
 wikipedia_cluster <- extractClusters(wikipedia_result, epsilon=0.1)
 wikipedia_result$data$cluster <- wikipedia_cluster
-viewClusters(optics_wikipedia_data)
+viewClusters(wikipedia_result$data)
 plot(wikipedia_result, epsilon=0.1)
 ```

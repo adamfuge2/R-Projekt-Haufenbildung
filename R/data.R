@@ -235,3 +235,17 @@
 #' \item{cluster}{Integers identifying which cluster the points belong to}
 #' }
 'manhattan_clustered_data'
+
+#' OPTICS Wikipedia example data
+#'
+#' Data set of 1500 points forming three main clusters as well as 50 noise points.
+#' The data set recreates the example used in the Wikipedia article of the [optics()] algorithm.
+#'
+#' #' @family cluster data examples
+#'
+#' @format A tibble with two columns
+#' \describe{
+#' \item{X}{Numeric values on the X axis}
+#' \item{Y}{Numeric values on the Y axis}
+#' }
+'optics_wikipedia_data'

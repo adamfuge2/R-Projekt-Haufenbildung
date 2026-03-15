@@ -17,6 +17,10 @@ path3 <- tibble::tibble(
 
 paths <- list(path1, path2, path3)
 
-optics_wikipedia_data <- generate_optics_test_data(paths, n_points = 500, noise_points = 100, sd = 0.035 )
+clusterpoints <- generateClusterDataFromPaths(n=1500, list_of_paths = paths, clusters_sd = rep(0.035, 3))
+
+noise <- generateNoiseData(n=50, lower_bounds = c(0,0), upper_bounds = c(1,1), colnames = c("X","Y"))
+
+optics_wikipedia_data <- dplyr::bind_rows(clusterpoints, noise)
 
 usethis::use_data(optics_wikipedia_data, overwrite = TRUE)
