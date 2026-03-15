@@ -36,8 +36,18 @@ viewClusters1D <-function(clustered_data){
   ## label the clusters
   clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
-  ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
+  clusters <- sort(unique(clustered_data$cluster))
+  clusters <- clusters[clusters != 0] # don't count noise as cluster
+
+  if(length(clusters) == 0) {
+    palette <- c("Noise" = "black") # no clusters return only noise
+  } else {
+    palette <- c(
+      "Noise" = "black",
+      stats::setNames(grDevices::rainbow(length(clusters)),
+                      paste0("Cluster ", clusters))
+    )
+  }
 
   clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
   if(K==0) clusternames <- character()
@@ -86,9 +96,18 @@ viewClusters2D <-function(clustered_data){
   ## label the clusters
   clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
-  ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
+  clusters <- sort(unique(clustered_data$cluster))
+  clusters <- clusters[clusters != 0] # don't count noise as cluster
 
+  if(length(clusters) == 0) {
+    palette <- c("Noise" = "black") # no clusters return only noise
+  } else {
+    palette <- c(
+      "Noise" = "black",
+      stats::setNames(grDevices::rainbow(length(clusters)),
+                      paste0("Cluster ", clusters))
+    )
+  }
 
   clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
   if(K==0) clusternames <- character()
@@ -140,11 +159,21 @@ viewClusters3D <-function(clustered_data){
   ## label the clusters
   clustered_data <- clustered_data |> dplyr::rowwise() |> dplyr::mutate('cluster_label' = clusterLabeling(.data$cluster))
 
+  clusters <- sort(unique(clustered_data$cluster))
+  clusters <- clusters[clusters != 0] # don't count noise as cluster
 
-  ## Defer the number of clusters
-  K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
+  if(length(clusters) == 0) {
+    palette <- c("Noise" = "black") # no clusters return only noise
+  } else {
+    palette <- c(
+      "Noise" = "black",
+      stats::setNames(grDevices::rainbow(length(clusters)),
+                      paste0("Cluster ", clusters))
+    )
+  }
 
-  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
+  ## Display data as 3D scatter plot
+  clustered_data <- clustered_data |> dplyr::mutate(color = palette[.data$cluster_label])
 
   x<- clustered_data$X
   y<- clustered_data$Y

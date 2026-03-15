@@ -29,9 +29,9 @@ as.reachability.optics <- function(object, ...) {
 #' @returns a reachability plot of the clustered data
 #'
 #' @export
-plot.optics <- function(x, ...) {
+plot.optics <- function(x, epsilon=NULL,...) {
   reach <- as.reachability(x)
-  plot(reach, ...)
+  plot(reach, epsilon=epsilon, x_optics=x,...)
 }
 
 #' Plot reachability object
@@ -42,11 +42,11 @@ plot.optics <- function(x, ...) {
 #' @returns a reachability plot of the clustered data
 #'
 #' @export
-plot.reachability <- function(x, epsilon=NULL,...){
+plot.reachability <- function(x, epsilon=NULL, x_optics=NULL,...){
   rd <- x$reachdist[x$order]
   n <- length(rd)
-  if(!is.null(epsilon)){
-    cluster_original <- extractClusters(x, epsilon)
+  if(!is.null(epsilon) && !is.null(x_optics)) {
+    cluster_original <- extractClusters(x_optics, epsilon)
     cluster_original[is.na(cluster_original)] <- 0
     cluster_ordered <- cluster_original[x$order]
     K <- max(cluster_original, na.rm=TRUE)
@@ -97,35 +97,65 @@ extractClusters <- function(object, epsilon) {
 #'
 #' @export
 extractClusters.optics <- function(object, epsilon){
-  rd <- object$reachdist[object$order]
-  cd <- object$coredist[object$order]
+
+  if(is.null(object$reachdist) || length(object$reachdist)==0) {
+    return(integer(nrow(object$data)))
+  }
+
+  if(is.null(object$order) || length(object$order) == 0)
+    return(integer(nrow(object$data)))
+
+  ord <- object$order
+  ord <- ord[!is.na(ord)]
+  if(length(ord) == 0)
+    return(integer(nrow(object$data)))
+
+  rd <- as.numeric(object$reachdist[ord])
+  cd <- as.numeric(object$coredist[ord])
   n <- length(rd)
+
   cluster_ordered <- integer(n)
-  cluster_id <- 0
-  tol <- .Machine$double.epsilon * 100 # toleranz, weil Täler noch nicht gut aussehen
+  cluster_id <- 0L
+  tol <- .Machine$double.eps * 100 # toleranz, weil Täler noch nicht gut aussehen
+  # ^ eps is not equal to the function parameter epsilon
+  rd[is.na(rd)] <- Inf
 
   for(i in seq_len(n)){
-    rd_val <- if(is.na(rd[i])) Inf else rd[i]
-    if(rd_val > epsilon+tol){
-      if(!is.na(cd[i]) && cd[i] <= epsilon+tol){
-        cluster_id <- cluster_id + 1
+
+    rd_val <- rd[i]
+    if(is.na(rd_val) || length(rd_val) == 0L)
+      rd_val <- Inf
+
+    cd_val <- if(length(cd) >= i) {
+      cd[i]
+    } else NA_real_
+    if(length(cd_val) == 0L)
+      cd_val <- NA_real_
+
+
+    if(rd_val > (epsilon + tol)) {
+      if(!is.na(cd_val) && cd_val <= (epsilon + tol)){
+        cluster_id <- cluster_id + 1L
         cluster_ordered[i] <- cluster_id
       } else {
-        cluster_ordered[i] <- 0
+        cluster_ordered[i] <- 0L
       }
     } else {
       cluster_ordered[i] <- cluster_id
     }
   }
 
-  cluster <- integer(n)
-  cluster[object$order] <- cluster_ordered
+  cluster <- integer(nrow(object$data))
+  cluster[ord] <- cluster_ordered
 
-  min_cluster_size <- object$minPts
+  min_cluster_size <- if(!is.null(object$minPts)) {
+    object$minPts
+    } else 1L
   cluster_sizes <- table(cluster)
-  small <- names(cluster_sizes[cluster_sizes < min_cluster_size])
-  cluster[cluster %in% as.numeric(small)] <- 0
-
+  small <- names(cluster_sizes)[cluster_sizes < min_cluster_size & names(cluster_sizes) != "0"]
+  if(length(small) > 0L) {
+    cluster[cluster %in% as.numeric(small)] <- 0
+  }
   return(cluster)
 }
 
