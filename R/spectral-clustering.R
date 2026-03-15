@@ -261,7 +261,7 @@ spectralClustering <- function(data,
     # apply DBSCAN
     clustering <- dbscan(spectral_projection$projected_data, ...)
 
-    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)# we would like to be able to access the projected data
+    # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
     # but were interested in the clustering of the original data points
     clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
@@ -271,7 +271,12 @@ spectralClustering <- function(data,
     # apply OPTICS
     clustering <- optics(spectral_projection$projected_data, ...)
 
-    # TODO Aaaaaron: Modify the output to your liking (see for example kMeans case)
+    optics_args <- list(...)
+    optics_clusters <- extractClusters(clustering, epsilon=optics_args$epsilon)
+    # we would like to be able to access the projected data
+    clustering$projected_clustered_data <- spectral_projection$projected_data |> tibble::add_column(cluster = optics_clusters)
+    # but were interested in the clustering of the original data points
+    clustering$clustered_data <- data |> tibble::add_column(cluster = optics_clusters)
   }
   else{
     stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
