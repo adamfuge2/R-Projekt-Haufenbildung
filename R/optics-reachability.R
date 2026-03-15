@@ -1,4 +1,5 @@
 # reachability plot for OPTICS algorithm
+#' @export
 as.reachability <- function(object, ...) {
   UseMethod("as.reachability")
 }
@@ -37,17 +38,17 @@ plot.optics <- function(x, ...) {
 #' Plot reachability object
 #'
 #' @param x reachability object
-#' @param eps epsilon marin
+#' @param epsilon epsilon margin
 #' @param ...
 #'
 #' @returns a reachability plot of the clustered data
 #'
 #' @export
-plot.reachability <- function(x, eps=NULL,...){
+plot.reachability <- function(x, epsilon=NULL,...){
   rd <- x$reachdist[x$order]
   n <- length(rd)
-  if(!is.null(eps)){
-    cluster_original <- extractClusters(x, eps)
+  if(!is.null(epsilon)){
+    cluster_original <- extractClusters(x, epsilon)
     cluster_original[is.na(cluster_original)] <- 0
     cluster_ordered <- cluster_original[x$order]
     K <- max(cluster_original, na.rm=TRUE)
@@ -72,8 +73,8 @@ plot.reachability <- function(x, eps=NULL,...){
     main="Reachability Plot"
   )
 
-  if(!is.null(eps))
-    abline(h=eps, col="red", lty=2)
+  if(!is.null(epsilon))
+    abline(h=epsilon, col="red", lty=2)
 }
 
 #' @export
@@ -87,28 +88,28 @@ extractClusters <- function(object, ...) {
 #' a reachability threshold.
 #'
 #' @param object an object of class `"optics"`
-#' @param eps reachability threshold epsilon
+#' @param epsilon reachability threshold epsilon
 #'
 #' @returns integer vector of cluster labels
 #'
 #' @examples
 #' data <- generateClusterData(n = 100)
 #' result <- optics(data, epsilon = 0.1, min_Pts = 5)
-#' cluster <- clusterfuck::extractClusters(result, eps = 0.05)
+#' cluster <- extractClusters(result, epsilon= 0.05)
 #'
 #' @export
-extractClusters.optics <- function(object, eps){
+extractClusters.optics <- function(object, epsilon){
   rd <- object$reachdist[object$order]
   cd <- object$coredist[object$order]
   n <- length(rd)
   cluster_ordered <- integer(n)
   cluster_id <- 0
-  tol <- .Machine$double.eps * 100 # toleranz, weil Täler noch nicht gut aussehen
+  tol <- .Machine$double.epsilon * 100 # toleranz, weil Täler noch nicht gut aussehen
 
   for(i in seq_len(n)){
     rd_val <- if(is.na(rd[i])) Inf else rd[i]
-    if(rd_val > eps+tol){
-      if(!is.na(cd[i]) && cd[i] <= eps+tol){
+    if(rd_val > epsilon+tol){
+      if(!is.na(cd[i]) && cd[i] <= epsilon+tol){
         cluster_id <- cluster_id + 1
         cluster_ordered[i] <- cluster_id
       } else {
@@ -135,18 +136,18 @@ extractClusters.optics <- function(object, eps){
 #' Computes cluster assignments from an object using the reachability threshold directly
 #'
 #' @param object an object of class `reachability`
-#' @param eps reachability threshold epsilon
+#' @param epsilon reachability threshold epsilon
 #'
 #' @returns integer vector of cluster labels
 #' @export
-extractClusters.reachability <- function(object, eps) {
+extractClusters.reachability <- function(object, epsilon) {
   rd <- object$reachdist[object$order]
   n <- length(rd)
   cluster <- integer(n)
   current_cluster <- 0
 
   for (i in 1:n) {
-    if (is.na(rd[i]) || rd[i] > eps) {
+    if (is.na(rd[i]) || rd[i] > epsilon) {
       current_cluster <- current_cluster + 1
     }
     cluster[i] <- current_cluster

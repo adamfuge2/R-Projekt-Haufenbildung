@@ -39,10 +39,13 @@ viewClusters1D <-function(clustered_data){
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
+  clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
+  if(K==0) clusternames <- character()
+
   ## Display data as 2D scatter plot
   ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
             ggplot2::geom_point() +
-            ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
+            ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),clusternames))) +
             ggplot2::labs(x='Data Points',x='Value')
 }
 
@@ -86,10 +89,14 @@ viewClusters2D <-function(clustered_data){
   ## Defer the number of clusters
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
+
+  clusternames <- paste0('Cluster ',unique(clustered_data$cluster[clustered_data$cluster!=0]))
+  if(K==0) clusternames <- character()
+
   ## Display data as 2D scatter plot
   ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
     ggplot2::geom_point() +
-    ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster)))))
+    ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),clusternames)))
 }
 
 
