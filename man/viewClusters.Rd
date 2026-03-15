@@ -15,6 +15,8 @@ used to color the data points}
 given, the data will be displayed with the clusters deferred from the
 column \code{'cluster'} of data or without clusters, using
 \code{viewData(data)}.}
+
+\item{print_directly}{If TRUE, the plot will be displayed directly instead of returned}
 }
 \description{
 Displays 1D to 3D data points color coded by their cluster. Can be used for:

@@ -4,7 +4,7 @@
 \alias{viewClusters2D}
 \title{View 2D cluster data}
 \usage{
-viewClusters2D(clustered_data, print_directly = TRUE)
+viewClusters2D(clustered_data)
 }
 \arguments{
 \item{clustered_data}{A tibble with every row representing a data point.

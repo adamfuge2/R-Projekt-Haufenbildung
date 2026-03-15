@@ -17,7 +17,7 @@
 #' clustered_data_1D <- kMeans(data_1D,K=3)$clustered_data
 #' clusterfuck:::viewClusters1D(clustered_data_1D)
 #'
-viewClusters1D <-function(clustered_data,print_directly=TRUE){
+viewClusters1D <-function(clustered_data){
 
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters1D can only display clusterings of 1D data' = dim==1)
@@ -40,10 +40,10 @@ viewClusters1D <-function(clustered_data,print_directly=TRUE){
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
-
-  plot(clustered_data$X,clustered_data$Y,col=clustered_data$color)
-
+  ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
+            ggplot2::geom_point() +
+            ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',1:K)))) +
+            ggplot2::labs(x='Data Points',x='Value')
 }
 
 
@@ -64,7 +64,7 @@ viewClusters1D <-function(clustered_data,print_directly=TRUE){
 #' clustered_data_2D <- kMeans(data_2D,K=5)$clustered_data
 #' clusterfuck:::viewClusters2D(clustered_data_2D)
 #'
-viewClusters2D <-function(clustered_data,print_directly=TRUE){
+viewClusters2D <-function(clustered_data){
 
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters2D can only display clusterings of 2D data' = dim==2)
@@ -87,9 +87,9 @@ viewClusters2D <-function(clustered_data,print_directly=TRUE){
   K <- clustered_data |> dplyr::filter(.data$cluster!=0) |> dplyr::distinct(.data$cluster) |> base::nrow()
 
   ## Display data as 2D scatter plot
-  clustered_data <- clustered_data |> dplyr::mutate('color' = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster))))[.data$cluster_label])
-
-  plot(clustered_data$X,clustered_data$Y,col=clustered_data$color)
+  ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
+    ggplot2::geom_point() +
+    ggplot2::scale_color_manual(values = c("Noise" = "black", stats::setNames(grDevices::rainbow(K),paste0('Cluster ',unique(clustered_data$cluster)))))
 }
 
 
@@ -112,7 +112,7 @@ viewClusters2D <-function(clustered_data,print_directly=TRUE){
 #' clustered_data_3D <- kMeans(data_3D,K=5)$clustered_data
 #' clusterfuck:::viewClusters3D(clustered_data_3D)
 #'
-viewClusters3D <-function(clustered_data,print_directly=TRUE){
+viewClusters3D <-function(clustered_data){
   dim <- ncol(clustered_data)-1
   stopifnot('clustered_data must have a row called \'cluster\''= 'cluster'%in%colnames(clustered_data))
   stopifnot('viewClusters3D can only display clusterings of 3D data' = dim==3)
@@ -145,7 +145,7 @@ viewClusters3D <-function(clustered_data,print_directly=TRUE){
   color <- clustered_data$color
 
   ## Display data as 3D scatter plot
-  invisible(scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color))
+  scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color)
 }
 
 #' View cluster data
@@ -167,6 +167,7 @@ viewClusters3D <-function(clustered_data,print_directly=TRUE){
 #'   given, the data will be displayed with the clusters deferred from the
 #'   column \code{'cluster'} of data or without clusters, using
 #'   \code{viewData(data)}.
+#' @param print_directly If TRUE, the plot will be displayed directly instead of returned
 #'
 #' @examples
 #' # 1D data without clusters
@@ -206,8 +207,6 @@ viewClusters <- function(data,clustering=NULL,print_directly=TRUE){
 
     if(ncol(data)-1==1){
       plot <- viewClusters1D(data)
-
-      # only print directly, if wished so
       if(print_directly)
         print(plot)
       else
@@ -215,17 +214,13 @@ viewClusters <- function(data,clustering=NULL,print_directly=TRUE){
     }
     else if(ncol(data)-1==2){
       plot <- viewClusters2D(data)
-
-      # only print directly, if wished so
       if(print_directly)
         print(plot)
       else
         return(plot)
     }
     else if(ncol(data)-1==3){
-
-      # scatter always prints directly,
-      viewClusters3D(data)
+      plot <- viewClusters3D(data)
     }
 
 
@@ -242,7 +237,7 @@ viewClusters <- function(data,clustering=NULL,print_directly=TRUE){
 #' data_1D <- generateClusterData(dim=1,cluster_amount=2)
 #' clusterfuck:::viewData1D(data_1D)
 #'
-viewData1D <- function(data,print_directly=TRUE){
+viewData1D <- function(data){
 
 colnames(data) <- 'Y'
 
@@ -391,15 +386,11 @@ print.spectral_clustering <- function(x, ...){
      ncol(x$projected_clustered_data) <= 4 &&
      ncol(x$projected_clustered_data) >= 2){
 
-    par(mfrow = c(1, 2))
     viewClusters(x$projected_clustered_data)
     viewClusters(x$clustered_data)
-    par(mfrow = c(1,1))
 
-
-    NextMethod(x,plot=FALSE)
-    }
-    else
+    NextMethod(x,plot=FALSE)}
+  else
     NextMethod(x)
 }
 
@@ -422,3 +413,4 @@ clustered_data <- function(data,cluster=NULL){
   clustered_data_validate(clustered_data)
   clustered_data
 }
+
