@@ -4,6 +4,7 @@ output:
   rmarkdown::html_vignette:
     toc: true
     tabset: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{The Hierarchical Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
@@ -28,12 +29,12 @@ library(clusterfuck)
 
 This is an overview about the Hierarchical Clustering algorithm of the clusterfuck package.
 
-## General Use
+# General Use
 In the most simple case, we have a 2-dimensional dataset containing, for example, 4 clusters:
 
 ```{r general_use_1, echo = 2}
 set.seed(129)
-data <- generateClusterData(n = 100, cluster_amount = 4, dim = 2)
+data <- generateClusterData(n=100,clusters_sd = c(0.04,0.01,0.05,0.04,0.04,0.04))
 ```
 
 This data set can be illustrated by using the \code{viewData} function:
@@ -50,9 +51,9 @@ hierarchicalClustering(data, 4)
 This returns a \code{clustering} object.
 
 
-## Parameters
+# Parameters
 
-### 2.1 data (necessary)
+## data (necessary)
 This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point or alternatively a matrix. 
 
 Some examples:
@@ -71,24 +72,24 @@ hierarchicalClustering(data_2, exact_cluster_amount=1)
 
 
 
-### 2.2 K
-The number of clusters the algorithm tries to fit the data in.
-This number must be
-- a positive integer 
-- larger than 0
-- at maximum equal to the amount of unique data points in `data`
+## min_cluster_amount, exact_cluster_amount and distance_limit
+There are 3 usable approaches two determine the final cluster amount.
+
+- `min_cluster_amount`: If given a value the algorithm will merge all clusters until this number of clusters is hit. Then it will choose the number of clusters immediately before the merge with th largest distance. Note that this implies that a cluster amount of 1 is not possible using this approach ('cut the dendrogram at the longest vertical line')
+- `exact_cluster_amount`:  If given a value the algorithm will return exactly that many clusters.
+- `distance_limit`: If given a value, this will be the maximum distance at which merges of clusters will still take place.
 
 Some examples
-```{r K_examples}
-hierarchicalClustering(data_1, 3)
-hierarchicalClustering(data_1, 5)
-hierarchicalClustering(data_1, 10)
-hierarchicalClustering(data_2, exact_cluster_amount = 1)
-# hierarchicalClustering(data_2, 5) throws error
+```{r K_examples, results='hide'}
+hierarchicalClustering(data, min_cluster_amount = 2)
+hierarchicalClustering(data, min_cluster_amount = 5)
+hierarchicalClustering(data, exact_cluster_amount = 2)
+hierarchicalClustering(data, exact_cluster_amount = 5)
+hierarchicalClustering(data, distance_limit = 0.2)
 ```
 
 
-## 2.3 mode
+## mode {.tabset}
 The linkage mode used to calculate the distance between two clusters. Since, in 
 general, a cluster consists of multiple datapoints, the definition of a distance
 between two clusters cannot be deduced by the distance function ('metric').
@@ -99,78 +100,83 @@ defining a distance between clusters.
 These modes can be transferred as an optional argument in the form of a string.
 In the following, the usage of these modes is demonstrated.
 
-### 2.3.1 Centroid
+### Centroid
 One rather heuristic method to define intercluster distance is to determine the 
 centroids of both clusters (this process is independent of any distance function
 as it makes use of the arithmetic mean) and then calculating the distance between
 the two centroids with the distance function.
 
-```{r mode-options-centroid, eval = FALSE}
+```{r mode-options-centroid, results = FALSE}
 hierarchicalClustering(data, 4, mode = "centroid")
 ```
 
-### 2.3.2 Single
+### Single
 Interprets the smallest distance of the pair \code{p_1, p_2} with \code{p_1} belonging
 to cluster 1 and \code{p_2} to cluster 2 as the distance between the two clusters.
 
-```{r mode-options-single, eval = FALSE}
+```{r mode-options-single, results = FALSE}
 hierarchicalClustering(data, 4, mode = "single")
 ```
 
-### 2.3.3 Complete
+### Complete
 Interprets the largest distance of the pair \code{p_1, p_2} with \code{p_1} belonging
 to cluster 1 and \code{p_2} to cluster 2 as the distance between the two clusters.
 
-```{r mode-options-complete, eval = FALSE}
+```{r mode-options-complete, results = FALSE}
 hierarchicalClustering(data, 4, mode = "complete")
 ```
 
 
-### 2.3.4 Average
+### Average
 Calculates the distance between every pair \code{p_1, p_2} with \code{p_1} belonging
 to cluster 1 and \code{p_2} to cluster 2 and then returning the mean of these values.
 
-```{r mode-options-average, eval = FALSE}
+```{r mode-options-average, results='hide'}
 hierarchicalClustering(data, 4, mode = "average")
 ```
 
 
 
 
-### 2.4 distance_method
+## distance_method {.tabset}
 This function comes with a handful of common distance function ('metric') pre made. 
 Use this parameter to choose one of the following:
 
-- `'euclidean'` (default)
-- `'maximum'`
-- `'manhattan'`
-- `'Lp'`
+- 'euclidean' (default)
+- 'maximum' 
+- 'manhattan'
+- 'canberra', 
+- 'binary',
+- 'minkowski' (see more in [p](#p))
 
-
-#### Examples {.tabset}
-
-##### euclidean
-```{r metric_examples_euclidean}
-hierarchicalClustering(euclidean_cluster_data, exact_cluster_amount =2, distance_method = 'euclidean')
-```
-
-##### maximum
-```{r metric_examples_maximum}
-hierarchicalClustering(maximum_cluster_data, exact_cluster_amount=2, distance_method = 'maximum')
-```
-
-##### manhattan
-```{r metric_examples_manhattan}
-hierarchicalClustering(manhattan_cluster_data, exact_cluster_amount=2, distance_method = 'manhattan')
+```{r include=FALSE}
+set.seed(12345)
+data_3 <- dplyr::slice_sample(optics_wikipedia_data,n=200)
 ```
 
 
-### 2.5 p
+### euclidean
+```{r metric_examples_euclidean, results='hide'}
+hierarchicalClustering(data_3, exact_cluster_amount =3, distance_method = 'euclidean')
+```
+
+### maximum
+```{r metric_examples_maximum, results='hide'}
+hierarchicalClustering(data_3, exact_cluster_amount=3, distance_method = 'maximum')
+```
+
+### manhattan
+```{r metric_examples_manhattan, results='hide'}
+hierarchicalClustering(data_3, exact_cluster_amount=3, distance_method = 'manhattan')
+```
+
+
+## p
 If you chose `'Lp'` for the parameter `distance_method` then this is where you can input the value for the p-metric. Will be ignored, if other distance functions are chosen.
 
 
 
-### 2.6 custom_distance_function
+## custom_distance_function
 You can also choose a custom distance function. This distance function must be a function with the following properties. If a custom distance function is provided, the parameters `distance_method` and `p` are ignored. 
 
 But please consider:
@@ -198,7 +204,7 @@ distanceByLongitudeAndLatitude <- function(x,y){
 }
 ```
 
-```{r globe_example_1, echo = -3}
+```{r globe_example_1, echo = -3, results='hide'}
 if(require('maps')){
 # load some data of word cities
 set.seed(124)
@@ -211,7 +217,7 @@ hierarchicalClustering(slice_of_the_world, custom_distance_function = distanceBy
 Because this is a main feature of the package, here is another example:
 
 
-```{r custom_distance_function_example_2}
+```{r custom_distance_function_example_2, results='hide'}
 WIDE_euclidean <- function(x,y) {
   x[[1]] <- 0.1*x[[1]]
   y[[1]] <- 0.1*y[[1]]
@@ -221,7 +227,7 @@ hierarchicalClustering(data_1, min_cluster_amount =4, custom_distance_function =
 ```
 
 
-### 2.7 .print_info
+## .print_info
 A logical of length 1.
 This is useful for debugging or finding loops caused by custom metrics. If `TRUE` some extra info will be displayed in the console.
 
@@ -233,18 +239,18 @@ hierarchicalClustering(data_1, .print_info = TRUE)
 
 
 
-## 3 Output
+# Output
 The output is a clustering object:
 A list of the class clustering with at least an element called `'clustered_data'`.
 
-### 3.1. clustered_data
+## clustered_data
 The original data with a column called `'cluster'` added.
 
 ```{r clustered_data}
 hierarchicalClustering(data_1, exact_cluster_amount =4)$clustered_data
 ```
 
-### 3.2 cluster_amount
+## cluster_amount
 The amount of clusters deferred by the algorithm
 
 ```{r cluster_amount}
