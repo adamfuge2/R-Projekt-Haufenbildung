@@ -35,6 +35,10 @@ test_that("Spectral Projection", {
   testthat::expect_warning(spectralProjection(data, k, gamma = gamma, custom_mercer_kernel = custom_kernel))
   testthat::expect_no_error(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4))
   testthat::expect_equal(ncol(spectralProjection(data, k, gamma = gamma, distance_method = "minkowski", p = 4)$projected_data), k)
+
+  # print_info:
+  testthat::expect_no_error(spectralProjection(data, k, gamma = gamma,.print_info = TRUE)) |>
+    capture_output(print=FALSE)
 })
 
 
@@ -51,10 +55,13 @@ test_that("Spectral Clustering", {
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "DBSCAN", epsilon=0.1, min_Pts=5))
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "OPTICS", epsilon=0.1, min_Pts=5))
 
+  testthat::expect_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "sdglaklgjkal", epsilon=0.1, min_Pts=5))
+
 })
 
 
 test_that("Spectral Clustering kernels", {
+  set.seed(123)
   data <- generateClusterData(n = 20, dim = 3)
   k <- 2
   gamma <- 1.4
