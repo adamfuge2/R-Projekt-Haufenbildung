@@ -1,12 +1,12 @@
 ---
-title: "The K-Medioids Clustering Algorithm"
+title: "The K-Medoids Clustering Algorithm"
 output: 
   rmarkdown::html_vignette:
     toc: true
     tabset: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{The K-Medioids Clustering Algorithm}
+  %\VignetteIndexEntry{The K-Medoids Clustering Algorithm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 library(clusterfuck)
 ```
 
-Here we will go over all information needed to use the kMedioids function of the clusterfuck package
+Here we will go over all information needed to use the kMedoids function of the clusterfuck package
 
 # General use
 
@@ -44,13 +44,13 @@ This is what it looks like
 viewData(data)
 ```
 
-**Apply the K-Medioids-algorithm with K = 4**       
+**Apply the K-Medoids-algorithm with K = 4**       
 ```{r general_use_3}
-kMedioids(data, K = 4)
+kMedoids(data, K = 4)
 ```
 
 ## How to find the right cluster amount
-K-Medioids can be used to find the right cluster amount. 
+K-Medoids can be used to find the right cluster amount. 
 Here we will use the **in clusterfuck implemented** silhouette coefficient.
 The clustering object already includes a value for the [mean_silhouette](#mean_silhouette) of the clusterings. High values of the mean silhouette imply a very good fit.
 
@@ -65,7 +65,7 @@ findClusterAmountSilhouette <- function(data,distance_method='euclidean',p=NULL,
 
   while(improvement>0 || K <= check_min){
 
-    fit[[K]] <- kMedioids(data = data,
+    fit[[K]] <- kMedoids(data = data,
                           K = K,
                           distance_method = distance_method,                          
                           p=p,
@@ -126,10 +126,10 @@ numericAndCharacterMixedDistance <- function(x,y){
 
 Lets go clustering!
 ```{r data_examples_4, results = FALSE}
-kMedioids(data_5,K=3)
-kMedioids(data_1,K=1,.print_info = TRUE)
-kMedioids(data_3,K=3,custom_distance_function = study_courses_distance)$clustered_data
-kMedioids(numbers_and_characters,K=3,custom_distance_function = numericAndCharacterMixedDistance)
+kMedoids(data_5,K=3)
+kMedoids(data_1,K=1,.print_info = TRUE)
+kMedoids(data_3,K=3,custom_distance_function = study_courses_distance)$clustered_data
+kMedoids(numbers_and_characters,K=3,custom_distance_function = numericAndCharacterMixedDistance)
 ```
 
 ## K
@@ -141,10 +141,10 @@ This number must be
 
 Some examples:
 ```{r K_examples, results = FALSE}
-kMedioids(data_1,K=3)
-kMedioids(data_1,K=5)
-kMedioids(data_1,K=10)
-kMedioids(data_2,K=1)
+kMedoids(data_1,K=3)
+kMedoids(data_1,K=5)
+kMedoids(data_1,K=10)
+kMedoids(data_2,K=1)
 ```
 
 ## distance_method {.tabset}
@@ -165,20 +165,20 @@ viewClusters(manhattan_clustered_data)
 
 ### euclidean
 ```{r metric_examples_euclidean, results = FALSE, fig.width = 4}
-kMedioids(maximum_cluster_data, K=2, distance_method = 'euclidean')
-kMedioids(manhattan_cluster_data, K=2, distance_method = 'euclidean')
+kMedoids(maximum_cluster_data, K=2, distance_method = 'euclidean')
+kMedoids(manhattan_cluster_data, K=2, distance_method = 'euclidean')
 ```
 
 ### maximum
 ```{r metric_examples_maximum, results = FALSE, fig.width = 4}
-kMedioids(maximum_cluster_data, K=2, distance_method = 'maximum')
-kMedioids(manhattan_cluster_data, K=2, distance_method = 'maximum')
+kMedoids(maximum_cluster_data, K=2, distance_method = 'maximum')
+kMedoids(manhattan_cluster_data, K=2, distance_method = 'maximum')
 ```
 
 ### manhattan
 ```{r metric_examples_manhattan, results = FALSE, fig.width = 4}
-kMedioids(maximum_cluster_data, K=2, distance_method = 'manhattan')
-kMedioids(manhattan_cluster_data, K=2, distance_method = 'manhattan')
+kMedoids(maximum_cluster_data, K=2, distance_method = 'manhattan')
+kMedoids(manhattan_cluster_data, K=2, distance_method = 'manhattan')
 ```
 
 ## p {.tabset}
@@ -192,31 +192,31 @@ full_data <- generateNoiseData(n=4000,lower_bounds = c(0,0),upper_bounds= c(1,1)
 
 ### p = 1 (manhattan)
 ```{r p_examples_1}
-f <- kMedioids(data_5,K=4, distance_method = 'minkowski', p=1)$clustering_function
+f <- kMedoids(data_5,K=4, distance_method = 'minkowski', p=1)$clustering_function
 viewClusters(full_data,f)
 ```
 
 ### p = 1.5 
 ```{r p_examples_1_5}
-f <- kMedioids(data_5,K=4, distance_method = 'minkowski', p=1.5)$clustering_function
+f <- kMedoids(data_5,K=4, distance_method = 'minkowski', p=1.5)$clustering_function
 viewClusters(full_data,f)
 ```
 
 ### p = 2 (euclidean)
 ```{r p_examples_2}
-f <- kMedioids(data_5,K=4, distance_method = 'minkowski', p=2)$clustering_function
+f <- kMedoids(data_5,K=4, distance_method = 'minkowski', p=2)$clustering_function
 viewClusters(full_data,f)
 ```
 
 ### p = 4 
 ```{r p_examples_4}
-f <- kMedioids(data_5,K=4, distance_method = 'minkowski', p=4)$clustering_function
+f <- kMedoids(data_5,K=4, distance_method = 'minkowski', p=4)$clustering_function
 viewClusters(full_data,f)
 ```
 
 ### p = 8 
 ```{r p_examples_8}
-f <- kMedioids(data_5,K=4, distance = 'minkowski', p=8)$clustering_function
+f <- kMedoids(data_5,K=4, distance = 'minkowski', p=8)$clustering_function
 viewClusters(full_data,f)
 ```
 
@@ -227,7 +227,7 @@ But please consider:
 
 - Your custom distance function must applicable on the data
 
-- **Using an unoptimized custom distance function can slow** the calculation of kMedioids down significantly!
+- **Using an unoptimized custom distance function can slow** the calculation of kMedoids down significantly!
 
 
 Inputs:   
@@ -244,7 +244,7 @@ Output:
 Example:
 ```{r custom_distance_function, result=FALSE}
 discrete_distance <- function(x,y) !identical(x,y) |> as.numeric()
-kMedioids(data_1, K=4, custom_distance_function = discrete_distance)
+kMedoids(data_1, K=4, custom_distance_function = discrete_distance)
 ```
 
 Because this is a main feature of the package, here is another example:
@@ -265,7 +265,7 @@ if(require('maps')){
 # load some data of word cities
 slice_of_the_world <- tibble::tibble(dplyr::slice_sample(n=1000,maps::world.cities[,c('long','lat')]))
 
-clustering <- kMedioids(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
+clustering <- kMedoids(slice_of_the_world, K=7, custom_distance_function = distanceByLongitudeAndLatitude)
 clustering
 } 
 ```
@@ -286,7 +286,7 @@ This is useful for debugging for example when using [custom functions](#custom_f
 
 Example: 
 ```{r .print_info_example, fig.show='hide'}
-kMedioids(data_1,K=7, .print_info = TRUE)
+kMedoids(data_1,K=7, .print_info = TRUE)
 ```
 
 # Output
@@ -294,18 +294,18 @@ The output is a clustering object:
 A list of the class clustering with at least an element called 'clustered_data'.
 Reed more about clustering objects here TODO
 
-A clustering generated by K-Medioids also has the following properties (elements of the list):
+A clustering generated by K-Medoids also has the following properties (elements of the list):
 
 ## clustered_data
 The original data with a column called 'cluster' added.
 
 ```{r clustered_data}
-kMedioids(data_1,K=4)$clustered_data
+kMedoids(data_1,K=4)$clustered_data
 ```
 
 ## clustering_function
 A function which can relate any data point to their cluster. 
-Why this is special with K-Medioids: **This clustering function CAN be applied to new data!**
+Why this is special with K-Medoids: **This clustering function CAN be applied to new data!**
 
 ```{r clustering_function_example}
 training_data <- generateClusterData(n=100,
@@ -322,8 +322,8 @@ more_data <- generateNoiseData(5000,
                                lower_bounds = c(0,0), 
                                upper_bounds = c(1,1))
 
-# derive a clustering using K-Medioids
-f <- kMedioids(training_data,K=4)$clustering_function
+# derive a clustering using K-Medoids
+f <- kMedoids(training_data,K=4)$clustering_function
 
 f
 f(c(0.5,0.5))
@@ -334,11 +334,11 @@ viewClusters(unknown_data,f)
 viewClusters(more_data,f)
 ```
 
-## medioids
-The clustering is calculated by the distance of the data points to the medioids of each cluster. These medioids are also part of the output.
+## medoids
+The clustering is calculated by the distance of the data points to the medoids of each cluster. These medoids are also part of the output.
 
-```{r medioids_example}
-kMedioids(data_1,K=4)$medioids
+```{r medoids_example}
+kMedoids(data_1,K=4)$medoids
 ```
 
 ## inner_inequality
@@ -348,14 +348,14 @@ Be Aware: This is not enough, to directly* find an optimal value for K, as this 
 * Although the inner inequality  can be used in the so called 'elbow-method'. More here TODO
 
 ```{r inner_inequality_example}
-kMedioids(data_1,K=4)$inner_inequality
+kMedoids(data_1,K=4)$inner_inequality
 ```
 
 ## sum_of_squares
 Similar to inner_inequality but the distances are squared before being summed up.
 
 ```{r sum_of_squares}
-kMedioids(data_1,K=4)$sum_of_squares
+kMedoids(data_1,K=4)$sum_of_squares
 ```
 
 ## mean_silhouette
@@ -368,7 +368,7 @@ It can be valued between -1 and 1:
 - less than 0: A wrong clustering, in the sense that there are data points who should have been assigned to other clusters.
 
 ```{r mean_silhouette_example}
-kMedioids(data_1,K=4)$mean_silhouette
+kMedoids(data_1,K=4)$mean_silhouette
 ```
 
 

@@ -209,7 +209,7 @@ maximum_clustered_data |> viewClusters()
 ```
 
 ## concentric circles
-These data sets make K-Means and K-Medioids **fail**. 
+These data sets make K-Means and K-Medoids **fail**. 
 (If not using any fancy distance functions)
 
 ### two_concentric_circles
@@ -226,7 +226,7 @@ three_concentric_circles |> viewData()
 ## connected concentric circles
 These data sets make
 
-- K-Means and K-Medioids using standard distance functions **fail** 
+- K-Means and K-Medoids using standard distance functions **fail** 
 -  [hierarchical clustering], [optics()] and [dbscan()] **fail** because they would all find one big connected cluster
 
 We suggest using spectral clustering on this one
