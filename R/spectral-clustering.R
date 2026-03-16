@@ -189,7 +189,7 @@ spectralProjection <- function(data,
 #' Algorithm to project a data set to k dimensional space and then cluster it.
 #' @inheritParams spectralProjection
 #' @param cluster_algorithm A cluster algorithm to be used on the spectral
-#'   projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},
+#'   projected data. One of: \code{'K-Means'}, \code{'K-Medoids'},
 #'   \code{'hierarchical Clustering'}, \code{'DBSCAN'}, \code{'OPTICS'}
 #' @param ... Further parameters to pass on to the clustering algorithm.
 #' @param .print_info A logical of length 1. If \code{TRUE} additional
@@ -237,9 +237,9 @@ spectralClustering <- function(data,
     clustering$clustered_data <- data |> tibble::add_column(cluster = clustering$clustered_data$cluster)
 
   }
-  else if(cluster_algorithm == 'K-Medioids'){
+  else if(cluster_algorithm == 'K-Medoids'){
     # apply kMeadioids
-    clustering <- kMedioids(spectral_projection$projected_data, ..., distance_method = 'euclidean')
+    clustering <- kMedoids(spectral_projection$projected_data, ..., distance_method = 'euclidean')
 
     # we would like to be able to access the projected data
     clustering$projected_clustered_data <- clustering$clustered_data
@@ -279,7 +279,7 @@ spectralClustering <- function(data,
     clustering$clustered_data <- data |> tibble::add_column(cluster = optics_clusters)
   }
   else{
-    stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedioids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
+    stop('Unknown clustering algorithm. Try one of \'kMeans\', \'kMedoids\', \'hierarchical Clustering\', \'DBSCAN\' or \'OPTICS\'. ')
   }
 
   if(.print_info) print('Success, All done!')

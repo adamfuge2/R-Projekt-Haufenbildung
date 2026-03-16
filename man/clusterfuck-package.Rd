@@ -6,7 +6,7 @@
 \alias{clusterfuck-package}
 \title{clusterfuck: A collection of common clustering algorithms}
 \description{
-This package includes the algoriithms K-Means, K-Medioids, spectral clustering, hierarchical clustering, DBSCAN and OPTICS. Also included are easy to use functions to - score the clusterings, - plot the clusterings, - generate clustered test data.
+This package includes the algorithms K-Means, K-Medoids, spectral clustering, hierarchical clustering, DBSCAN and OPTICS. Also included are easy to use functions to - score the clusterings, - plot the clusterings, - generate clustered test data.
 }
 \details{
 Details

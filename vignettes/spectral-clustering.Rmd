@@ -33,7 +33,7 @@ Here we will go over all information needed to use the spectralClustering functi
 This algorithm is perfect for data sets where
 
 - DBSCAN and OPTICS fail because e.g. all points are connected by 'bridges'
-- K-Means and K-Medioids fail, because the clusters are non spherical. 
+- K-Means and K-Medoids fail, because the clusters are non spherical. 
 
 One such data set is this one:
 ```{r general_use_viewData}
@@ -45,7 +45,7 @@ three_connected_concentric_circles |> viewData()
 three_connected_concentric_circles |>
 spectralClustering(k=3,
                    gamma = 50,
-                   cluster_algorithm = 'K-Medioids',
+                   cluster_algorithm = 'K-Medoids',
                    K = 3
                    )
 ```
@@ -302,7 +302,7 @@ One of the **most important** parameters of this clustering algorithm. This algo
 Choose one of:
 
 - `'K-Means'` (default) [see vignette](K-Means.html)
-- `'K-Medioids'` [see vignette](K-Medioids.html)
+- `'K-Medoids'` [see vignette](K-Medoids.html)
 - `'hierarchical clustering'` [see vignette](hierarchical-clustering.html) 
 - `'DBSCAN'` [see vignette](dbscan.html)
 - `'OPTICS'` [see vignette](optics.html)

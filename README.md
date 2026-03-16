@@ -18,7 +18,7 @@ functions**.
 The implemented clustering algorithms:
 
 - K-Means
-- K-Medioids
+- K-Medoids
 - spectral clustering
 - hierarchical clustering
 - DBSCAN
@@ -216,7 +216,7 @@ hierarchicalClustering(study_courses_data,
 
 ### Clustering misshapen data without custom distance
 
-K-Means and K-Medioids work very well when the clusters are
+K-Means and K-Medoids work very well when the clusters are
 **spherical** meaning in a filled ‘round’ ball around a center.
 
 Lets look at this data set.
@@ -227,17 +227,17 @@ two_concentric_circles |> viewData()
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
 
-K-Medioids and K-Means have a very hard time clustering this
+K-Medoids and K-Means have a very hard time clustering this
 
 ``` r
-kMedioids(two_concentric_circles,K=2)
+kMedoids(two_concentric_circles,K=2)
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
 
 We could now invest the effort and try to define a distance function on
-this data to improve the clustering made by K-Medioids and K-Means
-(usually one would choose K-Medioids for these kinds of distance
+this data to improve the clustering made by K-Medoids and K-Means
+(usually one would choose K-Medoids for these kinds of distance
 functions).
 
 But far simpler is the approach to use DBSCAN or OPTICS:
@@ -258,7 +258,7 @@ three_connected_concentric_circles |> viewData()
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
 
-K-Means and K-Medioids fail because the data is non spherical
+K-Means and K-Medoids fail because the data is non spherical
 
 ``` r
 kMeans(three_connected_concentric_circles, K=3)
@@ -326,14 +326,14 @@ Our last resort: the powerful spectral clustering:
 spectralClustering(three_connected_concentric_circles,
                    k = 3,
                    gamma = 50,
-                   cluster_algorithm = 'K-Medioids',
+                   cluster_algorithm = 'K-Medoids',
                    K = 3)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" /><img src="man/figures/README-unnamed-chunk-8-2.png" alt="" width="100%" />
 
     #> A clustering object:
-    #> Data clustered by K-Medioids algorithm 
+    #> Data clustered by K-Medoids algorithm 
     #> 
     #> 
     #> $clustered_data
@@ -354,12 +354,12 @@ spectralClustering(three_connected_concentric_circles,
     #> 
     #> $clustering_function
     #> function (x) 
-    #> base::which.min(sapply(1:K, function(k) distance(x, base::unlist(data[old_medioid_indeces[k], 
+    #> base::which.min(sapply(1:K, function(k) distance(x, base::unlist(data[old_medoid_indeces[k], 
     #>     ]))))
     #> <bytecode: 0x55ead447a7a8>
     #> <environment: 0x55ead8274df8>
     #> 
-    #> $medioids
+    #> $medoids
     #> # A tibble: 3 × 3
     #>         X_1         X_2        X_3
     #>       <dbl>       <dbl>      <dbl>
@@ -394,7 +394,7 @@ spectralClustering(three_connected_concentric_circles,
     #> 10  0.000580 -0.00000281  -0.000750        1
     #> # ℹ 990 more rows
     #> A clustering object:
-    #> Data clustered by K-Medioids algorithm 
+    #> Data clustered by K-Medoids algorithm 
     #> 
     #> 
     #> $clustered_data
@@ -415,12 +415,12 @@ spectralClustering(three_connected_concentric_circles,
     #> 
     #> $clustering_function
     #> function (x) 
-    #> base::which.min(sapply(1:K, function(k) distance(x, base::unlist(data[old_medioid_indeces[k], 
+    #> base::which.min(sapply(1:K, function(k) distance(x, base::unlist(data[old_medoid_indeces[k], 
     #>     ]))))
     #> <bytecode: 0x55ead447a7a8>
     #> <environment: 0x55ead8274df8>
     #> 
-    #> $medioids
+    #> $medoids
     #> # A tibble: 3 × 3
     #>         X_1         X_2        X_3
     #>       <dbl>       <dbl>      <dbl>

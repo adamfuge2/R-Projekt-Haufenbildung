@@ -105,7 +105,7 @@ study_courses_distance <- function(x,y) study_courses_dissimilarity_matrix[[unli
 #viewData(students_data)
 #
 #
-#clustering <- kMedioids(students_data,K=4,custom_distance_function=studies_difference,.print_info = TRUE)
+#clustering <- kMedoids(students_data,K=4,custom_distance_function=studies_difference,.print_info = TRUE)
 #
 #clustering$clustered_data
 #

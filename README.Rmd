@@ -26,7 +26,7 @@ A main feature of this package is the clustering of **non numeric** or **mixed**
 The implemented clustering algorithms:
 
  - K-Means
- - K-Medioids
+ - K-Medoids
  - spectral clustering
  - hierarchical clustering
  - DBSCAN
@@ -90,19 +90,19 @@ hierarchicalClustering(study_courses_data,
 ```
 
 ### Clustering misshapen data without custom distance
-K-Means and K-Medioids work very well when the clusters are **spherical** meaning in a filled 'round' ball around a center.
+K-Means and K-Medoids work very well when the clusters are **spherical** meaning in a filled 'round' ball around a center.
 
 Lets look at this data set.
 ```{r, results='hide'}
 two_concentric_circles |> viewData()
 ```
 
-K-Medioids and K-Means have a very hard time clustering this
+K-Medoids and K-Means have a very hard time clustering this
 ```{r, results='hide'}
-kMedioids(two_concentric_circles,K=2)
+kMedoids(two_concentric_circles,K=2)
 ```
 
-We could now invest the effort and try to define a distance function on this data to improve the clustering made by K-Medioids and K-Means (usually one would choose K-Medioids for these kinds of distance functions).
+We could now invest the effort and try to define a distance function on this data to improve the clustering made by K-Medoids and K-Means (usually one would choose K-Medoids for these kinds of distance functions).
 
 But far simpler is the approach to use DBSCAN or OPTICS:
 ```{r dbscan, results='hide'}
@@ -122,7 +122,7 @@ Now lets look at a data set that's famously hard to cluster:
 three_connected_concentric_circles |> viewData()
 ```
 
-K-Means and K-Medioids fail because the data is non spherical
+K-Means and K-Medoids fail because the data is non spherical
 ```{r three_con_kmeans, results='hide'}
 kMeans(three_connected_concentric_circles, K=3)
 ```
@@ -137,7 +137,7 @@ Our last resort: the powerful spectral clustering:
 spectralClustering(three_connected_concentric_circles,
                    k = 3,
                    gamma = 50,
-                   cluster_algorithm = 'K-Medioids',
+                   cluster_algorithm = 'K-Medoids',
                    K = 3)
 ```
 

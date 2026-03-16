@@ -174,7 +174,7 @@ clustering$mean_silhouette
 This is the main parameter to be provided and the data upon which the clustering algorithm will be deployed. It is recommended your data is a tibble with every row representing a data point. 
 
 - Must have at least 1 data point.
-- **`mean()` must be applicable** on the types which represent a data point. If this is an exclusion criterion for your data set, maybe try [K-Medioids](K-Medioids.html).
+- **`mean()` must be applicable** on the types which represent a data point. If this is an exclusion criterion for your data set, maybe try [K-Medoids](K-Medoids.html).
 
 Here some examples: 
 ```{r data_definitions}
@@ -298,7 +298,7 @@ But please consider:
 - Your custom metric must applicable on the data (on which `mean()` must be applicable)
 - Non continous custom metrics can cause loops
 - **Using an unoptimized custom metric can slow** the calculation of kMeans down significantly! 
-- (For unusual custom metrics consider using [kMedioids](K-Medioid.Rmd) instead)
+- (For unusual custom metrics consider using [kMedoids](K-Medoid.Rmd) instead)
 
 
 Inputs:   

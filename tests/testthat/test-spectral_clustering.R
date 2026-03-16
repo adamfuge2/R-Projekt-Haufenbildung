@@ -45,7 +45,7 @@ test_that("Spectral Clustering", {
 
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, K = 4))
 
-  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "K-Medioids", K = 4))
+  testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "K-Medoids", K = 4))
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "hierarchical clustering", min_cluster_amount = 2))
 
   testthat::expect_no_error(spectralClustering(data, k, gamma = gamma, cluster_algorithm = "DBSCAN", epsilon=0.1, min_Pts=5))

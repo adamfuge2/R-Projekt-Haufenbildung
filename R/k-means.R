@@ -202,7 +202,7 @@ findClusterAmountElbow <- function(data, check_min = 1, .print_info = FALSE){
 
 #' Fining a best cluster amount using the 'Silhoutte coefficient'
 #'
-#' Tries finding a K-Medioids clustering for increasing K and stops if the
+#' Tries finding a K-Medoids clustering for increasing K and stops if the
 #' mean Silhouette is worse than the previously calculated one.
 #'
 #' Be careful with its result, it is only heuristically optimal.
@@ -225,7 +225,7 @@ findClusterAmountSilhouette <- function(data,distance_method='euclidean',p=NULL,
     if(.print_info)
       print(paste0('checking K = ',K))
 
-    fit[[K]] <- kMedioids(data = data,K = K,distance_method = distance_method,p=p,custom_distance_function=custom_distance_function, .print_info = .print_info)$mean_silhouette
+    fit[[K]] <- kMedoids(data = data,K = K,distance_method = distance_method,p=p,custom_distance_function=custom_distance_function, .print_info = .print_info)$mean_silhouette
 
     if(K>1) improvement <- fit[[K]] - fit[[K-1]]
 

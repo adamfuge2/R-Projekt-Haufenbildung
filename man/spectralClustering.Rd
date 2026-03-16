@@ -43,7 +43,7 @@ two of the \code{data} row type.}
 \item{kernel_epsilon}{maximal distance at which data points are still considered neighbored.}
 
 \item{cluster_algorithm}{A cluster algorithm to be used on the spectral
-projected data. One of: \code{'K-Means'}, \code{'K-Medioids'},
+projected data. One of: \code{'K-Means'}, \code{'K-Medoids'},
 \code{'hierarchical Clustering'}, \code{'DBSCAN'}, \code{'OPTICS'}}
 
 \item{...}{Further parameters to pass on to the clustering algorithm.}

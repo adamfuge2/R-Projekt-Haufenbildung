@@ -33,7 +33,7 @@ two of the \code{data} row type.}
 a positive integer, the 'optimal' amount of clusters
 }
 \description{
-Tries finding a K-Medioids clustering for increasing K and stops if the
+Tries finding a K-Medoids clustering for increasing K and stops if the
 mean Silhouette is worse than the previously calculated one.
 }
 \details{
