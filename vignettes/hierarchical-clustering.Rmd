@@ -101,7 +101,7 @@ In the following, the usage of these modes is demonstrated.
 
 ### 2.3.1 Centroid
 One rather heuristic method to define intercluster distance is to determine the 
-centroids of both clusters (this process is independet of any distance function
+centroids of both clusters (this process is independent of any distance function
 as it makes use of the arithmetic mean) and then calculating the distance between
 the two centroids with the distance function.
 
@@ -111,7 +111,7 @@ hierarchicalClustering(data, 4, mode = "centroid")
 
 ### 2.3.2 Single
 Interprets the smallest distance of the pair \code{p_1, p_2} with \code{p_1} belonging
-to cluster 1 and \code{p_2} to cluster 2 as the distance beween the two clusters.
+to cluster 1 and \code{p_2} to cluster 2 as the distance between the two clusters.
 
 ```{r mode-options-single, eval = FALSE}
 hierarchicalClustering(data, 4, mode = "single")

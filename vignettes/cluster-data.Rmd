@@ -217,7 +217,7 @@ These data sets make K-Means and K-Medoids **fail**.
 two_concentric_circles |> viewData()
 ```
 
-### three_concetric_circles
+### three_concentric_circles
 
 ```{r}
 three_concentric_circles |> viewData()

@@ -1,7 +1,7 @@
 #' Hierarchical Clustering
 #'
 #' The Hierarchical Clustering algorithm.
-#' Starts by assigning each datapoint a cluster-ID and then combining two clusters
+#' Starts by assigning each data point a cluster-ID and then combining two clusters
 #' closest to each other given a linkage mode and metric in each iteration. Merge
 #' until n clusters remain.
 #'
@@ -77,9 +77,9 @@ hierarchicalClustering <- function(data,
   # Used to decide a 'best' value for the luster amount later
   join_distances <- rep(0,n)
 
-  if(K > n || K < 1) stop(paste0("Dataset with ", n, " datapoints cannot have ", K, " clusters!"))
+  if(K > n || K < 1) stop(paste0("Dataset with ", n, " data points cannot have ", K, " clusters!"))
 
-  # assign each datapoint a cluster-ID
+  # assign each data point a cluster-ID
   cluster <- 1:n
 
   # we also keep track of the clusters,

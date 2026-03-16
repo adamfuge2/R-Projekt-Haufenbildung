@@ -205,7 +205,7 @@ spectralClustering(tibble::tibble(X=c(1,1,4,1,5,1,4)),
 This is one of the many parameters ([gamma](#gamma), [kernel_epsilon](#epsilon), [mercer_kernel](#mercer_kernel), [custom_mercer_kernel](#custom_mercer_kernel), [distance_method](#distance_method), [p](#p) and [custom_distance_function](#custom_distance_function)) used to select the kernel.
 
 It is a use friendly way to use common distance functions in spectral clusterings.
-Calculates the gaussian kernel in [mercian_kernel](#mercian_kernel) using this distance instead of the euclidean distance. This means: please provide a non negative value for [gamma](#gamma)
+Calculates the gaussian kernel in [mercer_kernel](#mercer_kernel) using this distance instead of the euclidean distance. This means: please provide a non negative value for [gamma](#gamma)
 
 Choose one of:
 
@@ -333,7 +333,7 @@ spectralClustering(data_1,k=5,gamma=30,K=7, .print_info = TRUE)
 # Output
 The output depends on the chosen clustering algorithm
 
-Most oftely a clustering object:
+Most often a clustering object:
 A list of the class clustering with at least an element called 'clustered_data'.
 Reed more about clustering objects here TODO
 

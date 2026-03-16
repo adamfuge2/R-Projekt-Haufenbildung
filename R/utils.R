@@ -237,12 +237,12 @@ tibbleAsPath <- function(data){
 
 #' Dissimilarity matrix
 #'
-#' Calculates the matrix encoding the differences inbetween all data points
+#' Calculates the matrix encoding the differences in between all data points
 #'
 #' @param data      a tibble with with every row representing a data point.
 #' @inheritParams getDistanceFunction
 #'
-#' @returns a dissimilarity matrix, a row and coloumn for every data point
+#' @returns a dissimilarity matrix, a row and column for every data point
 #' @export
 dissimilarityMatrix <-function(data,distance_method='euclidean',p=NULL,custom_distance_function=NULL){
   if(is.null(custom_distance_function)){

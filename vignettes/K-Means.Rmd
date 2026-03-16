@@ -99,10 +99,10 @@ image(1:nrow(ddf), 1, as.matrix(1:nrow(ddf)),
 
 
 ## Categorizing unknown data
-We continoue the example from above:
+We continue the example from above:
 
-- Hey, you say, I was'nt asked what my favorite color is!
-Luckily this is another example where kMeans excells at. Unknown data, on which the clustering has'nt been trained can still be clustered.
+- Hey, you say, I wasn't asked what my favorite color is!
+Luckily this is another example where kMeans excels at. Unknown data, on which the clustering hasn't been trained can still be clustered.
 
 Another part of a K-Means-clustering object is the clustering function. A function which can relate a new data point to a cluster it would be part of.
 Whats your favorite color? - mines a golden yellow: [255, 223, 0]
@@ -132,7 +132,7 @@ Sometimes one may not know the cluster amount right away. Instinctively this may
 ```{r general_use_sum_of_squares}
 clustering$sum_of_squares
 ```
-This number only makes sense in context. See this rudementary implementation of the elbow method:
+This number only makes sense in context. See this rudimentary implementation of the elbow method:
 ```{r elbow_function_def}
 findClusterAmountElbow <- function(data, check_min = 1){
   sum_of_squares <- numeric()
@@ -296,7 +296,7 @@ You can also choose a custom distance function. This distance function must be a
 
 But please consider:
 - Your custom metric must applicable on the data (on which `mean()` must be applicable)
-- Non continous custom metrics can cause loops
+- Non continuous custom metrics can cause loops
 - **Using an unoptimized custom metric can slow** the calculation of kMeans down significantly! 
 - (For unusual custom metrics consider using [kMedoids](K-Medoid.Rmd) instead)
 

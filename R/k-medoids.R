@@ -56,13 +56,13 @@ kMedoids <- function(data,
   if(.print_info) print('Done. \n now find starting medoids')
 
   ## (BUILD) Define starting medoids
-  medoid_indeces <- greedySearchMedoidIndeces(data,K,dissimilarity_matrix=D)
+  medoid_Indices <- greedySearchMedoidIndeces(data,K,dissimilarity_matrix=D)
 
 
 
   if(.print_info) print('Done. \n now calculating first costs')
 
-  new_min_cost <-  structure(D[medoid_indeces,],dim=c(K,n)) |>
+  new_min_cost <-  structure(D[medoid_Indices,],dim=c(K,n)) |>
     apply(c(2),min) |>
     sum()
 
@@ -73,9 +73,9 @@ kMedoids <- function(data,
       list(
         clustered_data = clustered_data(data, cluster=1),
         clustering_function = function(x) 1,
-        centroids = data[medoid_indeces,],
+        centroids = data[medoid_Indices,],
         inner_inequality = new_min_cost,
-        sum_of_squares = structure(D[medoid_indeces,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
+        sum_of_squares = structure(D[medoid_Indices,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
         mean_silhouette = 0
       ),
       description = 'Data clustered by K-Means algorithm',
@@ -91,16 +91,16 @@ kMedoids <- function(data,
       base::print(base::paste0('Found a new best clustering! The new best cost is ',new_min_cost))
 
     ## Save old medoids, to compare with next medoids
-    old_medoid_indeces <- medoid_indeces
+    old_medoid_Indices <- medoid_Indices
     old_min_cost <- new_min_cost
 
     ## calculate which changed medoids would diminsh the inner inequality most
-    costs <- base::matrix(base::rep(1:n,length(medoid_indeces)),ncol = length(medoid_indeces))
-    for(k in 1:length(medoid_indeces)){
-      costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedoid(x,medoid_indeces,k,dissimilarity_matrix=D))
+    costs <- base::matrix(base::rep(1:n,length(medoid_Indices)),ncol = length(medoid_Indices))
+    for(k in 1:length(medoid_Indices)){
+      costs[,k] <- sapply(costs[,k],function(x) innerInequalityAfterChangingMedoid(x,medoid_Indices,k,dissimilarity_matrix=D))
     }
 
-    ## Save which indeces of data point o and medoid m would have the lower cost
+    ## Save which Indices of data point o and medoid m would have the lower cost
     m_opt <- arrayInd(which.min(costs), dim(costs))[2]
     o_opt <- arrayInd(which.min(costs), dim(costs))[1]
 
@@ -108,7 +108,7 @@ kMedoids <- function(data,
       print(paste0('changing medoid ', m_opt, ' with data point ', o_opt))
     # change medoid
 
-    medoid_indeces[m_opt] <- o_opt
+    medoid_Indices[m_opt] <- o_opt
 
     # new minimal
     new_min_cost <- costs[o_opt,m_opt]
@@ -120,10 +120,10 @@ kMedoids <- function(data,
                                   custom_distance_function = custom_distance_function)
 
   clustering_function <- function(x) 1:K |>
-    sapply(function(k) distance(x,base::unlist(data[old_medoid_indeces[k],]))) |>
+    sapply(function(k) distance(x,base::unlist(data[old_medoid_Indices[k],]))) |>
     base::which.min()
 
-  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[old_medoid_indeces,],dim=c(K,n)) |> apply(c(2),which.min))
+  best_clustered_data <- data |> dplyr::mutate(cluster = structure(D[old_medoid_Indices,],dim=c(K,n)) |> apply(c(2),which.min))
 
 
   ## returns clustered data and a function returning the cluster a datapoint (atomic vector) belongs to
@@ -131,9 +131,9 @@ kMedoids <- function(data,
     list(
       clustered_data = clustered_data(best_clustered_data),
       clustering_function = clustering_function,
-      medoids = data[old_medoid_indeces,],
+      medoids = data[old_medoid_Indices,],
       inner_inequality = old_min_cost,
-      sum_of_squares = structure(D[old_medoid_indeces,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
+      sum_of_squares = structure(D[old_medoid_Indices,]^2,dim=c(K,n)) |> apply(c(2),min) |> sum(),
       mean_silhouette = 1:n |> sapply(function(index) silhouette_faster(best_clustered_data,index,D)) |> mean()
     ),
     description = 'Data clustered by K-Medoids algorithm',
@@ -151,24 +151,24 @@ kMedoids <- function(data,
 #'
 #' @param o         an index of a data point (of external data)
 #'   to exchange with the medoid
-#' @param medoid_indeces The indeces of the original medoids
+#' @param medoid_Indices The Indices of the original medoids
 #'   centroid/medoid.
 #' @param m         an index of a data point to exchange with the medoid
 #' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
 #' @returns the inner inequality, called cost, after the exchange of medoids
-innerInequalityAfterChangingMedoid <- function(o,medoid_indeces,m,dissimilarity_matrix){
+innerInequalityAfterChangingMedoid <- function(o,medoid_Indices,m,dissimilarity_matrix){
 
   # change medoid
-  medoid_indeces[m] <- o
+  medoid_Indices[m] <- o
 
   # dont reward changes, which would result in a lower than promised cluster amount
-  if(!base::identical(medoid_indeces,unique(medoid_indeces))){
+  if(!base::identical(medoid_Indices,unique(medoid_Indices))){
     return(Inf)
   }
 
   # return the costs
-  return(structure(dissimilarity_matrix[medoid_indeces,],dim=c(length(medoid_indeces),nrow(dissimilarity_matrix))) |> apply(c(2),min) |>  sum() )
+  return(structure(dissimilarity_matrix[medoid_Indices,],dim=c(length(medoid_Indices),nrow(dissimilarity_matrix))) |> apply(c(2),min) |>  sum() )
 }
 
 
@@ -189,7 +189,7 @@ innerInequalityAfterChangingMedoid <- function(o,medoid_indeces,m,dissimilarity_
 #' @inheritParams getDistanceFunction
 #' @param dissimilarity_matrix    A matrix having encoded all distances between data points
 #'
-#' @returns The indeces of good-enough clustering medoid in the \code{data}
+#' @returns The Indices of good-enough clustering medoid in the \code{data}
 greedySearchMedoidIndeces <- function(data,
                                        K,
                                        distance_method='euclidean',
@@ -229,7 +229,7 @@ greedySearchMedoidIndeces <- function(data,
   # ignore chosen medoid in fourther decisions,
   M <- M[-medoid_index,-medoid_index]
 
-  medoid_indeces <- medoid_index
+  medoid_Indices <- medoid_index
 
   if(K>1){
     for(k in 2:K){
@@ -264,134 +264,12 @@ greedySearchMedoidIndeces <- function(data,
       M <- M[-medoid_index,-medoid_index]
 
       # account for the removed rows from M
-      for(x in sort(medoid_indeces)) if(medoid_index >= x) medoid_index<-medoid_index+1
+      for(x in sort(medoid_Indices)) if(medoid_index >= x) medoid_index<-medoid_index+1
 
       # lastly: add the newly found medoid
-      medoid_indeces <- c(medoid_indeces,medoid_index)
+      medoid_Indices <- c(medoid_Indices,medoid_index)
       medoids <- dplyr::add_row(medoids, data[medoid_index,])
     }
   }
-  return(medoid_indeces)
+  return(medoid_Indices)
 }
-
-
-
-## Example
-## generate some test data
-#data <- generateClusterTestDataSimple2D(n=50,5)
-#
-## lets view it
-#viewClusters(data)
-#
-###############################################################
-## Apply the K-Medoids algortithm                           ##
-#clustering <- kMedoids(data,K=5)
-## as K-medoids has O(n²) runtime this may take a while     ##
-###############################################################
-#
-## is this any good? We can calculate the inner inequalty of this clustering
-## here, lower is better
-#innerInequality(data,clustering)
-#
-#
-## or we can find the silhouette coefficient of the clustering
-## the closer this is to 1, the better
-#meanSilhouette(data,clustering)
-#
-#
-#viewClusters(clustering$clustered_data)
-#
-#
-#
-#
-#
-### We can also apply this to data, whose number of clusters is unknown
-#data <- generateClusterTestDataSimple2D(n=100, n_clusters=base::floor(stats::runif(1,1,10)))
-#
-## this is what it looks like
-#viewClusters(data)
-#
-###############################################################
-## We make a guess for K and apply the K-Medoids algortithm ##
-#clustering <- K_medoids(data,K=4)
-## this may take a while                                     ##
-###############################################################
-#
-## is it any good?
-#viewClusters(data,clustering)
-#meanSilhouette(data,clustering)
-#
-###############################################################
-## Try a higher K and apply the K-Medoids algortithm        ##
-#clustering <- K_medoids(data,K=7)
-## this may take a while                                     ##
-###############################################################
-#
-## By comparing the mean Silhouette one can defer the number of clusters
-#viewClusters(data,clustering)
-#meanSilhouette(data,clustering)
-#
-#
-#
-#
-#
-#
-### New Data
-## The resulting function does take inputs not of the original data set
-## note that the amount of unkown data is vastly greater than the training data
-#clusters <- list(tibble::tibble(X=0.05,Y=0.05),
-#                 tibble::tibble(X=0.03,Y=0.02),
-#                 tibble::tibble(X=0.03,Y=0.08),
-#                 tibble::tibble(X=0.07,Y=0.04))
-#training_data <- generateClusterTestData2DFromPaths(n=50, clusters)
-#unknown_data <- generateClusterTestData2DFromPaths(n=1000, clusters)
-#
-## derive a clustering using K-medoids
-#clustering <- K_medoids(training_data,4)
-## this would take ages for 1000 data points
-#
-## lets take a look
-#viewClusters(training_data,clustering)
-#viewClusters(unknown_data,clustering)
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-### greedy searched medoids
-## To start of with an already good choice of cluster medians, this algorithm uses
-## greedy search. This can also be used, to give a fast, but unoptimized clustering:
-#
-## some data
-#data <- generateClusterTestDataSimple2D(n=100,5)
-#
-#
-#####################################################
-## Use greedy search, to find medoids fast        ##
-#medoids <- greedySearchMedoidIndeces(data,K=5)
-##                                                 ##
-#####################################################
-#
-## Defer a clustering
-#clustering <- clusteringFromCentroids(medoids)
-#
-## lets see the unoptimized clustering
-#viewClusters(data,clustering)
-#
-#####################################################
-## Lets see the real K-Medoids in action!         ##
-#clustering <- K_medoids(data,K=5)
-## go grab a cup of tea, this takes a few minutes  ##
-#####################################################
-#
-## lets see the optimized clustering
-#viewClusters(data,clustering)
-#
-#
-#
