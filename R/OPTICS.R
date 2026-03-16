@@ -19,6 +19,7 @@
 #'   \item `minPts` minimum number of points for core distance
 #' }
 #'
+#' @references https://en.wikipedia.org/wiki/OPTICS
 #' @export
 optics <- function(data, epsilon, min_Pts,
                    distance_method = "euclidean",

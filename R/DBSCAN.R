@@ -15,6 +15,7 @@
 #'   \item `clustering_function` function assigning clusters
 #' }
 #'
+#' @references https://en.wikipedia.org/wiki/DBSCAN
 #' @export
 dbscan <- function(data, epsilon, min_Pts,
                    distance_method = "euclidean",

@@ -22,6 +22,7 @@
 #'   unknown data points. Returns the cluster the data point belongs to.
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster medoids.
 #'   }
+#' @references https://en.wikipedia.org/wiki/K-medoids
 #' @export
 kMedoids <- function(data,
                       K,

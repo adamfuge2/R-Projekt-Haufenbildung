@@ -32,6 +32,7 @@
 #'   unknown data points. Returns the cluster the data point belongs to.
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
 #'   }
+#' @references [James 10.3.2](https://link.springer.com/book/10.1007/978-1-0716-1418-1)
 #' @export
 hierarchicalClustering <- function(data,
                                    min_cluster_amount=2,

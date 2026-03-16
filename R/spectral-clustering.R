@@ -76,6 +76,7 @@ kernelByCustomDistanceFunction <- function(distance,gamma)
 #'
 #' @returns tibble with eigenvectors of projected dimension k
 #'
+#' @references [Richter 10.2](https: //link.springer.com/book/10.1007/978-3-662-59354-7)
 #' @export
 spectralProjection <- function(data,
                               k,
@@ -196,6 +197,7 @@ spectralProjection <- function(data,
 #'   information will be displayed during runtime. Used in debugging.
 #' @returns a clustering object
 #'
+#' @references [Richter 10.2](https: //link.springer.com/book/10.1007/978-3-662-59354-7)
 #' @export
 spectralClustering <- function(data,
                                k,

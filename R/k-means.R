@@ -24,6 +24,7 @@
 #'   unknown data points. Returns the cluster the data point belongs to.
 #'   \item{\strong{\code{'inner_inequality'}}} a numeric. The sum of all differences of the data points to their cluster centroid.
 #'   }
+#' @references [Richter 9.1](https: //link.springer.com/book/10.1007/978-3-662-59354-7)
 #' @export
 kMeans <- function(data,K,distance_method='euclidean',p=NULL,custom_distance_function=NULL,tries=K, .print_info = FALSE){
   start <- Sys.time()
