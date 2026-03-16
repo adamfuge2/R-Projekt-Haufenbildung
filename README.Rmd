@@ -1,0 +1,146 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# clusterfuck
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+Make clustering data sets easy with `'clusterfuck'`!
+Use it to categorize data into clusters, choose representative data points and broad structures in the data.
+
+A main feature of this package is the clustering of **non numeric** or **mixed** data and clustering using exotic **custom distance functions**.
+
+The implemented clustering algorithms:
+
+ - K-Means
+ - K-Medioids
+ - spectral clustering
+ - hierarchical clustering
+ - DBSCAN
+ - OPTICS
+
+
+Additionally it includes
+
+- functions for **generating** Data to test clustering functions on
+- a collection of pre made **data for clustering**
+- a collection of pre made **distance functions** for clustering (some very exotic)
+- functions to **view data** and **view clustered data** of up to 3 Dimensions
+- a function to calculate the **silhouette coefficient** of a clustering
+
+## Installation
+
+You can install the development version of clusterfuck from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("adamfuge2/R-Projekt-Haufenbildung")
+```
+
+## Examples
+
+Lets load clusterfuck
+```{r example}
+library(clusterfuck)
+```
+
+### Clustering some points in 2D
+
+Lets take a look at a data set
+```{r example_1}
+euclidean_cluster_data |> viewData()
+```
+
+(euclidean_cluster_data is one of the premade data sets and viewData a function to view it)
+
+We would like to cluster this data set into three distinct parts. We can use K-Means to do that.
+
+```{r cluster_euclid}
+kMeans(euclidean_cluster_data, K=3)
+```
+
+The result is a clustering object with some more useful information. 
+See the vignette of kMeans for more information about it.
+
+### Clustering exotic data sets and distances
+An exotic example data set featured in `'clusterfuck'` is
+```{r}
+study_courses_data
+```
+
+with its (made up) distance function `'study_courses_distance'`. 
+Because is a main feature of the package it is very easy to cluster this pair of data and distance function. 
+
+```{r}
+hierarchicalClustering(study_courses_data, 
+                       custom_distance_function = study_courses_distance)
+```
+
+### Clustering misshapen data without custom distance
+K-Means and K-Medioids work very well when the clusters are **spherical** meaning in a filled 'round' ball around a center.
+
+Lets look at this data set.
+```{r, results='hide'}
+two_concentric_circles |> viewData()
+```
+
+K-Medioids and K-Means have a very hard time clustering this
+```{r, results='hide'}
+kMedioids(two_concentric_circles,K=2)
+```
+
+We could now invest the effort and try to define a distance function on this data to improve the clustering made by K-Medioids and K-Means (usually one would choose K-Medioids for these kinds of distance functions).
+
+But far simpler is the approach to use DBSCAN or OPTICS:
+```{r dbscan, results='hide'}
+clustering <- optics(two_concentric_circles,epsilon = 0.3,min_Pts = 5)
+```
+
+```{r dbscan_visualize, results='hide', echo=FALSE}
+# For visualization purposes
+clustered_data(two_concentric_circles,
+               extractClusters(clustering,epsilon=0.3)) |>
+  viewClusters()
+```
+
+### Clustering is hard
+Now lets look at a data set that's famously hard to cluster:
+```{r, results='hide'}
+three_connected_concentric_circles |> viewData()
+```
+
+K-Means and K-Medioids fail because the data is non spherical
+```{r three_con_kmeans, results='hide'}
+kMeans(three_connected_concentric_circles, K=3)
+```
+
+DBSCAN, OPTICS and hierarchical clustering fail because the data points are all connected
+```{r}
+dbscan(three_connected_concentric_circles,epsilon = 0.1,min_Pts = 5)
+```
+
+Our last resort: the powerful spectral clustering:
+```{r}
+spectralClustering(three_connected_concentric_circles,
+                   k = 3,
+                   gamma = 50,
+                   cluster_algorithm = 'K-Medioids',
+                   K = 3)
+```
+
+**Success!**
+
+

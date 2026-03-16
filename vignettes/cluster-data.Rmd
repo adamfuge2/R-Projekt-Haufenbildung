@@ -244,7 +244,7 @@ three_connected_concentric_circles |> viewData()
 ```
 
 ## looping data sets
-The following are data sets are data sets in 'pacman' (go out to the right, come in from the left) space embedded in $$\mathbb{R}^2$$.
+The following are data sets are data sets in 'pacman' (go out to the right, come in from the left) space embedded in $\mathbb{R}^2$.
 
 
 ### hours_of_the_day
