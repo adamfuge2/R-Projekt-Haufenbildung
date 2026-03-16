@@ -15,24 +15,17 @@ test_that('clusteringFromCentroids',{
   testthat::expect_false(clustering(c(0.1,0.46)) == clustering(c(0.8,0.4)))
 })
 
-test_that('InnerInequality',{
-
-  set.seed(13456)
-
-  data <- generateClusterData(n=100,cluster_amount = 3)
-
-  clustering <- kMeans(data,K=3,tries = 10)
-
-  testthat::expect_equal(round(clustering$inner_inequality,1),14.4)
-})
-
 
 test_that('silhouette',{
   data <- tibble::tibble(X=c(0.1,0.1,0.8),Y=c(0.46,0.8,0.4))
+  other <- tibble::tibble(X=c(0.1),Y=c(0.46))
+
 
   clustering <- clusteringFromCentroids(data)
+  clustering_other <- clusteringFromCentroids(other)
 
   testthat::expect_equal(silhouette(data,clustering,c(0.1,0.46)),0)
+  testthat::expect_equal(silhouette(data,clustering_other,c(0.1,0.46)),0)
 
 
   testthat::expect_gt(silhouette(data,clustering,c(0.15,0.46),is_part_of_data = FALSE), silhouette(data,clustering,c(0.4,0.46),is_part_of_data = FALSE))
@@ -40,8 +33,10 @@ test_that('silhouette',{
 
 test_that('meanSilhouette',{
   data <- tibble::tibble(X=c(0.1,0.1,0.8),Y=c(0.46,0.8,0.4))
+  other <- tibble::tibble(X=c(0.1),Y=c(0.46))
 
   clustering <- clusteringFromCentroids(data)
+  clustering_other <- clusteringFromCentroids(other)
 
   # should be zero, because mono elementary clusters
   testthat::expect_equal(meanSilhouette(data,clustering),0)

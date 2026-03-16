@@ -31,6 +31,7 @@ test_that("Hierarchical Clustering -> Linkage Modes", {
   testthat::expect_no_error(hierarchicalClustering(data, 2, mode = "single"))
   testthat::expect_no_error(hierarchicalClustering(data, 2, mode = "complete"))
   testthat::expect_no_error(hierarchicalClustering(data, 2, mode = "average"))
+  testthat::expect_error(hierarchicalClustering(data, 2, mode = "gkgalh"))
 })
 
 
@@ -65,7 +66,7 @@ test_that("Hierarchical Clustering -> Different cluster amount methods", {
 
 
 test_that("Hierarchical Clustering -> misc inputs", {
-  hierarchicalClustering(data) |>
+  hierarchicalClustering(data, .print_info = TRUE) |>
     expect_no_error() |>
     capture_output(print=FALSE)
 })
