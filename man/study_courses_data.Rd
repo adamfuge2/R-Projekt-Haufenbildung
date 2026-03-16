@@ -18,7 +18,7 @@ study_courses_names'
 A dissimilarity matrix of study courses
 }
 \details{
-A matrix encoding the dissimilarties/distances of study courses.
+A matrix encoding the dissimilarities/distances of study courses.
 The names are given by study_courses_names at construction.
 study_courses_dissimilarity_matrix'
 Some Study courses

@@ -57,3 +57,6 @@ a clustering object
 \description{
 Algorithm to project a data set to k dimensional space and then cluster it.
 }
+\references{
+[Richter 10.2](https: //link.springer.com/book/10.1007/978-3-662-59354-7)
+}

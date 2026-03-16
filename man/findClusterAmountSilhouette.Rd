@@ -2,7 +2,7 @@
 % Please edit documentation in R/k-means.R
 \name{findClusterAmountSilhouette}
 \alias{findClusterAmountSilhouette}
-\title{Fining a best cluster amount using the 'Silhoutte coefficient'}
+\title{Fining a best cluster amount using the 'Silhouette coefficient'}
 \usage{
 findClusterAmountSilhouette(
   data,

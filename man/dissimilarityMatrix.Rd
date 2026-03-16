@@ -24,8 +24,8 @@ chosen to be \code{'Lp'}, this will be used as the p of the p-Metric.}
 two of the \code{data} row type.}
 }
 \value{
-a dissimilarity matrix, a row and coloumn for every data point
+a dissimilarity matrix, a row and column for every data point
 }
 \description{
-Calculates the matrix encoding the differences inbetween all data points
+Calculates the matrix encoding the differences in between all data points
 }

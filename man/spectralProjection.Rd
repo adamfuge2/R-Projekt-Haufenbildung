@@ -49,3 +49,6 @@ tibble with eigenvectors of projected dimension k
 \description{
 Algorithm to project a dataset to k dimensional space to use for spectral clustering.
 }
+\references{
+[Richter 10.2](https: //link.springer.com/book/10.1007/978-3-662-59354-7)
+}

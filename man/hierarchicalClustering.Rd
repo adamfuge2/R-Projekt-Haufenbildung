@@ -61,7 +61,10 @@ A list of the class 'clustering'. Contains \itemize{
 }
 \description{
 The Hierarchical Clustering algorithm.
-Starts by assigning each datapoint a cluster-ID and then combining two clusters
+Starts by assigning each data point a cluster-ID and then combining two clusters
 closest to each other given a linkage mode and metric in each iteration. Merge
 until n clusters remain.
+}
+\references{
+[James 10.3.2](https://link.springer.com/book/10.1007/978-1-0716-1418-1)
 }
