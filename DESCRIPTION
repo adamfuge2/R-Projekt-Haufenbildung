@@ -1,7 +1,7 @@
 Package: clusterfuck
 Type: Package
 Title: A collection of common clustering algorithms
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person(
       "Aaron", "Fath",
