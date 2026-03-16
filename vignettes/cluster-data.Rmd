@@ -175,7 +175,7 @@ euclidean_cluster_data |> viewData()
 We also have the same data set with clusters included
 
 ```{r}
-euclidean_cluster_data |> viewClusters()
+euclidean_clustered_data |> viewClusters()
 ```
 
 ## manhattan_cluster_data

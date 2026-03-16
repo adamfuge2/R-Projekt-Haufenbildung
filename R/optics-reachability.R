@@ -166,7 +166,7 @@ extractClusters.reachability <- function(object, epsilon) {
   }
   cluster <- integer(object$n_obs)
   cluster[ord] <- cluster_ordered
-  min_cluster_size <- if(!is.null(object$minPts)) object$minPts else 1L #groesstmoegliches clustering
+  min_cluster_size <- if(!is.null(object$minPts)) object$minPts else 1L
   cluster_sizes <- table(cluster)
   small <- names(cluster_sizes)[cluster_sizes < min_cluster_size & names(cluster_sizes) != "0"]
   if(length(small) > 0L) {
