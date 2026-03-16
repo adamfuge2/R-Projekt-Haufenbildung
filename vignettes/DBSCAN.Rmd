@@ -33,7 +33,7 @@ The algorithm works in a way that a cluster is formed if a specified number of p
 # General use
 We start with creating some test data
 ```{r general_use_1}
-data <- generateClusterData(n=300)
+data <- generateClusterData(n=300,clusters_sd = c(0.04,0.01,0.05,0.04,0.04,0.04))
 ```
 
 This is what it looks like
@@ -44,6 +44,7 @@ viewData(data)
 **Apply the DBSCAN algorithm with a neighborhood of 0.2 and a minimal number of points for a cluster to be formed 3**
 ```{r general_use_3}
 result <- dbscan(data, epsilon=0.2, min_Pts=3)
+result
 ```
 
 # Parameters
@@ -70,32 +71,54 @@ viewClusters(result_3$clustered_data)
 Points assigned to cluster 0 represent noise points that were not
 assigned to any cluster.
 
-## epsilon (required)
+## epsilon (required) {.tabset}
 The neighborhood radius from a point in which other points are considered neighbors.
 epsilon must be a positive number greater than 0. The larger epsilon is set, the less clusters will be formed, as more and more points will fall into the same cluster. A smaller epsilon on the other hand will lead to more clusters.
 
 This can be be observed when clustering the same data with different epsilon values:
-```{r epsilon_examples_1}
-result_small_epsilon <- dbscan(data_1, epsilon=0.05, min_Pts=5)
+
+### small epsilon
+```{r epsilon_examples_1a}
+result_small_epsilon <- dbscan(optics_wikipedia_data, epsilon=0.015, min_Pts=5)
 viewClusters(result_small_epsilon$clustered_data)
-result_medium_epsilon <- dbscan(data_1, epsilon=0.2, min_Pts=5)
+```
+
+### medium epsilon
+```{r epsilon_examples_1b}
+result_medium_epsilon <- dbscan(optics_wikipedia_data, epsilon=0.1, min_Pts=5)
 viewClusters(result_medium_epsilon$clustered_data)
-result_big_epsilon <- dbscan(data_1, epsilon=0.3, min_Pts=5)
+```
+
+### high epsilon
+```{r epsilon_examples_1c}
+result_big_epsilon <- dbscan(optics_wikipedia_data, epsilon=0.3, min_Pts=5)
 viewClusters(result_big_epsilon$clustered_data)
 ```
 
-## min_Pts (required)
+## min_Pts (required) {.tabset}
 The number of points that have to be within epsilon neighborhood of each other to count as a cluster.
 min_Pts must be a positive integer greater than 0. The larger min_Pts is set, the less clusters will be formed, as less clusters have enough points within epsilon neighborhood. A small min_Pts will lead to more clusters.
 Large min_Pts will lead to more noise points.
 
 This can be be observed when clustering the same data with different min_Pts values:
-```{r minPts_examples_1}
-result_small_minPts <- dbscan(data_1, epsilon=0.2, min_Pts=3)
+
+### small minPts
+```{r minPts_examples_1a}
+result_small_minPts <- dbscan(optics_wikipedia_data, epsilon=0.05, min_Pts=2)
 viewClusters(result_small_minPts$clustered_data)
-result_medium_minPts <- dbscan(data_1, epsilon=0.2, min_Pts=5)
+```
+
+
+### medium minPts
+```{r minPts_examples_1b}
+result_medium_minPts <- dbscan(optics_wikipedia_data, epsilon=0.05, min_Pts=10)
 viewClusters(result_medium_minPts$clustered_data)
-result_big_minPts <- dbscan(data_1, epsilon=0.2, min_Pts=15)
+```
+
+
+### high minPts
+```{r minPts_examples_1c}
+result_big_minPts <- dbscan(optics_wikipedia_data, epsilon=0.05, min_Pts=100)
 viewClusters(result_big_minPts$clustered_data)
 ```
 
@@ -123,7 +146,7 @@ clusters <- list(
 )
 
 training_data <- generateClusterDataFromPaths(n = 200, clusters)
-unknown_data  <- generateClusterDataFromPaths(n = 50, clusters)
+more_data  <- generateNoiseData(n = 500, lower_bounds = c(0,0), upper_bounds = c(1,1))
 
 # derive clustering using DBSCAN
 f <- dbscan(training_data, epsilon = 0.15, min_Pts = 3)$clustering_function
@@ -133,7 +156,7 @@ f(c(0.5,0.5))
 
 # The clustering function can now be applied to different datasets.
 viewClusters(training_data, f)
-viewClusters(unknown_data, f)
+viewClusters(more_data, f)
 ```
 
 
