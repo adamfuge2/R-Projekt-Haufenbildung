@@ -22,6 +22,10 @@ viewClusters1D <-function(clustered_data){
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters1D can only display clusterings of 1D data' = dim==1)
 
+  axis_labels <- c('Value')
+  if(length(colnames(clustered_data))==2)
+    axis_labels <- colnames(clustered_data)[colnames(clustered_data)!='cluster']
+
   prefered_colnames <- c('Y')
   colname_index <- 1
 
@@ -55,7 +59,7 @@ viewClusters1D <-function(clustered_data){
   ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
             ggplot2::geom_point() +
             ggplot2::scale_color_manual(values = palette) +
-            ggplot2::labs(x='Data Points',y='Value')+
+            ggplot2::labs(x='Data Points',y=axis_labels[[1]])+
             theme(legend.title=element_blank())
 }
 
@@ -81,6 +85,10 @@ viewClusters2D <-function(clustered_data){
 
   dim <- ncol(clustered_data)-1
   stopifnot('viewClusters2D can only display clusterings of 2D data' = dim==2)
+
+  axis_labels <- c('X','Y')
+  if(length(colnames(clustered_data))==3)
+    axis_labels <- colnames(clustered_data)[colnames(clustered_data)!='cluster']
 
   prefered_colnames <- c('X','Y')
   colname_index <- 1
@@ -116,6 +124,7 @@ viewClusters2D <-function(clustered_data){
   ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
     ggplot2::geom_point() +
     ggplot2::scale_color_manual(values = palette) +
+    ggplot2::labs(x=axis_labels[[1]],y=axis_labels[[2]])+
     theme(legend.title=element_blank())
 }
 
@@ -144,6 +153,10 @@ viewClusters3D <-function(clustered_data){
   stopifnot('clustered_data must have a row called \'cluster\''= 'cluster'%in%colnames(clustered_data))
   stopifnot('viewClusters3D can only display clusterings of 3D data' = dim==3)
 
+
+  axis_labels <- c('X','Y','Z')
+  if(length(colnames(clustered_data))==4)
+    axis_labels <- colnames(clustered_data)[colnames(clustered_data)!='cluster']
 
 
   prefered_colnames <- c('X','Y','Z')
@@ -182,7 +195,7 @@ viewClusters3D <-function(clustered_data){
   color <- clustered_data$color
 
   ## Display data as 3D scatter plot
-  scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color)
+  scatterplot3d::scatterplot3d(x = x, y = y, z = z, color = color, xlab = axis_labels[[1]], ylab = axis_labels[[2]], zlab = axis_labels[[3]])
 }
 
 #' View cluster data
