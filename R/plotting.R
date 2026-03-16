@@ -55,7 +55,8 @@ viewClusters1D <-function(clustered_data){
   ggplot2::ggplot(clustered_data,ggplot2::aes(y=.data$Y, x=row(clustered_data)[,1] ,colour = .data$cluster_label)) +
             ggplot2::geom_point() +
             ggplot2::scale_color_manual(values = palette) +
-            ggplot2::labs(x='Data Points',x='Value')
+            ggplot2::labs(x='Data Points',y='Value')+
+            theme(legend.title=element_blank())
 }
 
 
@@ -114,7 +115,8 @@ viewClusters2D <-function(clustered_data){
   ## Display data as 2D scatter plot
   ggplot2::ggplot(clustered_data,ggplot2::aes(x=.data$X,y=.data$Y,colour = .data$cluster_label)) +
     ggplot2::geom_point() +
-    ggplot2::scale_color_manual(values = palette)
+    ggplot2::scale_color_manual(values = palette) +
+    theme(legend.title=element_blank())
 }
 
 
