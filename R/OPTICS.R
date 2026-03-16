@@ -39,13 +39,13 @@ optics <- function(data, epsilon, min_Pts,
   if(is.null(distance_method)) {
     dist_x <- as.matrix(stats::dist(x))
   } else {
-    dist_x <- dissimilarityMatrix( # die Distanzmatrix von data
+    dist_x <- dissimilarityMatrix(
       data,
       distance_method = distance_method,
       p = p,
       custom_distance_function = custom_distance_function)
   }
-  n <- nrow(x) # number of points
+  n <- nrow(x)
 
   processed <- rep(FALSE, n)
   reachability <- rep(Inf, n)
@@ -54,7 +54,7 @@ optics <- function(data, epsilon, min_Pts,
   predecessor <- rep(NA_integer_, n)
 
   getNeighbors <- function(point) {
-    which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
+    which(dist_x[point, ] <= epsilon)
   }
 
   coreDistance <- function(point, neighbors) {
@@ -100,14 +100,12 @@ optics <- function(data, epsilon, min_Pts,
 
   for(point in seq_len(n)) {  # for each point in data
     # point.reachability-distance = NULL
-    # we can save one more for loop? maybe?
     if(processed[point] == FALSE) {   # for each unprocessed point in data
       neighbors <- getNeighbors(point) # N <- getNeighbors(point, epsilon)
       processed[point] <- TRUE  # mark point as processed
       ordered <- c(ordered, point)     # place point in ordered list
       core_distance[point] <- coreDistance(point, neighbors)
         if(!is.na(core_distance[point])) {    # if (core-distance(point, epsilon, min_Pts) != NULL)
-        # define Seeds, as "priority queue" doesn't exist in base R
         seeds_points <- integer(0)
         seeds_reach <- numeric(0)
         seeds <- update(neighbors, point, seeds_points, seeds_reach) # update(N, point, Seeds, epsilon, min_Pts)
@@ -115,7 +113,7 @@ optics <- function(data, epsilon, min_Pts,
         seeds_reach <- seeds$reach
 
         while (length(seeds_points) > 0) { # for each next q in Seeds
-          min_reach <- min(seeds_reach) # Täler sind tlw. durcheinander,
+          min_reach <- min(seeds_reach)
           cands <- which(seeds_reach == min_reach)
           if (length(cands) > 1) {
             i <- cands[which.min(seeds_points[cands])]

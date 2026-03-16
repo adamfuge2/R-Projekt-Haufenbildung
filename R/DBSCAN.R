@@ -34,23 +34,23 @@ dbscan <- function(data, epsilon, min_Pts,
  x <- as.matrix(data)
  if(is.null(distance_method)) {
    dist_x <- as.matrix(stats::dist(x))
- } else { dist_x <- dissimilarityMatrix( # die Distanzmatrix von data
+ } else { dist_x <- dissimilarityMatrix(
                                 data,
                                 distance_method = distance_method,
                                 p = p,
                                 custom_distance_function = custom_distance_function)
  }
- n <- nrow(x) # number of data points
+ n <- nrow(x)
  cluster_id = 0L
  visited <- rep(FALSE, n)
  cluster_labels <- rep(0L, n)
 
  regionQuery <- function(point) {
-   which(dist_x[point, ] <= epsilon) # Liste an Punkten, die innerhalb von Distanz epsilon um Punkt point liegen, point inklusive
+   which(dist_x[point, ] <= epsilon)
  }
 
  expandCluster <- function(point, area, cluster_id) {
-   cluster_labels[point] <<- cluster_id # must be super-assigned, or vanished after function call
+   cluster_labels[point] <<- cluster_id
    # add point to cluster / assign cluster to point
    i <- 1
    while(i <= length(area)) { # for each element p in region:
