@@ -335,9 +335,8 @@ The output depends on the chosen clustering algorithm
 
 Most often a clustering object:
 A list of the class clustering with at least an element called 'clustered_data'.
-Reed more about clustering objects here TODO
 
-A clustering generated like this also has the following properties (elements of the list):
+A clustering generated like this has the following properties (elements of the list):
 
 ## clustered_data
 The original data with a column called 'cluster' added.
